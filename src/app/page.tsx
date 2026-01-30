@@ -31,27 +31,11 @@ export default function Home() {
         {/* Tagline */}
         <div className="space-y-3">
           <h1 className="text-4xl font-bold tracking-tight">
-            Which book is better?
+            Beli for Books
           </h1>
           <p className="text-neutral-600 text-lg">
-            Compare books head-to-head. Build rankings. Discover what readers really think.
+            Compare books head-to-head. Build lists. Discover what readers really think.
           </p>
-        </div>
-
-        {/* How it works */}
-        <div className="flex justify-center gap-8 text-sm text-neutral-500 py-4">
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-2xl">📚</span>
-            <span>Pick a winner</span>
-          </div>
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-2xl">📊</span>
-            <span>Elo rankings</span>
-          </div>
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-2xl">🏆</span>
-            <span>Discover gems</span>
-          </div>
         </div>
 
         {/* Waitlist Form */}
