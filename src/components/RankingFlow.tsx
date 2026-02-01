@@ -305,7 +305,9 @@ export default function RankingFlow({
         <div className="p-6">
           {step === "cover" && (
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-center">Choose a cover</h2>
+              <h2 className="text-lg font-semibold text-center">
+                {existingEntry ? "Change cover" : "Choose a cover"}
+              </h2>
               {loadingEditions ? (
                 <div className="flex justify-center py-8">
                   <div className="w-8 h-8 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
@@ -371,18 +373,33 @@ export default function RankingFlow({
 
           {step === "category" && (
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-center">Add to my list of</h2>
+              <h2 className="text-lg font-semibold text-center">
+                {existingEntry ? "Change category" : "Add to my list of"}
+              </h2>
+              {existingEntry && (
+                <p className="text-sm text-neutral-500 text-center">
+                  Currently in: <span className="font-medium">{existingEntry.category}</span>
+                </p>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => handleCategorySelect("fiction")}
-                  className="p-4 border-2 border-neutral-200 rounded-xl hover:border-neutral-900 hover:bg-neutral-50 transition-all"
+                  className={`p-4 border-2 rounded-xl hover:border-neutral-900 hover:bg-neutral-50 transition-all ${
+                    existingEntry?.category === "fiction"
+                      ? "border-neutral-900 bg-neutral-50"
+                      : "border-neutral-200"
+                  }`}
                 >
                   <span className="text-2xl mb-2 block">📖</span>
                   <span className="font-medium">Fiction</span>
                 </button>
                 <button
                   onClick={() => handleCategorySelect("nonfiction")}
-                  className="p-4 border-2 border-neutral-200 rounded-xl hover:border-neutral-900 hover:bg-neutral-50 transition-all"
+                  className={`p-4 border-2 rounded-xl hover:border-neutral-900 hover:bg-neutral-50 transition-all ${
+                    existingEntry?.category === "nonfiction"
+                      ? "border-neutral-900 bg-neutral-50"
+                      : "border-neutral-200"
+                  }`}
                 >
                   <span className="text-2xl mb-2 block">📚</span>
                   <span className="font-medium">Non-Fiction</span>
@@ -393,13 +410,19 @@ export default function RankingFlow({
 
           {step === "tier" && (
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-center">How was it?</h2>
+              <h2 className="text-lg font-semibold text-center">
+                {existingEntry ? "Change rating" : "How was it?"}
+              </h2>
               <div className="flex justify-center gap-6">
                 <button
                   onClick={() => handleTierSelect("liked")}
                   className="flex flex-col items-center gap-2 group"
                 >
-                  <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center group-hover:bg-green-200 transition-colors">
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${
+                    existingEntry?.tier === "liked"
+                      ? "bg-green-200 ring-2 ring-green-500"
+                      : "bg-green-100 group-hover:bg-green-200"
+                  }`}>
                     <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
@@ -410,7 +433,11 @@ export default function RankingFlow({
                   onClick={() => handleTierSelect("fine")}
                   className="flex flex-col items-center gap-2 group"
                 >
-                  <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center group-hover:bg-yellow-200 transition-colors">
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${
+                    existingEntry?.tier === "fine"
+                      ? "bg-yellow-200 ring-2 ring-yellow-500"
+                      : "bg-yellow-100 group-hover:bg-yellow-200"
+                  }`}>
                     <div className="w-3 h-3 rounded-full bg-yellow-500" />
                   </div>
                   <span className="text-sm font-medium text-neutral-600">It was fine</span>
@@ -419,7 +446,11 @@ export default function RankingFlow({
                   onClick={() => handleTierSelect("disliked")}
                   className="flex flex-col items-center gap-2 group"
                 >
-                  <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                  <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${
+                    existingEntry?.tier === "disliked"
+                      ? "bg-red-200 ring-2 ring-red-500"
+                      : "bg-red-100 group-hover:bg-red-200"
+                  }`}>
                     <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
