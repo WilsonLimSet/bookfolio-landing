@@ -237,9 +237,7 @@ export default function EditProfilePage() {
 
   const handleRankingComplete = async () => {
     if (bookToRank && pendingPosition) {
-      await addToFavorites(bookToRank, pendingPosition);
-
-      // Refresh ranked books list
+      // Refresh ranked books list first to get the cover the user selected during ranking
       const { data: rankedData } = await supabase
         .from("user_books")
         .select("*")
@@ -247,6 +245,17 @@ export default function EditProfilePage() {
 
       if (rankedData) {
         setRankedBooks(rankedData);
+
+        // Find the newly ranked book to get the cover they selected
+        const newlyRanked = rankedData.find(b => b.open_library_key === bookToRank.key);
+        if (newlyRanked) {
+          await addToFavorites({
+            key: bookToRank.key,
+            title: newlyRanked.title,
+            author: newlyRanked.author,
+            coverUrl: newlyRanked.cover_url, // Use the cover selected during ranking
+          }, pendingPosition);
+        }
       }
     }
 
