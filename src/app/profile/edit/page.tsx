@@ -34,10 +34,23 @@ export default function EditProfilePage() {
   const supabase = createClient();
 
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [username, setUsername] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [bio, setBio] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [instagram, setInstagram] = useState("");
+  const [twitter, setTwitter] = useState("");
+  const [referralCode, setReferralCode] = useState("");
+  const [referralCount, setReferralCount] = useState(0);
+  const [copied, setCopied] = useState(false);
   const [favorites, setFavorites] = useState<FavoriteBook[]>([]);
   const [rankedBooks, setRankedBooks] = useState<RankedBook[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const REFERRALS_REQUIRED = 3; // Number of referrals needed to unlock social links
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
@@ -67,35 +80,45 @@ export default function EditProfilePage() {
 
       setUserId(user.id);
 
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("username")
-        .eq("id", user.id)
-        .single();
+      // Run all queries in parallel for faster loading
+      const [profileResult, favoritesResult, rankedResult, referralsResult] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("username, bio, avatar_url, instagram, twitter, referral_code")
+          .eq("id", user.id)
+          .single(),
+        supabase
+          .from("favorite_books")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("position"),
+        supabase
+          .from("user_books")
+          .select("*")
+          .eq("user_id", user.id),
+        supabase
+          .from("referrals")
+          .select("id", { count: "exact", head: true })
+          .eq("referrer_id", user.id),
+      ]);
 
-      if (profile) {
-        setUsername(profile.username);
+      if (profileResult.data) {
+        setUsername(profileResult.data.username);
+        setBio(profileResult.data.bio || "");
+        setAvatarUrl(profileResult.data.avatar_url || null);
+        setInstagram(profileResult.data.instagram || "");
+        setTwitter(profileResult.data.twitter || "");
+        setReferralCode(profileResult.data.referral_code || profileResult.data.username);
       }
 
-      // Load favorites
-      const { data: favoritesData } = await supabase
-        .from("favorite_books")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("position");
+      setReferralCount(referralsResult.count || 0);
 
-      if (favoritesData) {
-        setFavorites(favoritesData);
+      if (favoritesResult.data) {
+        setFavorites(favoritesResult.data);
       }
 
-      // Load ranked books
-      const { data: rankedData } = await supabase
-        .from("user_books")
-        .select("*")
-        .eq("user_id", user.id);
-
-      if (rankedData) {
-        setRankedBooks(rankedData);
+      if (rankedResult.data) {
+        setRankedBooks(rankedResult.data);
       }
 
       setLoading(false);
@@ -162,8 +185,13 @@ export default function EditProfilePage() {
     const rankedEntry = isBookRanked(book.key);
 
     if (rankedEntry) {
-      // Book is already ranked, add directly to favorites
-      await addToFavorites(book, position);
+      // Book is already ranked, add directly to favorites using the ranked book's cover
+      await addToFavorites({
+        key: book.key,
+        title: rankedEntry.title,
+        author: rankedEntry.author,
+        coverUrl: rankedEntry.cover_url, // Use the cover they selected when ranking
+      }, position);
     } else {
       // Book not ranked yet, trigger ranking flow
       setBookToRank({
@@ -240,6 +268,85 @@ export default function EditProfilePage() {
     setFavorites((prev) => prev.filter((f) => f.id !== favoriteId));
   };
 
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image must be less than 2MB");
+      return;
+    }
+
+    setAvatarFile(file);
+    setAvatarPreview(URL.createObjectURL(file));
+  };
+
+  const saveProfile = async () => {
+    if (!userId) return;
+
+    setSaving(true);
+
+    try {
+      let newAvatarUrl = avatarUrl;
+
+      // Upload avatar if changed
+      if (avatarFile) {
+        const fileExt = avatarFile.name.split(".").pop();
+        const filePath = `${userId}/avatar.${fileExt}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("avatars")
+          .upload(filePath, avatarFile, { upsert: true });
+
+        if (uploadError) {
+          console.error("Error uploading avatar:", uploadError);
+          alert("Failed to upload avatar");
+          setSaving(false);
+          return;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from("avatars")
+          .getPublicUrl(filePath);
+
+        newAvatarUrl = publicUrl;
+      }
+
+      // Update profile
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          bio: bio || null,
+          avatar_url: newAvatarUrl,
+          instagram: instagram || null,
+          twitter: twitter || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", userId);
+
+      if (error) {
+        console.error("Error updating profile:", error);
+        alert("Failed to save profile");
+        setSaving(false);
+        return;
+      }
+
+      setAvatarUrl(newAvatarUrl);
+      setAvatarFile(null);
+      setAvatarPreview(null);
+      alert("Profile saved!");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
@@ -268,6 +375,44 @@ export default function EditProfilePage() {
           <section className="space-y-4">
             <h2 className="text-lg font-semibold">Profile</h2>
 
+            {/* Avatar */}
+            <div className="flex items-center gap-4">
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="w-20 h-20 rounded-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+              >
+                {avatarPreview || avatarUrl ? (
+                  <img
+                    src={avatarPreview || avatarUrl!}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-2xl font-bold text-neutral-500">
+                    {username[0]?.toUpperCase()}
+                  </span>
+                )}
+              </div>
+              <div>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-sm font-medium text-neutral-900 hover:underline"
+                >
+                  Change photo
+                </button>
+                <p className="text-xs text-neutral-500 mt-1">
+                  JPG, PNG. Max 2MB.
+                </p>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-neutral-700 mb-1">
                 Username
@@ -282,6 +427,127 @@ export default function EditProfilePage() {
                 Username cannot be changed
               </p>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">
+                Bio
+              </label>
+              <textarea
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                placeholder="Tell others about yourself and your reading interests..."
+                className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none resize-none h-24"
+                maxLength={500}
+              />
+              <p className="text-xs text-neutral-500 mt-1 text-right">
+                {bio.length}/500
+              </p>
+            </div>
+
+            <button
+              onClick={saveProfile}
+              disabled={saving}
+              className="px-4 py-2 bg-neutral-900 text-white rounded-lg text-sm font-medium hover:bg-neutral-800 transition-colors disabled:opacity-50"
+            >
+              {saving ? "Saving..." : "Save Profile"}
+            </button>
+          </section>
+
+          {/* Social Links */}
+          <section className="space-y-4">
+            <h2 className="text-lg font-semibold">Social Links</h2>
+            {referralCount >= REFERRALS_REQUIRED ? (
+              <>
+                <p className="text-sm text-green-600">
+                  Unlocked! Your social links are visible on your profile.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      Instagram
+                    </label>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-neutral-200 bg-neutral-50 text-neutral-500 text-sm">
+                        @
+                      </span>
+                      <input
+                        type="text"
+                        value={instagram}
+                        onChange={(e) => setInstagram(e.target.value.replace(/^@/, ""))}
+                        placeholder="username"
+                        className="flex-1 px-3 py-2 rounded-r-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      Twitter / X
+                    </label>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-neutral-200 bg-neutral-50 text-neutral-500 text-sm">
+                        @
+                      </span>
+                      <input
+                        type="text"
+                        value={twitter}
+                        onChange={(e) => setTwitter(e.target.value.replace(/^@/, ""))}
+                        placeholder="username"
+                        className="flex-1 px-3 py-2 rounded-r-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="p-4 bg-neutral-50 rounded-xl">
+                <p className="text-sm text-neutral-600 mb-2">
+                  Invite <span className="font-semibold">{REFERRALS_REQUIRED - referralCount} more {REFERRALS_REQUIRED - referralCount === 1 ? "friend" : "friends"}</span> to unlock social links on your profile.
+                </p>
+                <div className="flex items-center gap-2">
+                  {[...Array(REFERRALS_REQUIRED)].map((_, i) => (
+                    <div
+                      key={i}
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+                        i < referralCount
+                          ? "bg-green-500 text-white"
+                          : "bg-neutral-200 text-neutral-400"
+                      }`}
+                    >
+                      {i < referralCount ? "✓" : i + 1}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+
+          {/* Referral Link */}
+          <section className="space-y-4">
+            <h2 className="text-lg font-semibold">Invite Friends</h2>
+            <p className="text-sm text-neutral-600">
+              Share your referral link. When friends sign up, you&apos;ll unlock social links on your profile.
+            </p>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                readOnly
+                value={`${typeof window !== "undefined" ? window.location.origin : ""}/login?ref=${referralCode}`}
+                className="flex-1 px-4 py-3 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-600 text-sm"
+              />
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/login?ref=${referralCode}`);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="px-4 py-2 bg-neutral-900 text-white rounded-lg text-sm font-medium hover:bg-neutral-800 transition-colors"
+              >
+                {copied ? "Copied!" : "Copy"}
+              </button>
+            </div>
+            <p className="text-xs text-neutral-500">
+              {referralCount} {referralCount === 1 ? "friend has" : "friends have"} signed up with your link
+            </p>
           </section>
 
           {/* Favorite Books */}
@@ -327,6 +593,45 @@ export default function EditProfilePage() {
               })}
             </div>
 
+            {/* Quick pick from ranked books */}
+            {favorites.length < 4 && rankedBooks.length > 0 && (
+              <div>
+                <p className="text-xs text-neutral-500 mb-2">Quick pick from your ranked books:</p>
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {rankedBooks
+                    .filter((b) => !isBookAlreadyFavorite(b.open_library_key || ""))
+                    .sort((a, b) => b.score - a.score)
+                    .slice(0, 8)
+                    .map((book) => (
+                      <button
+                        key={book.id}
+                        onClick={() => {
+                          const position = getNextAvailablePosition();
+                          if (position) {
+                            addToFavorites({
+                              key: book.open_library_key || book.id,
+                              title: book.title,
+                              author: book.author,
+                              coverUrl: book.cover_url,
+                            }, position);
+                          }
+                        }}
+                        className="flex-shrink-0 w-12 aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden hover:ring-2 hover:ring-neutral-900 transition-all"
+                        title={book.title}
+                      >
+                        {book.cover_url ? (
+                          <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-[8px] text-neutral-400 p-1">
+                            {book.title}
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                </div>
+              </div>
+            )}
+
             {/* Book Search */}
             {favorites.length < 4 && (
               <div className="relative">
@@ -334,7 +639,7 @@ export default function EditProfilePage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search for a book to add..."
+                  placeholder="Or search for any book..."
                   className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none"
                 />
 

@@ -1,14 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { login, signup } from "./actions";
 import Link from "next/link";
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const referralCode = searchParams.get("ref");
+
   const [isSignUp, setIsSignUp] = useState(false);
+  const [referrerName, setReferrerName] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // If there's a referral code, default to sign up mode
+  useEffect(() => {
+    if (referralCode) {
+      setIsSignUp(true);
+      setReferrerName(referralCode); // Referral code is the username
+    }
+  }, [referralCode]);
 
   async function handleSubmit(formData: FormData) {
     setError(null);
@@ -51,6 +64,16 @@ export default function LoginPage() {
         </div>
 
         <form action={handleSubmit} className="space-y-4">
+          {referralCode && (
+            <input type="hidden" name="referral_code" value={referralCode} />
+          )}
+
+          {isSignUp && referrerName && (
+            <div className="p-3 bg-blue-50 text-blue-700 rounded-lg text-sm">
+              Invited by <span className="font-semibold">@{referrerName}</span>
+            </div>
+          )}
+
           {isSignUp && (
             <div>
               <label
@@ -149,5 +172,19 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="min-h-screen flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
+        </main>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

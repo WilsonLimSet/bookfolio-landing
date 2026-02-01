@@ -4,7 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import AddToListButton from "@/components/AddToListButton";
 import WantToReadButton from "@/components/WantToReadButton";
+import CurrentlyReadingButton from "@/components/CurrentlyReadingButton";
 import HeaderWrapper from "@/components/HeaderWrapper";
+
+export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ key: string }>;
@@ -54,26 +57,36 @@ export default async function BookPage({ params }: PageProps) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Check if user has this book ranked
+  // Check if user has this book ranked, in want to read, or currently reading
   let userBookEntry = null;
   let isInWantToRead = false;
+  let isCurrentlyReading = false;
 
   if (user) {
-    const { data: ranked } = await supabase
-      .from("user_books")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("open_library_key", workKey)
-      .single();
-    userBookEntry = ranked;
+    const [rankedResult, wtrResult, readingResult] = await Promise.all([
+      supabase
+        .from("user_books")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("open_library_key", workKey)
+        .single(),
+      supabase
+        .from("want_to_read")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("open_library_key", workKey)
+        .single(),
+      supabase
+        .from("currently_reading")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("open_library_key", workKey)
+        .single(),
+    ]);
 
-    const { data: wtr } = await supabase
-      .from("want_to_read")
-      .select("id")
-      .eq("user_id", user.id)
-      .eq("open_library_key", workKey)
-      .single();
-    isInWantToRead = !!wtr;
+    userBookEntry = rankedResult.data;
+    isInWantToRead = !!wtrResult.data;
+    isCurrentlyReading = !!readingResult.data;
   }
 
   // Get all reviews for this book
@@ -87,7 +100,7 @@ export default async function BookPage({ params }: PageProps) {
   const reviewerIds = [...new Set(allRatings?.map(r => r.user_id) || [])];
   const { data: reviewerProfiles } = await supabase
     .from("profiles")
-    .select("id, username")
+    .select("id, username, avatar_url")
     .in("id", reviewerIds.length > 0 ? reviewerIds : ["none"]);
 
   const profileMap = new Map(reviewerProfiles?.map(p => [p.id, p]) || []);
@@ -156,15 +169,28 @@ export default async function BookPage({ params }: PageProps) {
                   existingEntry={userBookEntry}
                 />
                 {!userBookEntry && (
-                  <WantToReadButton
-                    book={{
-                      key: workKey,
-                      title: book.title,
-                      author: book.author,
-                      coverUrl: book.coverUrl,
-                    }}
-                    isInList={isInWantToRead}
-                  />
+                  <>
+                    <CurrentlyReadingButton
+                      book={{
+                        key: workKey,
+                        title: book.title,
+                        author: book.author,
+                        coverUrl: book.coverUrl,
+                      }}
+                      isReading={isCurrentlyReading}
+                    />
+                    {!isCurrentlyReading && (
+                      <WantToReadButton
+                        book={{
+                          key: workKey,
+                          title: book.title,
+                          author: book.author,
+                          coverUrl: book.coverUrl,
+                        }}
+                        isInList={isInWantToRead}
+                      />
+                    )}
+                  </>
                 )}
               </div>
             ) : (
@@ -239,9 +265,17 @@ export default async function BookPage({ params }: PageProps) {
                     <div className="flex items-center gap-3 mb-3">
                       <Link
                         href={`/profile/${reviewer?.username}`}
-                        className="w-8 h-8 bg-neutral-200 rounded-full flex items-center justify-center text-sm font-bold text-neutral-500 hover:bg-neutral-300 transition-colors"
+                        className="w-8 h-8 bg-neutral-200 rounded-full flex items-center justify-center text-sm font-bold text-neutral-500 hover:bg-neutral-300 transition-colors overflow-hidden"
                       >
-                        {(reviewer?.username || "?")[0].toUpperCase()}
+                        {reviewer?.avatar_url ? (
+                          <img
+                            src={reviewer.avatar_url}
+                            alt={reviewer.username}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          (reviewer?.username || "?")[0].toUpperCase()
+                        )}
                       </Link>
                       <div>
                         <Link

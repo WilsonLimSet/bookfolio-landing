@@ -3,6 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import HeaderWrapper from "@/components/HeaderWrapper";
 
+export const dynamic = "force-dynamic";
+
 export default async function FeedPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -139,6 +141,43 @@ function ActivityItem({
             </span>
             <span className="text-xs text-neutral-400">in {activity.book_category}</span>
           </div>
+          <p className="text-xs text-neutral-400 mt-1">{timeAgo}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (activity.action_type === "started_reading") {
+    return (
+      <div className="flex gap-4 p-4 bg-white rounded-xl border border-blue-100">
+        <Link
+          href={`/book/${activity.book_key?.replace("/works/", "").replace("/books/", "") || ""}`}
+          className="w-12 h-[72px] bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 ring-2 ring-blue-500"
+        >
+          {activity.book_cover_url && (
+            <img
+              src={activity.book_cover_url}
+              alt=""
+              className="w-full h-full object-cover"
+            />
+          )}
+        </Link>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm">
+            <Link
+              href={`/profile/${profile?.username}`}
+              className="font-medium hover:underline"
+            >
+              {profile?.username || "Someone"}
+            </Link>
+            {" started reading "}
+            <Link
+              href={`/book/${activity.book_key?.replace("/works/", "").replace("/books/", "") || ""}`}
+              className="font-medium hover:underline"
+            >
+              {activity.book_title}
+            </Link>
+          </p>
           <p className="text-xs text-neutral-400 mt-1">{timeAgo}</p>
         </div>
       </div>

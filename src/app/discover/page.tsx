@@ -4,6 +4,8 @@ import Link from "next/link";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import UserSearch from "@/components/UserSearch";
 
+export const dynamic = "force-dynamic";
+
 export default async function DiscoverPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

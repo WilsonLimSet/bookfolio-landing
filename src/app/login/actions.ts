@@ -32,6 +32,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const username = formData.get("username") as string;
+  const referralCode = formData.get("referral_code") as string | null;
 
   // Check if username is already taken
   const { data: existingUser } = await supabase
@@ -51,6 +52,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/confirm`,
       data: {
         username,
+        referral_code: referralCode || null,
       },
     },
   });
