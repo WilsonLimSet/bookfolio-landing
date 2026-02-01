@@ -11,10 +11,18 @@ interface HeaderProps {
   username?: string | null;
 }
 
+interface UserResult {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+}
+
 export default function Header({ user, username }: HeaderProps) {
   const pathname = usePathname();
+  const supabase = createClient();
   const [searchQuery, setSearchQuery] = useState("");
-  const [searchResults, setSearchResults] = useState<Book[]>([]);
+  const [bookResults, setBookResults] = useState<Book[]>([]);
+  const [userResults, setUserResults] = useState<UserResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -26,28 +34,40 @@ export default function Header({ user, username }: HeaderProps) {
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
         setShowSearch(false);
-        setSearchResults([]);
+        setBookResults([]);
+        setUserResults([]);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Debounced search
+  // Debounced search - books AND users
   useEffect(() => {
     if (searchTimeoutRef.current) {
       clearTimeout(searchTimeoutRef.current);
     }
 
     if (!searchQuery.trim()) {
-      setSearchResults([]);
+      setBookResults([]);
+      setUserResults([]);
       return;
     }
 
     setIsSearching(true);
     searchTimeoutRef.current = setTimeout(async () => {
-      const results = await searchBooks(searchQuery);
-      setSearchResults(results);
+      // Search books and users in parallel
+      const [books, usersResult] = await Promise.all([
+        searchBooks(searchQuery),
+        supabase
+          .from("profiles")
+          .select("id, username, avatar_url")
+          .ilike("username", `%${searchQuery}%`)
+          .limit(5),
+      ]);
+
+      setBookResults(books);
+      setUserResults(usersResult.data || []);
       setIsSearching(false);
     }, 300);
 
@@ -56,12 +76,11 @@ export default function Header({ user, username }: HeaderProps) {
         clearTimeout(searchTimeoutRef.current);
       }
     };
-  }, [searchQuery]);
+  }, [searchQuery, supabase]);
 
   const navLinks = user
     ? [
         { href: "/feed", label: "Feed" },
-        { href: "/discover", label: "Discover" },
         { href: "/leaderboard", label: "Leaderboard" },
       ]
     : [];
@@ -130,35 +149,75 @@ export default function Header({ user, username }: HeaderProps) {
                       </div>
                     )}
 
-                    {searchResults.length > 0 && (
-                      <div className="max-h-80 overflow-y-auto border-t border-neutral-100">
-                        {searchResults.map((book) => (
-                          <Link
-                            key={book.key}
-                            href={`/book/${book.key.replace("/works/", "")}`}
-                            onClick={() => {
-                              setShowSearch(false);
-                              setSearchQuery("");
-                              setSearchResults([]);
-                            }}
-                            className="flex items-center gap-3 p-3 hover:bg-neutral-50 transition-colors"
-                          >
-                            <div className="w-8 h-12 bg-neutral-100 rounded overflow-hidden flex-shrink-0">
-                              {book.coverUrl && (
-                                <img src={book.coverUrl} alt="" className="w-full h-full object-cover" />
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-sm truncate">{book.title}</p>
-                              <p className="text-xs text-neutral-500 truncate">{book.author}</p>
-                            </div>
-                          </Link>
-                        ))}
+                    {(userResults.length > 0 || bookResults.length > 0) && (
+                      <div className="max-h-96 overflow-y-auto border-t border-neutral-100">
+                        {/* Users Section */}
+                        {userResults.length > 0 && (
+                          <div>
+                            <p className="px-3 py-2 text-xs font-semibold text-neutral-400 uppercase tracking-wider bg-neutral-50">
+                              People
+                            </p>
+                            {userResults.map((profile) => (
+                              <Link
+                                key={profile.id}
+                                href={`/profile/${profile.username}`}
+                                onClick={() => {
+                                  setShowSearch(false);
+                                  setSearchQuery("");
+                                  setBookResults([]);
+                                  setUserResults([]);
+                                }}
+                                className="flex items-center gap-3 p-3 hover:bg-neutral-50 transition-colors"
+                              >
+                                <div className="w-8 h-8 bg-neutral-200 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold text-neutral-500">
+                                  {profile.avatar_url ? (
+                                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                                  ) : (
+                                    profile.username[0].toUpperCase()
+                                  )}
+                                </div>
+                                <p className="font-medium text-sm">@{profile.username}</p>
+                              </Link>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Books Section */}
+                        {bookResults.length > 0 && (
+                          <div>
+                            <p className="px-3 py-2 text-xs font-semibold text-neutral-400 uppercase tracking-wider bg-neutral-50">
+                              Books
+                            </p>
+                            {bookResults.map((book) => (
+                              <Link
+                                key={book.key}
+                                href={`/book/${book.key.replace("/works/", "")}`}
+                                onClick={() => {
+                                  setShowSearch(false);
+                                  setSearchQuery("");
+                                  setBookResults([]);
+                                  setUserResults([]);
+                                }}
+                                className="flex items-center gap-3 p-3 hover:bg-neutral-50 transition-colors"
+                              >
+                                <div className="w-8 h-12 bg-neutral-100 rounded overflow-hidden flex-shrink-0">
+                                  {book.coverUrl && (
+                                    <img src={book.coverUrl} alt="" className="w-full h-full object-cover" />
+                                  )}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-sm truncate">{book.title}</p>
+                                  <p className="text-xs text-neutral-500 truncate">{book.author}</p>
+                                </div>
+                              </Link>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
 
-                    {searchQuery && !isSearching && searchResults.length === 0 && (
-                      <p className="p-4 text-sm text-neutral-500 text-center">No books found</p>
+                    {searchQuery && !isSearching && bookResults.length === 0 && userResults.length === 0 && (
+                      <p className="p-4 text-sm text-neutral-500 text-center">No results found</p>
                     )}
                   </div>
                 )}
