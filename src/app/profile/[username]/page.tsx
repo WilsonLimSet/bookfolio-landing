@@ -52,6 +52,7 @@ export default async function ProfilePage({ params }: PageProps) {
     weeklyActivityResult,
     allUsersRankResult,
     booksThisYearResult,
+    listsCountResult,
   ] = await Promise.all([
     // Get referral count to determine if social links should be shown
     supabase
@@ -125,6 +126,12 @@ export default async function ProfilePage({ params }: PageProps) {
       .eq("user_id", profile.id)
       .gte("finished_at", yearStart)
       .lte("finished_at", yearEnd),
+    // Get public lists count
+    supabase
+      .from("book_lists")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", profile.id)
+      .eq("is_public", true),
   ]);
 
   const referralCount = referralResult.count || 0;
@@ -136,6 +143,7 @@ export default async function ProfilePage({ params }: PageProps) {
   const nonfictionCount = nonfictionResult.count || 0;
   const totalBooksRead = fictionCount + nonfictionCount;
   const wantToReadCount = wantToReadCountResult.count || 0;
+  const listsCount = listsCountResult.count || 0;
   const favoriteBooks = favoritesResult.data;
   const currentlyReading = currentlyReadingResult.data || [];
   const hasFavorites = (favoriteBooks?.length || 0) > 0;
@@ -386,6 +394,27 @@ export default async function ProfilePage({ params }: PageProps) {
                 <div>
                   <p className="font-medium">Want to Read</p>
                   <p className="text-sm text-neutral-500">{wantToReadCount} {wantToReadCount === 1 ? "book" : "books"}</p>
+                </div>
+              </div>
+              <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+
+            {/* Lists */}
+            <Link
+              href={`/profile/${username}/lists`}
+              className="flex items-center justify-between p-4 bg-white rounded-xl border border-neutral-100 hover:bg-neutral-50 transition-colors"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-medium">Lists</p>
+                  <p className="text-sm text-neutral-500">{listsCount} {listsCount === 1 ? "list" : "lists"}</p>
                 </div>
               </div>
               <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

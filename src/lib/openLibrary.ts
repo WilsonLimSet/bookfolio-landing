@@ -126,8 +126,10 @@ export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
+    // Search using title field which also matches alternative_title (translations)
+    // This helps find books like "The Stranger" which is stored as "L'Étranger"
     const response = await fetch(
-      `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=8&fields=key,title,author_name,cover_i,cover_edition_key,first_publish_year,edition_count`
+      `https://openlibrary.org/search.json?title=${encodeURIComponent(query)}&limit=12&fields=key,title,author_name,cover_i,cover_edition_key,first_publish_year,edition_count,alternative_title`
     );
 
     if (!response.ok) {
@@ -136,10 +138,29 @@ export async function searchBooks(query: string): Promise<Book[]> {
     }
 
     const data = await response.json();
-    const results: BookSearchResult[] = data.docs || [];
+    let results: BookSearchResult[] = data.docs || [];
+
+    // If few results with title search, also do general search
+    if (results.filter(b => b.cover_i).length < 4) {
+      const generalResponse = await fetch(
+        `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=12&fields=key,title,author_name,cover_i,cover_edition_key,first_publish_year,edition_count`
+      );
+      if (generalResponse.ok) {
+        const generalData = await generalResponse.json();
+        const generalResults: BookSearchResult[] = generalData.docs || [];
+        // Merge results, avoiding duplicates
+        const existingKeys = new Set(results.map(r => r.key));
+        for (const book of generalResults) {
+          if (!existingKeys.has(book.key)) {
+            results.push(book);
+          }
+        }
+      }
+    }
 
     return results
       .filter((book) => book.cover_i) // Only show books with covers
+      .slice(0, 8)
       .map((book) => ({
         key: book.key,
         title: book.title,

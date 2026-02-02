@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import LikeButton from "./LikeButton";
@@ -11,20 +11,6 @@ interface FeedTabsProps {
   currentUserId: string;
   followingIds: string[];
   currentUsername: string;
-}
-
-interface Activity {
-  id: string;
-  user_id: string;
-  action_type: string;
-  book_title: string | null;
-  book_author: string | null;
-  book_cover_url: string | null;
-  book_key: string | null;
-  book_score: string | null;
-  book_category: string | null;
-  target_user_id: string | null;
-  created_at: string;
 }
 
 interface ReviewData {
@@ -73,26 +59,7 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
   const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Load data based on active tab
-  useEffect(() => {
-    loadTabData();
-  }, [activeTab]);
-
-  async function loadTabData() {
-    setLoading(true);
-
-    if (activeTab === "friends") {
-      await loadFriendsActivity();
-    } else if (activeTab === "you") {
-      await loadYourActivity();
-    } else {
-      await loadNotifications();
-    }
-
-    setLoading(false);
-  }
-
-  async function loadFriendsActivity() {
+  const loadFriendsActivity = useCallback(async () => {
     // Get ranked books from people you follow (with reviews)
     let query = supabase
       .from("user_books")
@@ -146,9 +113,9 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
     } else {
       setFriendsActivity([]);
     }
-  }
+  }, [supabase, followingIds, currentUserId]);
 
-  async function loadYourActivity() {
+  const loadYourActivity = useCallback(async () => {
     const { data: reviews } = await supabase
       .from("user_books")
       .select("*")
@@ -172,9 +139,9 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
 
       setYourActivity(reviews);
     }
-  }
+  }, [supabase, currentUserId]);
 
-  async function loadNotifications() {
+  const loadNotifications = useCallback(async () => {
     const { data: notifs } = await supabase
       .from("notifications")
       .select("*")
@@ -207,7 +174,25 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
           .eq("read", false);
       }
     }
-  }
+  }, [supabase, currentUserId]);
+
+  // Load data based on active tab
+  useEffect(() => {
+    async function loadTabData() {
+      setLoading(true);
+
+      if (activeTab === "friends") {
+        await loadFriendsActivity();
+      } else if (activeTab === "you") {
+        await loadYourActivity();
+      } else {
+        await loadNotifications();
+      }
+
+      setLoading(false);
+    }
+    loadTabData();
+  }, [activeTab, loadFriendsActivity, loadYourActivity, loadNotifications]);
 
   function handleLikeToggle(reviewId: string, isLiked: boolean) {
     // Update local state

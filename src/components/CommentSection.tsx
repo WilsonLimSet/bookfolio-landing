@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
@@ -37,11 +37,7 @@ export default function CommentSection({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadComments();
-  }, [reviewId]);
-
-  async function loadComments() {
+  const loadComments = useCallback(async () => {
     const { data: commentsData } = await supabase
       .from("review_comments")
       .select("*")
@@ -65,7 +61,11 @@ export default function CommentSection({
     }
 
     setIsLoading(false);
-  }
+  }, [supabase, reviewId]);
+
+  useEffect(() => {
+    loadComments();
+  }, [loadComments]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

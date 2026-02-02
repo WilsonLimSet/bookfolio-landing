@@ -5,7 +5,9 @@ import Link from "next/link";
 import AddToListButton from "@/components/AddToListButton";
 import WantToReadButton from "@/components/WantToReadButton";
 import CurrentlyReadingButton from "@/components/CurrentlyReadingButton";
+import AddToBookListButton from "@/components/AddToBookListButton";
 import HeaderWrapper from "@/components/HeaderWrapper";
+import ExpandableText from "@/components/ExpandableText";
 
 export const dynamic = "force-dynamic";
 
@@ -192,6 +194,14 @@ export default async function BookPage({ params }: PageProps) {
                     )}
                   </>
                 )}
+                <AddToBookListButton
+                  book={{
+                    key: workKey,
+                    title: book.title,
+                    author: book.author,
+                    coverUrl: book.coverUrl,
+                  }}
+                />
               </div>
             ) : (
               <Link
@@ -208,11 +218,11 @@ export default async function BookPage({ params }: PageProps) {
                 <h2 className="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-2">
                   Description
                 </h2>
-                <p className="text-neutral-700 leading-relaxed">
-                  {book.description.length > 500
-                    ? book.description.slice(0, 500) + "..."
-                    : book.description}
-                </p>
+                <ExpandableText
+                  text={book.description}
+                  maxLength={500}
+                  className="text-neutral-700 leading-relaxed"
+                />
               </div>
             )}
 
