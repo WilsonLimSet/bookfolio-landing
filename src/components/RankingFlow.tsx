@@ -56,6 +56,9 @@ export default function RankingFlow({
     (existingEntry?.tier as Tier) || null
   );
   const [reviewText, setReviewText] = useState("");
+  const [finishedAt, setFinishedAt] = useState<string>(
+    new Date().toISOString().split("T")[0] // Default to today
+  );
 
   // For comparison step
   const [userBooks, setUserBooks] = useState<UserBook[]>([]);
@@ -191,6 +194,7 @@ export default function RankingFlow({
       rank_position: finalPosition,
       score,
       review_text: reviewText || null,
+      finished_at: finishedAt || null,
     });
 
     // Recalculate all scores in category
@@ -532,32 +536,43 @@ export default function RankingFlow({
 
           {step === "review" && (
             <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-center">Add a review (optional)</h2>
-              <p className="text-sm text-neutral-500 text-center">
-                Share your thoughts about this book
-              </p>
-              <textarea
-                value={reviewText}
-                onChange={(e) => setReviewText(e.target.value)}
-                placeholder="What did you think? Any highlights, quotes, or takeaways..."
-                className="w-full h-32 px-4 py-3 rounded-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none resize-none"
-                maxLength={1000}
-              />
-              <p className="text-xs text-neutral-400 text-right">{reviewText.length}/1000</p>
-              <div className="flex gap-3">
-                <button
-                  onClick={() => saveBook()}
-                  className="flex-1 py-3 text-neutral-600 border border-neutral-200 rounded-lg font-medium hover:bg-neutral-50 transition-colors"
-                >
-                  Skip
-                </button>
-                <button
-                  onClick={() => saveBook()}
-                  className="flex-1 py-3 bg-neutral-900 text-white rounded-lg font-medium hover:bg-neutral-800 transition-colors"
-                >
-                  {reviewText.trim() ? "Save with review" : "Save"}
-                </button>
+              <h2 className="text-lg font-semibold text-center">When did you finish?</h2>
+
+              {/* Date Finished */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  Date finished
+                </label>
+                <input
+                  type="date"
+                  value={finishedAt}
+                  onChange={(e) => setFinishedAt(e.target.value)}
+                  max={new Date().toISOString().split("T")[0]}
+                  className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none"
+                />
               </div>
+
+              {/* Review */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-1">
+                  Review (optional)
+                </label>
+                <textarea
+                  value={reviewText}
+                  onChange={(e) => setReviewText(e.target.value)}
+                  placeholder="What did you think? Any highlights, quotes, or takeaways..."
+                  className="w-full h-24 px-4 py-3 rounded-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none resize-none"
+                  maxLength={1000}
+                />
+                <p className="text-xs text-neutral-400 text-right">{reviewText.length}/1000</p>
+              </div>
+
+              <button
+                onClick={() => saveBook()}
+                className="w-full py-3 bg-neutral-900 text-white rounded-lg font-medium hover:bg-neutral-800 transition-colors"
+              >
+                Save
+              </button>
             </div>
           )}
 

@@ -95,6 +95,11 @@ export default async function ReadBooksPage({ params }: PageProps) {
                             {book.author && (
                               <p className="text-sm text-neutral-500 truncate">{book.author}</p>
                             )}
+                            {book.finished_at && (
+                              <p className="text-xs text-neutral-400">
+                                Finished {new Date(book.finished_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                              </p>
+                            )}
                           </div>
                           <div className={`text-lg font-bold ${
                             book.tier === 'liked' ? 'text-green-600' :
@@ -144,6 +149,11 @@ export default async function ReadBooksPage({ params }: PageProps) {
                             <p className="font-medium truncate">{book.title}</p>
                             {book.author && (
                               <p className="text-sm text-neutral-500 truncate">{book.author}</p>
+                            )}
+                            {book.finished_at && (
+                              <p className="text-xs text-neutral-400">
+                                Finished {new Date(book.finished_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                              </p>
                             )}
                           </div>
                           <div className={`text-lg font-bold ${

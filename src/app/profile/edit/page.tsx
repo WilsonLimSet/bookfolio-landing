@@ -48,6 +48,7 @@ export default function EditProfilePage() {
   const [copied, setCopied] = useState(false);
   const [favorites, setFavorites] = useState<FavoriteBook[]>([]);
   const [rankedBooks, setRankedBooks] = useState<RankedBook[]>([]);
+  const [readingGoal, setReadingGoal] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const REFERRALS_REQUIRED = 3; // Number of referrals needed to unlock social links
@@ -84,7 +85,7 @@ export default function EditProfilePage() {
       const [profileResult, favoritesResult, rankedResult, referralsResult] = await Promise.all([
         supabase
           .from("profiles")
-          .select("username, bio, avatar_url, instagram, twitter, referral_code")
+          .select("username, bio, avatar_url, instagram, twitter, referral_code, reading_goal_2025")
           .eq("id", user.id)
           .single(),
         supabase
@@ -109,6 +110,7 @@ export default function EditProfilePage() {
         setInstagram(profileResult.data.instagram || "");
         setTwitter(profileResult.data.twitter || "");
         setReferralCode(profileResult.data.referral_code || profileResult.data.username);
+        setReadingGoal(profileResult.data.reading_goal_2025 || null);
       }
 
       setReferralCount(referralsResult.count || 0);
@@ -336,6 +338,7 @@ export default function EditProfilePage() {
           avatar_url: newAvatarUrl,
           instagram: instagram || null,
           twitter: twitter || null,
+          reading_goal_2025: readingGoal || null,
           updated_at: new Date().toISOString(),
         })
         .eq("id", userId);
@@ -450,6 +453,27 @@ export default function EditProfilePage() {
               />
               <p className="text-xs text-neutral-500 mt-1 text-right">
                 {bio.length}/500
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-neutral-700 mb-1">
+                2025 Reading Goal
+              </label>
+              <div className="flex items-center gap-3">
+                <input
+                  type="number"
+                  value={readingGoal || ""}
+                  onChange={(e) => setReadingGoal(e.target.value ? parseInt(e.target.value) : null)}
+                  placeholder="e.g. 24"
+                  min={1}
+                  max={365}
+                  className="w-24 px-4 py-3 rounded-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none"
+                />
+                <span className="text-neutral-600">books this year</span>
+              </div>
+              <p className="text-xs text-neutral-500 mt-1">
+                Set a goal to track your reading progress
               </p>
             </div>
 

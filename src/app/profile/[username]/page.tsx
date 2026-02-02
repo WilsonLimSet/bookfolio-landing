@@ -20,7 +20,7 @@ export default async function ProfilePage({ params }: PageProps) {
   const [profileResult, userResult] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, username, bio, avatar_url, instagram, twitter")
+      .select("id, username, bio, avatar_url, instagram, twitter, reading_goal_2025")
       .eq("username", username)
       .single(),
     supabase.auth.getUser(),
@@ -35,6 +35,10 @@ export default async function ProfilePage({ params }: PageProps) {
   const isOwner = user?.id === profile.id;
 
   // Run all remaining queries in parallel
+  const currentYear = new Date().getFullYear();
+  const yearStart = `${currentYear}-01-01`;
+  const yearEnd = `${currentYear}-12-31`;
+
   const [
     referralResult,
     followResult,
@@ -47,6 +51,7 @@ export default async function ProfilePage({ params }: PageProps) {
     currentlyReadingResult,
     weeklyActivityResult,
     allUsersRankResult,
+    booksThisYearResult,
   ] = await Promise.all([
     // Get referral count to determine if social links should be shown
     supabase
@@ -113,6 +118,13 @@ export default async function ProfilePage({ params }: PageProps) {
       .from("user_books")
       .select("user_id")
       .order("user_id"),
+    // Get books finished this year (for reading goal)
+    supabase
+      .from("user_books")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", profile.id)
+      .gte("finished_at", yearStart)
+      .lte("finished_at", yearEnd),
   ]);
 
   const referralCount = referralResult.count || 0;
@@ -142,6 +154,11 @@ export default async function ProfilePage({ params }: PageProps) {
     .sort((a, b) => b[1] - a[1]);
   const userRank = sortedCounts.findIndex(([userId]) => userId === profile.id) + 1;
   const totalUsers = userBookCounts.size;
+
+  // Reading goal progress
+  const readingGoal = profile.reading_goal_2025;
+  const booksThisYear = booksThisYearResult.count || 0;
+  const goalProgress = readingGoal ? Math.min((booksThisYear / readingGoal) * 100, 100) : 0;
 
   return (
     <>
@@ -203,7 +220,7 @@ export default async function ProfilePage({ params }: PageProps) {
           </div>
 
           {/* Stats Row - Beli style */}
-          <div className="grid grid-cols-4 gap-2 mb-6">
+          <div className="grid grid-cols-4 gap-2 mb-4">
             <div className="bg-white rounded-xl p-3 text-center border border-neutral-100">
               <p className="text-2xl font-bold">{totalBooksRead}</p>
               <p className="text-xs text-neutral-500">Read</p>
@@ -221,6 +238,29 @@ export default async function ProfilePage({ params }: PageProps) {
               <p className="text-xs text-neutral-500">Followers</p>
             </div>
           </div>
+
+          {/* 2025 Reading Goal */}
+          {readingGoal && (
+            <div className="bg-white rounded-xl p-4 border border-neutral-100 mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">2025 Reading Goal</span>
+                <span className="text-sm text-neutral-500">
+                  {booksThisYear} / {readingGoal} books
+                </span>
+              </div>
+              <div className="w-full h-3 bg-neutral-100 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-green-500 rounded-full transition-all duration-500"
+                  style={{ width: `${goalProgress}%` }}
+                />
+              </div>
+              {goalProgress >= 100 && (
+                <p className="text-xs text-green-600 mt-2 text-center font-medium">
+                  Goal achieved!
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Actions */}
           <div className="flex justify-center gap-3 mb-8">
