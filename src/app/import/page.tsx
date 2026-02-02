@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { searchBooks } from "@/lib/openLibrary";
 import Link from "next/link";
@@ -26,7 +25,6 @@ interface MatchedBook {
 type Step = "upload" | "matching" | "categorize" | "rank" | "importing" | "done";
 
 export default function ImportPage() {
-  const router = useRouter();
   const supabase = createClient();
 
   const [step, setStep] = useState<Step>("upload");

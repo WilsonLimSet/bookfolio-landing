@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { getEditions, BookEdition } from "@/lib/openLibrary";
 
@@ -79,13 +79,7 @@ export default function RankingFlow({
   }, [book.key]);
 
   // Load user's books in category when we get to compare step
-  useEffect(() => {
-    if (step === "compare" && category) {
-      loadUserBooks();
-    }
-  }, [step, category]);
-
-  async function loadUserBooks() {
+  const loadUserBooks = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
@@ -108,7 +102,15 @@ export default function RankingFlow({
       setHigh(books.length);
       setCompareIndex(Math.floor(books.length / 2));
     }
-  }
+  }, [supabase, category, book.key]);
+
+  useEffect(() => {
+    if (step === "compare" && category) {
+      // Use timeout to avoid synchronous setState triggers
+      const timer = setTimeout(() => loadUserBooks(), 0);
+      return () => clearTimeout(timer);
+    }
+  }, [step, category, loadUserBooks]);
 
   function handleCategorySelect(cat: Category) {
     setCategory(cat);
@@ -152,7 +154,9 @@ export default function RankingFlow({
   // Go to review step when we have final position
   useEffect(() => {
     if (finalPosition !== null && category && tier && step === "compare") {
-      setStep("review");
+      // Use timeout to avoid synchronous setState in effect
+      const timer = setTimeout(() => setStep("review"), 0);
+      return () => clearTimeout(timer);
     }
   }, [finalPosition, category, tier, step]);
 

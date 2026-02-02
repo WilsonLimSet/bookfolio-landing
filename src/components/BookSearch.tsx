@@ -25,7 +25,8 @@ export default function BookSearch({
     }
 
     if (!query.trim()) {
-      setResults([]);
+      // Use timeout to avoid synchronous setState in effect
+      debounceRef.current = setTimeout(() => setResults([]), 0);
       return;
     }
 
@@ -110,6 +111,11 @@ export default function BookSearch({
                   {book.author}
                   {book.year && <span className="text-neutral-400"> ({book.year})</span>}
                 </p>
+                {book.alternativeTitles && book.alternativeTitles.length > 0 && (
+                  <p className="text-xs text-neutral-400 truncate">
+                    aka {book.alternativeTitles[0]}
+                  </p>
+                )}
               </div>
             </button>
           ))}
@@ -117,8 +123,11 @@ export default function BookSearch({
       )}
 
       {showResults && query && !loading && results.length === 0 && (
-        <div className="absolute z-10 w-full mt-2 bg-white rounded-lg border border-neutral-200 shadow-lg p-4 text-center text-neutral-500">
-          No books found
+        <div className="absolute z-10 w-full mt-2 bg-white rounded-lg border border-neutral-200 shadow-lg p-4 text-center">
+          <p className="text-neutral-500">No books found</p>
+          <p className="text-xs text-neutral-400 mt-1">
+            Try the original title or author name for translated works
+          </p>
         </div>
       )}
     </div>

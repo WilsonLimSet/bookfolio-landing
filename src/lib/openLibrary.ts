@@ -6,6 +6,7 @@ export interface BookSearchResult {
   cover_edition_key?: string;
   first_publish_year?: number;
   edition_count?: number;
+  alternative_title?: string[];
 }
 
 export interface Book {
@@ -15,6 +16,7 @@ export interface Book {
   coverUrl: string | null;
   year: number | null;
   editions: number;
+  alternativeTitles?: string[];
 }
 
 export interface Edition {
@@ -168,6 +170,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
         coverUrl: `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`,
         year: book.first_publish_year || null,
         editions: book.edition_count || 1,
+        alternativeTitles: book.alternative_title?.slice(0, 3),
       }));
   } catch (error) {
     console.error("Failed to search books:", error);

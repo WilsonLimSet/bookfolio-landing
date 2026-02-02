@@ -29,11 +29,17 @@ export default function UserSearch({ currentUserId, followingIds }: UserSearchPr
     }
 
     if (!query.trim()) {
-      setResults([]);
+      // Use timeout to avoid synchronous setState in effect
+      searchTimeoutRef.current = setTimeout(() => {
+        setResults([]);
+        setIsSearching(false);
+      }, 0);
       return;
     }
 
-    setIsSearching(true);
+    // Use immediate timeout to set loading state (to avoid synchronous setState)
+    const loadingTimeout = setTimeout(() => setIsSearching(true), 0);
+
     searchTimeoutRef.current = setTimeout(async () => {
       const { data } = await supabase
         .from("profiles")
@@ -47,6 +53,7 @@ export default function UserSearch({ currentUserId, followingIds }: UserSearchPr
     }, 300);
 
     return () => {
+      clearTimeout(loadingTimeout);
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { login, signup } from "./actions";
 import Link from "next/link";
@@ -9,19 +9,14 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const referralCode = searchParams.get("ref");
 
-  const [isSignUp, setIsSignUp] = useState(false);
-  const [referrerName, setReferrerName] = useState<string | null>(null);
+  // If there's a referral code, default to sign up mode
+  const [isSignUp, setIsSignUp] = useState(() => !!referralCode);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // If there's a referral code, default to sign up mode
-  useEffect(() => {
-    if (referralCode) {
-      setIsSignUp(true);
-      setReferrerName(referralCode); // Referral code is the username
-    }
-  }, [referralCode]);
+  // Referrer name is just the referral code (username)
+  const referrerName = referralCode;
 
   async function handleSubmit(formData: FormData) {
     setError(null);

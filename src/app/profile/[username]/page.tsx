@@ -35,9 +35,11 @@ export default async function ProfilePage({ params }: PageProps) {
   const isOwner = user?.id === profile.id;
 
   // Run all remaining queries in parallel
-  const currentYear = new Date().getFullYear();
+  const now = new Date();
+  const currentYear = now.getFullYear();
   const yearStart = `${currentYear}-01-01`;
   const yearEnd = `${currentYear}-12-31`;
+  const twelveWeeksAgo = new Date(now.getTime() - 12 * 7 * 24 * 60 * 60 * 1000).toISOString();
 
   const [
     referralResult,
@@ -112,7 +114,7 @@ export default async function ProfilePage({ params }: PageProps) {
       .from("activity")
       .select("created_at")
       .eq("user_id", profile.id)
-      .gte("created_at", new Date(Date.now() - 12 * 7 * 24 * 60 * 60 * 1000).toISOString())
+      .gte("created_at", twelveWeeksAgo)
       .order("created_at", { ascending: false }),
     // Get users by book count for ranking (limited for performance)
     supabase
@@ -161,7 +163,6 @@ export default async function ProfilePage({ params }: PageProps) {
   const sortedCounts = Array.from(userBookCounts.entries())
     .sort((a, b) => b[1] - a[1]);
   const userRank = sortedCounts.findIndex(([userId]) => userId === profile.id) + 1;
-  const totalUsers = userBookCounts.size;
 
   // Reading goal progress
   const readingGoal = profile.reading_goal_2025;

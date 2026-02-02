@@ -49,12 +49,18 @@ export default function Header({ user, username }: HeaderProps) {
     }
 
     if (!searchQuery.trim()) {
-      setBookResults([]);
-      setUserResults([]);
+      // Use timeout to avoid synchronous setState in effect
+      searchTimeoutRef.current = setTimeout(() => {
+        setBookResults([]);
+        setUserResults([]);
+        setIsSearching(false);
+      }, 0);
       return;
     }
 
-    setIsSearching(true);
+    // Use immediate timeout to set loading state (to avoid synchronous setState)
+    const loadingTimeout = setTimeout(() => setIsSearching(true), 0);
+
     searchTimeoutRef.current = setTimeout(async () => {
       // Search books and users in parallel
       const [books, usersResult] = await Promise.all([
@@ -72,6 +78,7 @@ export default function Header({ user, username }: HeaderProps) {
     }, 300);
 
     return () => {
+      clearTimeout(loadingTimeout);
       if (searchTimeoutRef.current) {
         clearTimeout(searchTimeoutRef.current);
       }

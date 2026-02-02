@@ -14,11 +14,12 @@ interface FollowButtonProps {
 
 export default function FollowButton({
   targetUserId,
-  targetUsername,
+  targetUsername: _targetUsername,
   isFollowing: initialIsFollowing,
   currentUserId,
   onFollowChange,
 }: FollowButtonProps) {
+  void _targetUsername; // Reserved for future use (e.g., "Follow @username")
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [loading, setLoading] = useState(false);
   const router = useRouter();
