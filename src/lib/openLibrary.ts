@@ -138,7 +138,7 @@ export async function searchBooks(query: string): Promise<Book[]> {
     }
 
     const data = await response.json();
-    let results: BookSearchResult[] = data.docs || [];
+    const results: BookSearchResult[] = data.docs || [];
 
     // If few results with title search, also do general search
     if (results.filter(b => b.cover_i).length < 4) {

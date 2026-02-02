@@ -6,6 +6,12 @@ import UserSearch from "@/components/UserSearch";
 
 export const dynamic = "force-dynamic";
 
+interface SuggestedUser {
+  id: string;
+  username: string;
+  bookCount: number;
+}
+
 export default async function DiscoverPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -45,12 +51,12 @@ export default async function DiscoverPage() {
     .select("id, username")
     .in("id", suggestedUserIds.length > 0 ? suggestedUserIds : ["none"]);
 
-  const suggestedUsers = suggestedUserIds
+  const suggestedUsers: SuggestedUser[] = suggestedUserIds
     .map(id => {
       const profile = suggestedProfiles?.find(p => p.id === id);
       return profile ? { ...profile, bookCount: userCounts.get(id) || 0 } : null;
     })
-    .filter(Boolean);
+    .filter((user): user is SuggestedUser => user !== null);
 
   // Get recently active users (from activity)
   const { data: recentActivity } = await supabase
@@ -88,7 +94,7 @@ export default async function DiscoverPage() {
                 Suggested for you
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {suggestedUsers.map((user: any) => (
+                {suggestedUsers.map((user) => (
                   <Link
                     key={user.id}
                     href={`/profile/${user.username}`}

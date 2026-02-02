@@ -114,11 +114,11 @@ export default async function ProfilePage({ params }: PageProps) {
       .eq("user_id", profile.id)
       .gte("created_at", new Date(Date.now() - 12 * 7 * 24 * 60 * 60 * 1000).toISOString())
       .order("created_at", { ascending: false }),
-    // Get all users ranked by book count for ranking
+    // Get users by book count for ranking (limited for performance)
     supabase
       .from("user_books")
       .select("user_id")
-      .order("user_id"),
+      .limit(5000),
     // Get books finished this year (for reading goal)
     supabase
       .from("user_books")

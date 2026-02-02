@@ -2,6 +2,7 @@ import { notFound, redirect } from "next/navigation";
 import { getBookDetails } from "@/lib/openLibrary";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import Image from "next/image";
 import AddToListButton from "@/components/AddToListButton";
 import WantToReadButton from "@/components/WantToReadButton";
 import CurrentlyReadingButton from "@/components/CurrentlyReadingButton";
@@ -91,12 +92,13 @@ export default async function BookPage({ params }: PageProps) {
     isCurrentlyReading = !!readingResult.data;
   }
 
-  // Get all reviews for this book
+  // Get reviews for this book (limited for performance)
   const { data: allRatings } = await supabase
     .from("user_books")
     .select("id, user_id, score, tier, review_text, created_at")
     .eq("open_library_key", workKey)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(100);
 
   // Get profiles for reviewers
   const reviewerIds = [...new Set(allRatings?.map(r => r.user_id) || [])];
@@ -124,14 +126,27 @@ export default async function BookPage({ params }: PageProps) {
           <div className="flex flex-col md:flex-row gap-6 sm:gap-8">
           {/* Cover */}
           <div className="flex-shrink-0">
-            <div className="w-48 md:w-64 aspect-[2/3] bg-neutral-100 rounded-xl overflow-hidden shadow-lg mx-auto md:mx-0">
+            <div className="w-48 md:w-64 aspect-[2/3] bg-neutral-100 rounded-xl overflow-hidden shadow-lg mx-auto md:mx-0 relative group">
+              {/* Top light reflection */}
+              <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/15 to-transparent pointer-events-none z-10 rounded-t-xl" />
               {book.coverUrl ? (
-                <img src={book.coverUrl} alt={book.title} className="w-full h-full object-cover" />
+                <Image
+                  src={book.coverUrl}
+                  alt={book.title}
+                  fill
+                  priority
+                  className="object-cover"
+                  unoptimized
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-neutral-400 p-4 text-center">
                   {book.title}
                 </div>
               )}
+              {/* Spine shadow */}
+              <div className="absolute left-0 inset-y-0 w-[4px] bg-gradient-to-r from-black/25 to-transparent pointer-events-none" />
+              {/* Bottom shadow */}
+              <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
             </div>
           </div>
 
