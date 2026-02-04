@@ -76,6 +76,7 @@ export interface BookDetails {
   description: string | null;
   firstPublishYear: number | null;
   subjects: string[];
+  pageCount: number | null;
 }
 
 export async function getBookDetails(workKey: string): Promise<BookDetails | null> {
@@ -136,14 +137,47 @@ export async function getBookDetails(workKey: string): Promise<BookDetails | nul
       }
     }
 
+    // Get publish year - try multiple sources
+    let firstPublishYear: number | null = null;
+    if (work.first_publish_date) {
+      const parsed = parseInt(work.first_publish_date);
+      if (!isNaN(parsed)) firstPublishYear = parsed;
+    }
+    // Try to extract year from subjects like "nyt:...-2019-10-06"
+    if (!firstPublishYear && work.subjects) {
+      for (const subject of work.subjects) {
+        const match = subject.match(/(\d{4})-\d{2}-\d{2}$/);
+        if (match) {
+          firstPublishYear = parseInt(match[1]);
+          break;
+        }
+      }
+    }
+    // Try first edition publish date
+    if (!firstPublishYear && editionsResult?.entries?.[0]?.publish_date) {
+      const match = editionsResult.entries[0].publish_date.match(/\d{4}/);
+      if (match) {
+        firstPublishYear = parseInt(match[0]);
+      }
+    }
+
+    // Get page count from first edition
+    const pageCount = editionsResult?.entries?.[0]?.number_of_pages || null;
+
+    // Filter out NYT subjects and clean up subject names
+    const cleanSubjects = (work.subjects || [])
+      .filter((s: string) => !s.startsWith('nyt:') && !s.includes('New York Times'))
+      .slice(0, 6);
+
     return {
       key: workKey,
       title: work.title,
       author: authorName,
       coverUrl,
       description,
-      firstPublishYear: work.first_publish_date ? parseInt(work.first_publish_date) : null,
-      subjects: (work.subjects || []).slice(0, 5),
+      firstPublishYear,
+      subjects: cleanSubjects,
+      pageCount,
     };
   } catch (error) {
     console.error("Failed to fetch book details:", error);

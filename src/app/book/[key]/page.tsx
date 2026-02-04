@@ -153,8 +153,20 @@ export default async function BookPage({ params }: PageProps) {
           <div className="flex-1">
             <h1 className="text-3xl font-bold mb-2">{book.title}</h1>
             {book.author && (
-              <p className="text-xl text-neutral-600 mb-4">{book.author}</p>
+              <p className="text-xl text-neutral-600 mb-1">{book.author}</p>
             )}
+            {/* Metadata row */}
+            <div className="flex flex-wrap items-center gap-3 text-sm text-neutral-500 mb-4">
+              {book.firstPublishYear && (
+                <span>{book.firstPublishYear}</span>
+              )}
+              {book.pageCount && (
+                <>
+                  {book.firstPublishYear && <span>·</span>}
+                  <span>{book.pageCount} pages</span>
+                </>
+              )}
+            </div>
 
             {/* User's rating if exists */}
             {userBookEntry && (
@@ -227,7 +239,7 @@ export default async function BookPage({ params }: PageProps) {
             )}
 
             {/* Description */}
-            {book.description && (
+            {book.description ? (
               <div className="mt-4">
                 <h2 className="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-2">
                   Description
@@ -238,11 +250,20 @@ export default async function BookPage({ params }: PageProps) {
                   className="text-neutral-700 leading-relaxed"
                 />
               </div>
-            )}
+            ) : book.subjects.length > 0 ? (
+              <div className="mt-4">
+                <p className="text-sm text-neutral-400 italic">
+                  No description available
+                </p>
+              </div>
+            ) : null}
 
             {/* Subjects/Tags */}
             {book.subjects.length > 0 && (
-              <div className="mt-6">
+              <div className="mt-4">
+                <h2 className="text-sm font-semibold text-neutral-400 uppercase tracking-wider mb-2">
+                  Topics
+                </h2>
                 <div className="flex flex-wrap gap-2">
                   {book.subjects.map((subject) => (
                     <span
