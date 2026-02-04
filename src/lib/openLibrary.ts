@@ -85,15 +85,17 @@ export async function getBookDetails(workKey: string): Promise<BookDetails | nul
     if (!workRes.ok) return null;
     const work = await workRes.json();
 
-    // Get author name
-    let authorName: string | null = null;
-    if (work.authors?.[0]?.author?.key) {
-      const authorRes = await fetch(`https://openlibrary.org${work.authors[0].author.key}.json`);
-      if (authorRes.ok) {
-        const author = await authorRes.json();
-        authorName = author.name || null;
-      }
-    }
+    // Parallel fetch: author and first edition (for fallback description)
+    const authorKey = work.authors?.[0]?.author?.key;
+    const [authorResult, editionsResult] = await Promise.all([
+      authorKey
+        ? fetch(`https://openlibrary.org${authorKey}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
+        : Promise.resolve(null),
+      // Fetch first edition for fallback description
+      fetch(`https://openlibrary.org${workKey}/editions.json?limit=1`).then(r => r.ok ? r.json() : null).catch(() => null),
+    ]);
+
+    const authorName = authorResult?.name || null;
 
     // Get cover
     const coverId = work.covers?.[0];
@@ -101,12 +103,37 @@ export async function getBookDetails(workKey: string): Promise<BookDetails | nul
       ? `https://covers.openlibrary.org/b/id/${coverId}-L.jpg`
       : null;
 
-    // Get description
+    // Get description - try multiple sources
     let description: string | null = null;
+
+    // 1. Try work description
     if (work.description) {
       description = typeof work.description === 'string'
         ? work.description
         : work.description.value || null;
+    }
+
+    // 2. Fallback to first edition description
+    if (!description && editionsResult?.entries?.[0]) {
+      const firstEdition = editionsResult.entries[0];
+      if (firstEdition.description) {
+        description = typeof firstEdition.description === 'string'
+          ? firstEdition.description
+          : firstEdition.description.value || null;
+      }
+    }
+
+    // 3. Fallback to excerpts or first_sentence
+    if (!description && work.excerpts?.[0]?.excerpt) {
+      description = work.excerpts[0].excerpt;
+    }
+    if (!description && work.first_sentence) {
+      const sentence = typeof work.first_sentence === 'string'
+        ? work.first_sentence
+        : work.first_sentence.value || null;
+      if (sentence) {
+        description = sentence;
+      }
     }
 
     return {

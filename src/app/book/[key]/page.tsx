@@ -2,7 +2,6 @@ import { notFound, redirect } from "next/navigation";
 import { getBookDetails } from "@/lib/openLibrary";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import Image from "next/image";
 import AddToListButton from "@/components/AddToListButton";
 import WantToReadButton from "@/components/WantToReadButton";
 import CurrentlyReadingButton from "@/components/CurrentlyReadingButton";
@@ -51,61 +50,66 @@ export default async function BookPage({ params }: PageProps) {
     workKey = decodedKey.startsWith("/works/") ? decodedKey : `/works/${decodedKey}`;
   }
 
-  const book = await getBookDetails(workKey);
+  // Parallel fetch: book details + Supabase setup
+  const supabase = await createClient();
+  const [book, { data: { user } }, { data: allRatings }] = await Promise.all([
+    getBookDetails(workKey),
+    supabase.auth.getUser(),
+    supabase
+      .from("user_books")
+      .select("id, user_id, score, tier, review_text, created_at")
+      .eq("open_library_key", workKey)
+      .order("created_at", { ascending: false })
+      .limit(100),
+  ]);
 
   if (!book) {
     notFound();
   }
-
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
 
   // Check if user has this book ranked, in want to read, or currently reading
   let userBookEntry = null;
   let isInWantToRead = false;
   let isCurrentlyReading = false;
 
-  if (user) {
-    const [rankedResult, wtrResult, readingResult] = await Promise.all([
-      supabase
-        .from("user_books")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("open_library_key", workKey)
-        .single(),
-      supabase
-        .from("want_to_read")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("open_library_key", workKey)
-        .single(),
-      supabase
-        .from("currently_reading")
-        .select("id")
-        .eq("user_id", user.id)
-        .eq("open_library_key", workKey)
-        .single(),
-    ]);
-
-    userBookEntry = rankedResult.data;
-    isInWantToRead = !!wtrResult.data;
-    isCurrentlyReading = !!readingResult.data;
-  }
-
-  // Get reviews for this book (limited for performance)
-  const { data: allRatings } = await supabase
-    .from("user_books")
-    .select("id, user_id, score, tier, review_text, created_at")
-    .eq("open_library_key", workKey)
-    .order("created_at", { ascending: false })
-    .limit(100);
-
-  // Get profiles for reviewers
+  // Parallel fetch: user's book status + reviewer profiles
   const reviewerIds = [...new Set(allRatings?.map(r => r.user_id) || [])];
-  const { data: reviewerProfiles } = await supabase
-    .from("profiles")
-    .select("id, username, avatar_url")
-    .in("id", reviewerIds.length > 0 ? reviewerIds : ["none"]);
+
+  const [userStatusResults, { data: reviewerProfiles }] = await Promise.all([
+    user
+      ? Promise.all([
+          supabase
+            .from("user_books")
+            .select("*")
+            .eq("user_id", user.id)
+            .eq("open_library_key", workKey)
+            .single(),
+          supabase
+            .from("want_to_read")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("open_library_key", workKey)
+            .single(),
+          supabase
+            .from("currently_reading")
+            .select("id")
+            .eq("user_id", user.id)
+            .eq("open_library_key", workKey)
+            .single(),
+        ])
+      : Promise.resolve([null, null, null]),
+    supabase
+      .from("profiles")
+      .select("id, username, avatar_url")
+      .in("id", reviewerIds.length > 0 ? reviewerIds : ["none"]),
+  ]);
+
+  if (user && userStatusResults) {
+    const [rankedResult, wtrResult, readingResult] = userStatusResults;
+    userBookEntry = rankedResult?.data || null;
+    isInWantToRead = !!wtrResult?.data;
+    isCurrentlyReading = !!readingResult?.data;
+  }
 
   const profileMap = new Map(reviewerProfiles?.map(p => [p.id, p]) || []);
 
@@ -126,27 +130,22 @@ export default async function BookPage({ params }: PageProps) {
           <div className="flex flex-col md:flex-row gap-6 sm:gap-8">
           {/* Cover */}
           <div className="flex-shrink-0">
-            <div className="w-48 md:w-64 aspect-[2/3] bg-neutral-100 rounded-xl overflow-hidden shadow-lg mx-auto md:mx-0 relative group">
-              {/* Top light reflection */}
-              <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/15 to-transparent pointer-events-none z-10 rounded-t-xl" />
+            <div className="w-48 md:w-64 bg-neutral-50 rounded-xl overflow-hidden shadow-lg mx-auto md:mx-0 relative group">
               {book.coverUrl ? (
-                <Image
+                <img
                   src={book.coverUrl}
                   alt={book.title}
-                  fill
-                  priority
-                  className="object-cover"
-                  unoptimized
+                  className="w-full h-auto block rounded-xl"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-neutral-400 p-4 text-center">
+                <div className="w-full aspect-[2/3] flex items-center justify-center text-neutral-400 p-4 text-center bg-neutral-100">
                   {book.title}
                 </div>
               )}
               {/* Spine shadow */}
-              <div className="absolute left-0 inset-y-0 w-[4px] bg-gradient-to-r from-black/25 to-transparent pointer-events-none" />
+              <div className="absolute left-0 inset-y-0 w-[4px] bg-gradient-to-r from-black/20 to-transparent pointer-events-none rounded-l-xl" />
               {/* Bottom shadow */}
-              <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
+              <div className="absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/10 to-transparent pointer-events-none rounded-b-xl" />
             </div>
           </div>
 
