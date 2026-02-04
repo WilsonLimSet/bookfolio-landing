@@ -79,12 +79,13 @@ export interface BookDetails {
   pageCount: number | null;
 }
 
-// Fetch description from Google Books API as fallback
+// Fetch description from Google Books API as fallback (cached for 7 days)
 async function getGoogleBooksDescription(title: string, author: string | null): Promise<string | null> {
   try {
     const query = author ? `${title} ${author}` : title;
     const response = await fetch(
-      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=1`
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=1`,
+      { next: { revalidate: 604800 } } // Cache for 7 days
     );
     if (!response.ok) return null;
     const data = await response.json();
@@ -96,8 +97,10 @@ async function getGoogleBooksDescription(title: string, author: string | null): 
 
 export async function getBookDetails(workKey: string): Promise<BookDetails | null> {
   try {
-    // Fetch work details
-    const workRes = await fetch(`https://openlibrary.org${workKey}.json`);
+    // Fetch work details (cached for 1 day)
+    const workRes = await fetch(`https://openlibrary.org${workKey}.json`, {
+      next: { revalidate: 86400 }
+    });
     if (!workRes.ok) return null;
     const work = await workRes.json();
 
@@ -105,10 +108,12 @@ export async function getBookDetails(workKey: string): Promise<BookDetails | nul
     const authorKey = work.authors?.[0]?.author?.key;
     const [authorResult, editionsResult] = await Promise.all([
       authorKey
-        ? fetch(`https://openlibrary.org${authorKey}.json`).then(r => r.ok ? r.json() : null).catch(() => null)
+        ? fetch(`https://openlibrary.org${authorKey}.json`, { next: { revalidate: 86400 } })
+            .then(r => r.ok ? r.json() : null).catch(() => null)
         : Promise.resolve(null),
       // Fetch first edition for fallback description
-      fetch(`https://openlibrary.org${workKey}/editions.json?limit=1`).then(r => r.ok ? r.json() : null).catch(() => null),
+      fetch(`https://openlibrary.org${workKey}/editions.json?limit=1`, { next: { revalidate: 86400 } })
+        .then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
 
     const authorName = authorResult?.name || null;
