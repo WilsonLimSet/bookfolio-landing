@@ -52,7 +52,7 @@ export default async function ProfilePage({ params }: PageProps) {
     favoritesResult,
     currentlyReadingResult,
     weeklyActivityResult,
-    allUsersRankResult,
+    userRankResult,
     booksThisYearResult,
     listsCountResult,
   ] = await Promise.all([
@@ -116,11 +116,8 @@ export default async function ProfilePage({ params }: PageProps) {
       .eq("user_id", profile.id)
       .gte("created_at", twelveWeeksAgo)
       .order("created_at", { ascending: false }),
-    // Get users by book count for ranking (limited for performance)
-    supabase
-      .from("user_books")
-      .select("user_id")
-      .limit(5000),
+    // Get user's rank efficiently using SQL
+    supabase.rpc("get_user_book_rank", { target_user_id: profile.id }),
     // Get books finished this year (for reading goal)
     supabase
       .from("user_books")
@@ -154,15 +151,8 @@ export default async function ProfilePage({ params }: PageProps) {
   const weeklyActivity = weeklyActivityResult.data || [];
   const weekStreak = calculateWeekStreak(weeklyActivity.map(a => new Date(a.created_at)));
 
-  // Calculate rank on Bookfolio
-  const allUsersBooks = allUsersRankResult.data || [];
-  const userBookCounts = new Map<string, number>();
-  allUsersBooks.forEach(book => {
-    userBookCounts.set(book.user_id, (userBookCounts.get(book.user_id) || 0) + 1);
-  });
-  const sortedCounts = Array.from(userBookCounts.entries())
-    .sort((a, b) => b[1] - a[1]);
-  const userRank = sortedCounts.findIndex(([userId]) => userId === profile.id) + 1;
+  // Get rank from SQL function
+  const userRank = userRankResult.data || 0;
 
   // Reading goal progress
   const readingGoal = profile.reading_goal_2025;
