@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { getEditions, BookEdition } from "@/lib/openLibrary";
 
@@ -36,6 +37,70 @@ type Step = "cover" | "category" | "tier" | "compare" | "review" | "saving";
 type Category = "fiction" | "nonfiction";
 type Tier = "liked" | "fine" | "disliked";
 
+// Animation variants
+const overlayVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 },
+} as const;
+
+const modalVariants = {
+  hidden: { opacity: 0, scale: 0.95, y: 20 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { type: "spring" as const, stiffness: 300, damping: 30 },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.95,
+    y: 20,
+    transition: { duration: 0.2 },
+  },
+};
+
+const stepVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 100 : -100,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    transition: { type: "spring" as const, stiffness: 300, damping: 30 },
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -100 : 100,
+    opacity: 0,
+    transition: { duration: 0.2 },
+  }),
+};
+
+const bookCardVariants = {
+  idle: { scale: 1, y: 0 },
+  hover: { scale: 1.02, y: -4, transition: { type: "spring" as const, stiffness: 400, damping: 25 } },
+  tap: { scale: 0.98 },
+  selected: {
+    scale: 1.05,
+    y: -8,
+    boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
+    transition: { type: "spring" as const, stiffness: 400, damping: 25 },
+  },
+  exit: {
+    scale: 0.8,
+    opacity: 0,
+    transition: { duration: 0.3 },
+  },
+};
+
+const pulseVariants = {
+  pulse: {
+    scale: [1, 1.05, 1],
+    transition: { repeat: Infinity, duration: 2 },
+  },
+};
+
 export default function RankingFlow({
   book,
   onClose,
@@ -45,6 +110,7 @@ export default function RankingFlow({
   const supabase = createClient();
 
   const [step, setStep] = useState<Step>("cover");
+  const [direction, setDirection] = useState(1); // For step transition direction
   const [selectedCover, setSelectedCover] = useState<string | null>(book.coverUrl);
   const [editions, setEditions] = useState<BookEdition[]>([]);
   const [loadingEditions, setLoadingEditions] = useState(true);
@@ -57,15 +123,58 @@ export default function RankingFlow({
   );
   const [reviewText, setReviewText] = useState("");
   const [finishedAt, setFinishedAt] = useState<string>(
-    new Date().toISOString().split("T")[0] // Default to today
+    new Date().toISOString().split("T")[0]
   );
 
   // For comparison step
-  const [userBooks, setUserBooks] = useState<UserBook[]>([]);
+  const [userBooksCache, setUserBooksCache] = useState<Record<string, UserBook[]>>({});
+  const [loadingBooks, setLoadingBooks] = useState(false);
   const [compareIndex, setCompareIndex] = useState(0);
   const [low, setLow] = useState(0);
   const [high, setHigh] = useState(0);
   const [finalPosition, setFinalPosition] = useState<number | null>(null);
+  const [selectedBook, setSelectedBook] = useState<"new" | "existing" | null>(null);
+  const [isComparing, setIsComparing] = useState(false);
+
+  // Get user books for current category from cache
+  const userBooks = useMemo(() => {
+    return category ? (userBooksCache[category] || []) : [];
+  }, [category, userBooksCache]);
+
+  // Prefetch user books for BOTH categories on mount
+  useEffect(() => {
+    async function prefetchBooks() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      setLoadingBooks(true);
+
+      // Fetch both categories in parallel
+      const [fictionResult, nonfictionResult] = await Promise.all([
+        supabase
+          .from("user_books")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("category", "fiction")
+          .order("rank_position"),
+        supabase
+          .from("user_books")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("category", "nonfiction")
+          .order("rank_position"),
+      ]);
+
+      setUserBooksCache({
+        fiction: (fictionResult.data || []).filter(b => b.open_library_key !== book.key),
+        nonfiction: (nonfictionResult.data || []).filter(b => b.open_library_key !== book.key),
+      });
+
+      setLoadingBooks(false);
+    }
+
+    prefetchBooks();
+  }, [supabase, book.key]);
 
   // Load editions for cover selection
   useEffect(() => {
@@ -78,75 +187,66 @@ export default function RankingFlow({
     loadEditions();
   }, [book.key]);
 
-  // Load user's books in category when we get to compare step
-  const loadUserBooks = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data } = await supabase
-      .from("user_books")
-      .select("*")
-      .eq("user_id", user.id)
-      .eq("category", category)
-      .order("rank_position");
-
-    const books = (data || []).filter(b => b.open_library_key !== book.key);
-    setUserBooks(books);
-
-    if (books.length === 0) {
-      // First book in category, position 1
-      setFinalPosition(1);
-    } else {
-      // Start binary search
-      setLow(0);
-      setHigh(books.length);
-      setCompareIndex(Math.floor(books.length / 2));
-    }
-  }, [supabase, category, book.key]);
-
+  // Initialize binary search when entering compare step
   useEffect(() => {
-    if (step === "compare" && category) {
-      // Use timeout to avoid synchronous setState triggers
-      const timer = setTimeout(() => loadUserBooks(), 0);
-      return () => clearTimeout(timer);
+    if (step === "compare" && category && !loadingBooks) {
+      const books = userBooksCache[category] || [];
+      if (books.length === 0) {
+        setFinalPosition(1);
+      } else {
+        setLow(0);
+        setHigh(books.length);
+        setCompareIndex(Math.floor(books.length / 2));
+      }
     }
-  }, [step, category, loadUserBooks]);
+  }, [step, category, loadingBooks, userBooksCache]);
+
+  const goToStep = useCallback((newStep: Step, dir: number = 1) => {
+    setDirection(dir);
+    setStep(newStep);
+  }, []);
 
   function handleCategorySelect(cat: Category) {
     setCategory(cat);
-    setStep("tier");
+    goToStep("tier");
   }
 
   function handleTierSelect(t: Tier) {
     setTier(t);
-    setStep("compare");
+    goToStep("compare");
   }
 
-  function handlePrefer(preferNew: boolean) {
+  async function handlePrefer(preferNew: boolean) {
+    // Show selection animation
+    setSelectedBook(preferNew ? "new" : "existing");
+    setIsComparing(true);
+
+    // Wait for animation
+    await new Promise(resolve => setTimeout(resolve, 400));
+
     // Binary search logic
     let newLow = low;
     let newHigh = high;
 
     if (preferNew) {
-      // New book is better, search upper half (lower positions)
       newHigh = compareIndex;
     } else {
-      // Existing book is better, search lower half (higher positions)
       newLow = compareIndex + 1;
     }
 
     if (newLow >= newHigh) {
-      // Found position
-      setFinalPosition(newLow + 1); // 1-indexed
+      setFinalPosition(newLow + 1);
     } else {
       setLow(newLow);
       setHigh(newHigh);
       setCompareIndex(Math.floor((newLow + newHigh) / 2));
     }
+
+    setSelectedBook(null);
+    setIsComparing(false);
   }
 
   function handleSkip() {
-    // Skip comparison, insert in middle of remaining range
     const midPosition = Math.floor((low + high) / 2) + 1;
     setFinalPosition(midPosition);
   }
@@ -154,19 +254,17 @@ export default function RankingFlow({
   // Go to review step when we have final position
   useEffect(() => {
     if (finalPosition !== null && category && tier && step === "compare") {
-      // Use timeout to avoid synchronous setState in effect
-      const timer = setTimeout(() => setStep("review"), 0);
+      const timer = setTimeout(() => goToStep("review"), 0);
       return () => clearTimeout(timer);
     }
-  }, [finalPosition, category, tier, step]);
+  }, [finalPosition, category, tier, step, goToStep]);
 
   async function saveBook() {
-    setStep("saving");
+    goToStep("saving");
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    // Calculate score based on position and tier
     const totalBooks = userBooks.length + 1;
     const score = calculateScore(finalPosition!, totalBooks, tier!);
 
@@ -175,15 +273,17 @@ export default function RankingFlow({
       await supabase.from("user_books").delete().eq("id", existingEntry.id);
     }
 
-    // Shift positions of books at or after this position
-    if (userBooks.length > 0) {
-      const booksToShift = userBooks.filter(b => b.rank_position >= finalPosition!);
-      for (const b of booksToShift) {
-        await supabase
-          .from("user_books")
-          .update({ rank_position: b.rank_position + 1 })
-          .eq("id", b.id);
-      }
+    // Shift positions of books at or after this position (batch update)
+    const booksToShift = userBooks.filter(b => b.rank_position >= finalPosition!);
+    if (booksToShift.length > 0) {
+      await Promise.all(
+        booksToShift.map(b =>
+          supabase
+            .from("user_books")
+            .update({ rank_position: b.rank_position + 1 })
+            .eq("id", b.id)
+        )
+      );
     }
 
     // Insert new book
@@ -201,27 +301,25 @@ export default function RankingFlow({
       finished_at: finishedAt || null,
     });
 
-    // Recalculate all scores in category
-    await recalculateScores(user.id, category!);
-
-    // Log activity
-    await supabase.from("activity").insert({
-      user_id: user.id,
-      action_type: "ranked",
-      book_title: book.title,
-      book_author: book.author,
-      book_cover_url: selectedCover,
-      book_key: book.key,
-      book_score: score,
-      book_category: category,
-    });
-
-    // Remove from want_to_read if it was there
-    await supabase
-      .from("want_to_read")
-      .delete()
-      .eq("user_id", user.id)
-      .eq("open_library_key", book.key);
+    // Parallel post-insert operations
+    await Promise.all([
+      recalculateScores(user.id, category!),
+      supabase.from("activity").insert({
+        user_id: user.id,
+        action_type: "ranked",
+        book_title: book.title,
+        book_author: book.author,
+        book_cover_url: selectedCover,
+        book_key: book.key,
+        book_score: score,
+        book_category: category,
+      }),
+      supabase
+        .from("want_to_read")
+        .delete()
+        .eq("user_id", user.id)
+        .eq("open_library_key", book.key),
+    ]);
 
     onComplete();
   }
@@ -236,17 +334,19 @@ export default function RankingFlow({
 
     if (!books || books.length === 0) return;
 
-    for (const b of books) {
-      const newScore = calculateScore(b.rank_position, books.length, b.tier);
-      await supabase
-        .from("user_books")
-        .update({ score: newScore, updated_at: new Date().toISOString() })
-        .eq("id", b.id);
-    }
+    // Batch all score updates
+    await Promise.all(
+      books.map(b => {
+        const newScore = calculateScore(b.rank_position, books.length, b.tier);
+        return supabase
+          .from("user_books")
+          .update({ score: newScore, updated_at: new Date().toISOString() })
+          .eq("id", b.id);
+      })
+    );
   }
 
   function calculateScore(position: number, total: number, bookTier: string): number {
-    // Tier boundaries
     const tierRanges = {
       liked: { min: 6.7, max: 10 },
       fine: { min: 3.4, max: 6.6 },
@@ -255,18 +355,15 @@ export default function RankingFlow({
 
     const range = tierRanges[bookTier as Tier];
 
-    // If only one book, give it the middle of the tier
     if (total === 1) {
       return Math.round(((range.min + range.max) / 2) * 10) / 10;
     }
 
-    // Count books in this tier
     const booksInTier = userBooks.filter(b => b.tier === bookTier).length + 1;
     const positionInTier = userBooks
       .filter(b => b.tier === bookTier && b.rank_position < position)
       .length + 1;
 
-    // Linear interpolation within tier
     const ratio = (booksInTier - positionInTier) / (booksInTier - 1 || 1);
     const score = range.min + ratio * (range.max - range.min);
 
@@ -274,320 +371,556 @@ export default function RankingFlow({
   }
 
   const currentCompareBook = userBooks[compareIndex];
+  const stepIndex = ["cover", "category", "tier", "compare", "review", "saving"].indexOf(step);
+  const progress = ((stepIndex + 1) / 5) * 100;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+      >
+        {/* Backdrop */}
+        <motion.div
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          variants={overlayVariants}
+          onClick={onClose}
+        />
 
-      <div className="relative bg-white rounded-2xl shadow-xl max-w-lg w-full overflow-hidden">
-        {/* Header */}
-        <div className="p-4 border-b border-neutral-200 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            {selectedCover && (
-              <img
-                src={selectedCover}
-                alt=""
-                className="w-10 h-14 object-cover rounded"
-              />
-            )}
-            <div>
-              <p className="font-medium truncate max-w-[200px]">{book.title}</p>
-              {book.author && (
-                <p className="text-sm text-neutral-500 truncate max-w-[200px]">
-                  {book.author}
-                </p>
-              )}
-            </div>
+        {/* Modal */}
+        <motion.div
+          className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden"
+          variants={modalVariants}
+        >
+          {/* Progress bar */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-neutral-100">
+            <motion.div
+              className="h-full bg-gradient-to-r from-neutral-800 to-neutral-600"
+              initial={{ width: 0 }}
+              animate={{ width: `${progress}%` }}
+              transition={{ type: "spring", stiffness: 100, damping: 20 }}
+            />
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-neutral-100 rounded-lg"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
 
-        {/* Content */}
-        <div className="p-6">
-          {step === "cover" && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-center">
-                {existingEntry ? "Change cover" : "Choose a cover"}
-              </h2>
-              {loadingEditions ? (
-                <div className="flex justify-center py-8">
-                  <div className="w-8 h-8 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
-                </div>
-              ) : (
-                <>
-                  <div className="grid grid-cols-4 gap-3 max-h-64 overflow-y-auto">
-                    {/* Original cover */}
-                    {book.coverUrl && (
-                      <button
-                        onClick={() => setSelectedCover(book.coverUrl)}
-                        className={`aspect-[2/3] rounded-lg overflow-hidden border-2 transition-all ${
-                          selectedCover === book.coverUrl
-                            ? "border-neutral-900 ring-2 ring-neutral-900"
-                            : "border-transparent hover:border-neutral-300"
-                        }`}
-                      >
-                        <img
-                          src={book.coverUrl}
-                          alt="Original cover"
-                          className="w-full h-full object-cover"
-                        />
-                      </button>
-                    )}
-                    {/* Edition covers */}
-                    {editions
-                      .filter((e) => e.coverUrl !== book.coverUrl)
-                      .map((edition) => (
-                        <button
-                          key={edition.key}
-                          onClick={() => setSelectedCover(edition.coverUrl)}
-                          className={`aspect-[2/3] rounded-lg overflow-hidden border-2 transition-all ${
-                            selectedCover === edition.coverUrl
-                              ? "border-neutral-900 ring-2 ring-neutral-900"
-                              : "border-transparent hover:border-neutral-300"
-                          }`}
-                        >
-                          {edition.coverUrl && (
+          {/* Header */}
+          <div className="p-4 pt-5 border-b border-neutral-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <motion.div
+                className="relative"
+                whileHover={{ scale: 1.05 }}
+                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+              >
+                {selectedCover ? (
+                  <img
+                    src={selectedCover}
+                    alt=""
+                    className="w-10 h-14 object-cover rounded shadow-md"
+                  />
+                ) : (
+                  <div className="w-10 h-14 bg-neutral-200 rounded flex items-center justify-center">
+                    <span className="text-[8px] text-neutral-400">No cover</span>
+                  </div>
+                )}
+              </motion.div>
+              <div>
+                <p className="font-semibold truncate max-w-[200px]">{book.title}</p>
+                {book.author && (
+                  <p className="text-sm text-neutral-500 truncate max-w-[200px]">
+                    {book.author}
+                  </p>
+                )}
+              </div>
+            </div>
+            <motion.button
+              onClick={onClose}
+              className="p-2 hover:bg-neutral-100 rounded-full"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </motion.button>
+          </div>
+
+          {/* Content with step transitions */}
+          <div className="p-6 min-h-[320px]">
+            <AnimatePresence mode="wait" custom={direction}>
+              {step === "cover" && (
+                <motion.div
+                  key="cover"
+                  custom={direction}
+                  variants={stepVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="space-y-4"
+                >
+                  <h2 className="text-lg font-semibold text-center">
+                    {existingEntry ? "Change cover" : "Choose a cover"}
+                  </h2>
+                  {loadingEditions ? (
+                    <div className="flex justify-center py-8">
+                      <motion.div
+                        className="w-10 h-10 border-3 border-neutral-200 border-t-neutral-800 rounded-full"
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                      />
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-4 gap-3 max-h-64 overflow-y-auto">
+                        {book.coverUrl && (
+                          <motion.button
+                            onClick={() => setSelectedCover(book.coverUrl)}
+                            className={`aspect-[2/3] rounded-lg overflow-hidden border-2 ${
+                              selectedCover === book.coverUrl
+                                ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-2"
+                                : "border-transparent hover:border-neutral-300"
+                            }`}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.98 }}
+                          >
                             <img
-                              src={edition.coverUrl}
-                              alt={edition.title}
+                              src={book.coverUrl}
+                              alt="Original cover"
                               className="w-full h-full object-cover"
                             />
-                          )}
-                        </button>
-                      ))}
-                  </div>
-                  {editions.length === 0 && !book.coverUrl && (
-                    <p className="text-center text-neutral-500 text-sm py-4">
-                      No covers available for this book
+                          </motion.button>
+                        )}
+                        {editions
+                          .filter((e) => e.coverUrl !== book.coverUrl)
+                          .map((edition, i) => (
+                            <motion.button
+                              key={edition.key}
+                              onClick={() => setSelectedCover(edition.coverUrl)}
+                              className={`aspect-[2/3] rounded-lg overflow-hidden border-2 ${
+                                selectedCover === edition.coverUrl
+                                  ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-2"
+                                  : "border-transparent hover:border-neutral-300"
+                              }`}
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: i * 0.05 }}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.98 }}
+                            >
+                              {edition.coverUrl && (
+                                <img
+                                  src={edition.coverUrl}
+                                  alt={edition.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              )}
+                            </motion.button>
+                          ))}
+                      </div>
+                      {editions.length === 0 && !book.coverUrl && (
+                        <p className="text-center text-neutral-500 text-sm py-4">
+                          No covers available for this book
+                        </p>
+                      )}
+                    </>
+                  )}
+                  <motion.button
+                    onClick={() => goToStep("category")}
+                    className="w-full py-3 bg-neutral-900 text-white rounded-xl font-medium"
+                    whileHover={{ scale: 1.02, backgroundColor: "#262626" }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    {selectedCover ? "Continue" : "Skip"}
+                  </motion.button>
+                </motion.div>
+              )}
+
+              {step === "category" && (
+                <motion.div
+                  key="category"
+                  custom={direction}
+                  variants={stepVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="space-y-4"
+                >
+                  <h2 className="text-lg font-semibold text-center">
+                    {existingEntry ? "Change category" : "Add to my list of"}
+                  </h2>
+                  {existingEntry && (
+                    <p className="text-sm text-neutral-500 text-center">
+                      Currently in: <span className="font-medium">{existingEntry.category}</span>
                     </p>
                   )}
-                </>
+                  <div className="grid grid-cols-2 gap-4">
+                    <motion.button
+                      onClick={() => handleCategorySelect("fiction")}
+                      className={`p-6 border-2 rounded-xl ${
+                        existingEntry?.category === "fiction"
+                          ? "border-neutral-900 bg-neutral-50"
+                          : "border-neutral-200"
+                      }`}
+                      variants={bookCardVariants}
+                      initial="idle"
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
+                      <motion.span
+                        className="text-3xl mb-3 block"
+                        animate={{ rotate: [0, -10, 10, 0] }}
+                        transition={{ repeat: Infinity, duration: 3, repeatDelay: 2 }}
+                      >
+                        📖
+                      </motion.span>
+                      <span className="font-semibold">Fiction</span>
+                      <p className="text-xs text-neutral-500 mt-1">
+                        {userBooksCache.fiction?.length || 0} books
+                      </p>
+                    </motion.button>
+                    <motion.button
+                      onClick={() => handleCategorySelect("nonfiction")}
+                      className={`p-6 border-2 rounded-xl ${
+                        existingEntry?.category === "nonfiction"
+                          ? "border-neutral-900 bg-neutral-50"
+                          : "border-neutral-200"
+                      }`}
+                      variants={bookCardVariants}
+                      initial="idle"
+                      whileHover="hover"
+                      whileTap="tap"
+                    >
+                      <motion.span
+                        className="text-3xl mb-3 block"
+                        animate={{ rotate: [0, 10, -10, 0] }}
+                        transition={{ repeat: Infinity, duration: 3, repeatDelay: 2 }}
+                      >
+                        📚
+                      </motion.span>
+                      <span className="font-semibold">Non-Fiction</span>
+                      <p className="text-xs text-neutral-500 mt-1">
+                        {userBooksCache.nonfiction?.length || 0} books
+                      </p>
+                    </motion.button>
+                  </div>
+                </motion.div>
               )}
-              <button
-                onClick={() => setStep("category")}
-                className="w-full py-3 bg-neutral-900 text-white rounded-lg font-medium hover:bg-neutral-800 transition-colors"
-              >
-                {selectedCover ? "Continue" : "Skip"}
-              </button>
-            </div>
-          )}
 
-          {step === "category" && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-center">
-                {existingEntry ? "Change category" : "Add to my list of"}
-              </h2>
-              {existingEntry && (
-                <p className="text-sm text-neutral-500 text-center">
-                  Currently in: <span className="font-medium">{existingEntry.category}</span>
-                </p>
+              {step === "tier" && (
+                <motion.div
+                  key="tier"
+                  custom={direction}
+                  variants={stepVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="space-y-6"
+                >
+                  <h2 className="text-lg font-semibold text-center">
+                    {existingEntry ? "Change rating" : "How was it?"}
+                  </h2>
+                  <div className="flex justify-center gap-8">
+                    {[
+                      { id: "liked", icon: "check", color: "green", label: "Liked it" },
+                      { id: "fine", icon: "dot", color: "yellow", label: "It was fine" },
+                      { id: "disliked", icon: "x", color: "red", label: "Didn't like it" },
+                    ].map((t, i) => (
+                      <motion.button
+                        key={t.id}
+                        onClick={() => handleTierSelect(t.id as Tier)}
+                        className="flex flex-col items-center gap-3"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.1 }}
+                      >
+                        <motion.div
+                          className={`w-18 h-18 rounded-full flex items-center justify-center ${
+                            existingEntry?.tier === t.id
+                              ? `bg-${t.color}-200 ring-2 ring-${t.color}-500 ring-offset-2`
+                              : `bg-${t.color}-100`
+                          }`}
+                          style={{
+                            width: 72,
+                            height: 72,
+                            backgroundColor: existingEntry?.tier === t.id
+                              ? t.color === "green" ? "#bbf7d0" : t.color === "yellow" ? "#fef08a" : "#fecaca"
+                              : t.color === "green" ? "#dcfce7" : t.color === "yellow" ? "#fef9c3" : "#fee2e2",
+                          }}
+                          whileHover={{
+                            scale: 1.1,
+                            backgroundColor: t.color === "green" ? "#bbf7d0" : t.color === "yellow" ? "#fef08a" : "#fecaca",
+                          }}
+                          whileTap={{ scale: 0.95 }}
+                          variants={pulseVariants}
+                          animate={existingEntry?.tier === t.id ? "pulse" : undefined}
+                        >
+                          {t.icon === "check" && (
+                            <svg className="w-9 h-9 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <motion.path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2.5}
+                                d="M5 13l4 4L19 7"
+                                initial={{ pathLength: 0 }}
+                                animate={{ pathLength: 1 }}
+                                transition={{ duration: 0.5, delay: 0.2 }}
+                              />
+                            </svg>
+                          )}
+                          {t.icon === "dot" && (
+                            <motion.div
+                              className="w-4 h-4 rounded-full bg-yellow-500"
+                              animate={{ scale: [1, 1.2, 1] }}
+                              transition={{ repeat: Infinity, duration: 2 }}
+                            />
+                          )}
+                          {t.icon === "x" && (
+                            <svg className="w-9 h-9 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          )}
+                        </motion.div>
+                        <span className="text-sm font-medium text-neutral-600">{t.label}</span>
+                      </motion.button>
+                    ))}
+                  </div>
+                </motion.div>
               )}
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  onClick={() => handleCategorySelect("fiction")}
-                  className={`p-4 border-2 rounded-xl hover:border-neutral-900 hover:bg-neutral-50 transition-all ${
-                    existingEntry?.category === "fiction"
-                      ? "border-neutral-900 bg-neutral-50"
-                      : "border-neutral-200"
-                  }`}
-                >
-                  <span className="text-2xl mb-2 block">📖</span>
-                  <span className="font-medium">Fiction</span>
-                </button>
-                <button
-                  onClick={() => handleCategorySelect("nonfiction")}
-                  className={`p-4 border-2 rounded-xl hover:border-neutral-900 hover:bg-neutral-50 transition-all ${
-                    existingEntry?.category === "nonfiction"
-                      ? "border-neutral-900 bg-neutral-50"
-                      : "border-neutral-200"
-                  }`}
-                >
-                  <span className="text-2xl mb-2 block">📚</span>
-                  <span className="font-medium">Non-Fiction</span>
-                </button>
-              </div>
-            </div>
-          )}
 
-          {step === "tier" && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-center">
-                {existingEntry ? "Change rating" : "How was it?"}
-              </h2>
-              <div className="flex justify-center gap-6">
-                <button
-                  onClick={() => handleTierSelect("liked")}
-                  className="flex flex-col items-center gap-2 group"
+              {step === "compare" && finalPosition === null && (
+                <motion.div
+                  key="compare"
+                  custom={direction}
+                  variants={stepVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="space-y-4"
                 >
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${
-                    existingEntry?.tier === "liked"
-                      ? "bg-green-200 ring-2 ring-green-500"
-                      : "bg-green-100 group-hover:bg-green-200"
-                  }`}>
-                    <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium text-neutral-600">Liked it</span>
-                </button>
-                <button
-                  onClick={() => handleTierSelect("fine")}
-                  className="flex flex-col items-center gap-2 group"
-                >
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${
-                    existingEntry?.tier === "fine"
-                      ? "bg-yellow-200 ring-2 ring-yellow-500"
-                      : "bg-yellow-100 group-hover:bg-yellow-200"
-                  }`}>
-                    <div className="w-3 h-3 rounded-full bg-yellow-500" />
-                  </div>
-                  <span className="text-sm font-medium text-neutral-600">It was fine</span>
-                </button>
-                <button
-                  onClick={() => handleTierSelect("disliked")}
-                  className="flex flex-col items-center gap-2 group"
-                >
-                  <div className={`w-16 h-16 rounded-full flex items-center justify-center transition-colors ${
-                    existingEntry?.tier === "disliked"
-                      ? "bg-red-200 ring-2 ring-red-500"
-                      : "bg-red-100 group-hover:bg-red-200"
-                  }`}>
-                    <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </div>
-                  <span className="text-sm font-medium text-neutral-600">Didn&apos;t like it</span>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === "compare" && finalPosition === null && currentCompareBook && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-center">Which do you prefer?</h2>
-              <div className="flex items-center gap-4">
-                {/* New book */}
-                <button
-                  onClick={() => handlePrefer(true)}
-                  className="flex-1 p-4 border-2 border-neutral-200 rounded-xl hover:border-neutral-900 transition-all group"
-                >
-                  <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden mb-3 group-hover:shadow-lg transition-shadow">
-                    {selectedCover ? (
-                      <img src={selectedCover} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400 p-2 text-center">
-                        {book.title}
+                  {loadingBooks || !currentCompareBook ? (
+                    <div className="text-center py-12">
+                      <motion.div
+                        className="w-12 h-12 border-3 border-neutral-200 border-t-neutral-800 rounded-full mx-auto"
+                        animate={{ rotate: 360 }}
+                        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                      />
+                      <p className="text-neutral-500 mt-4">Loading your books...</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="text-center">
+                        <h2 className="text-lg font-semibold">Which do you prefer?</h2>
+                        <p className="text-xs text-neutral-400 mt-1">
+                          {Math.ceil(Math.log2(userBooks.length + 1))} comparisons max
+                        </p>
                       </div>
-                    )}
-                  </div>
-                  <p className="font-medium text-sm truncate">{book.title}</p>
-                  {book.author && (
-                    <p className="text-xs text-neutral-500 truncate">{book.author}</p>
+
+                      <div className="flex items-stretch gap-4">
+                        {/* New book */}
+                        <motion.button
+                          onClick={() => !isComparing && handlePrefer(true)}
+                          className={`flex-1 p-4 border-2 rounded-xl overflow-hidden ${
+                            selectedBook === "new" ? "border-green-500 bg-green-50" : "border-neutral-200"
+                          }`}
+                          variants={bookCardVariants}
+                          initial="idle"
+                          animate={selectedBook === "new" ? "selected" : selectedBook === "existing" ? "exit" : "idle"}
+                          whileHover={!isComparing ? "hover" : undefined}
+                          whileTap={!isComparing ? "tap" : undefined}
+                          disabled={isComparing}
+                        >
+                          <motion.div
+                            className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden mb-3 mx-auto max-w-[120px]"
+                            layoutId="new-book-cover"
+                          >
+                            {selectedCover ? (
+                              <img src={selectedCover} alt="" className="w-full h-full object-cover" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400 p-2 text-center">
+                                {book.title}
+                              </div>
+                            )}
+                          </motion.div>
+                          <p className="font-medium text-sm truncate">{book.title}</p>
+                          {book.author && (
+                            <p className="text-xs text-neutral-500 truncate">{book.author}</p>
+                          )}
+                        </motion.button>
+
+                        {/* VS indicator */}
+                        <div className="flex-shrink-0 flex items-center">
+                          <motion.div
+                            className="w-12 h-12 rounded-full bg-neutral-100 flex items-center justify-center text-sm font-bold text-neutral-400"
+                            animate={{
+                              scale: [1, 1.1, 1],
+                              backgroundColor: ["#f5f5f5", "#e5e5e5", "#f5f5f5"],
+                            }}
+                            transition={{ repeat: Infinity, duration: 2 }}
+                          >
+                            VS
+                          </motion.div>
+                        </div>
+
+                        {/* Existing book */}
+                        <AnimatePresence mode="wait">
+                          <motion.button
+                            key={currentCompareBook.id}
+                            onClick={() => !isComparing && handlePrefer(false)}
+                            className={`flex-1 p-4 border-2 rounded-xl overflow-hidden ${
+                              selectedBook === "existing" ? "border-green-500 bg-green-50" : "border-neutral-200"
+                            }`}
+                            variants={bookCardVariants}
+                            initial={{ opacity: 0, x: 50 }}
+                            animate={selectedBook === "existing" ? "selected" : selectedBook === "new" ? "exit" : "idle"}
+                            exit={{ opacity: 0, x: -50 }}
+                            whileHover={!isComparing ? "hover" : undefined}
+                            whileTap={!isComparing ? "tap" : undefined}
+                            disabled={isComparing}
+                          >
+                            <motion.div
+                              className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden mb-3 mx-auto max-w-[120px]"
+                            >
+                              {currentCompareBook.cover_url ? (
+                                <img src={currentCompareBook.cover_url} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400 p-2 text-center">
+                                  {currentCompareBook.title}
+                                </div>
+                              )}
+                            </motion.div>
+                            <p className="font-medium text-sm truncate">{currentCompareBook.title}</p>
+                            <p className="text-xs text-neutral-500">
+                              {currentCompareBook.author && <span className="truncate">{currentCompareBook.author} · </span>}
+                              <span className="text-neutral-900 font-semibold">{currentCompareBook.score}</span>
+                            </p>
+                          </motion.button>
+                        </AnimatePresence>
+                      </div>
+
+                      {/* Skip button */}
+                      <motion.div
+                        className="flex justify-center pt-2"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        <motion.button
+                          onClick={handleSkip}
+                          className="px-4 py-2 text-sm text-neutral-400 hover:text-neutral-600 transition-colors"
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          disabled={isComparing}
+                        >
+                          Too tough · Skip
+                        </motion.button>
+                      </motion.div>
+                    </>
                   )}
-                </button>
+                </motion.div>
+              )}
 
-                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-neutral-100 flex items-center justify-center text-sm font-medium text-neutral-500">
-                  OR
-                </div>
-
-                {/* Existing book */}
-                <button
-                  onClick={() => handlePrefer(false)}
-                  className="flex-1 p-4 border-2 border-neutral-200 rounded-xl hover:border-neutral-900 transition-all group"
+              {step === "review" && (
+                <motion.div
+                  key="review"
+                  custom={direction}
+                  variants={stepVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="space-y-4"
                 >
-                  <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden mb-3 group-hover:shadow-lg transition-shadow">
-                    {currentCompareBook.cover_url ? (
-                      <img src={currentCompareBook.cover_url} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400 p-2 text-center">
-                        {currentCompareBook.title}
-                      </div>
-                    )}
-                  </div>
-                  <p className="font-medium text-sm truncate">{currentCompareBook.title}</p>
-                  <p className="text-xs text-neutral-500">
-                    {currentCompareBook.author && <span className="truncate">{currentCompareBook.author} · </span>}
-                    <span className="text-neutral-900 font-medium">{currentCompareBook.score}</span>
-                  </p>
-                </button>
-              </div>
+                  <h2 className="text-lg font-semibold text-center">When did you finish?</h2>
 
-              {/* Actions */}
-              <div className="flex justify-center gap-4 pt-2">
-                <button
-                  onClick={handleSkip}
-                  className="px-4 py-2 text-sm text-neutral-500 hover:text-neutral-700"
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      Date finished
+                    </label>
+                    <input
+                      type="date"
+                      value={finishedAt}
+                      onChange={(e) => setFinishedAt(e.target.value)}
+                      max={new Date().toISOString().split("T")[0]}
+                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100 focus:outline-none transition-all"
+                    />
+                  </motion.div>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      Review (optional)
+                    </label>
+                    <textarea
+                      value={reviewText}
+                      onChange={(e) => setReviewText(e.target.value)}
+                      placeholder="What did you think? Any highlights, quotes, or takeaways..."
+                      className="w-full h-24 px-4 py-3 rounded-xl border border-neutral-200 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100 focus:outline-none resize-none transition-all"
+                      maxLength={1000}
+                    />
+                    <p className="text-xs text-neutral-400 text-right">{reviewText.length}/1000</p>
+                  </motion.div>
+
+                  <motion.button
+                    onClick={() => saveBook()}
+                    className="w-full py-3 bg-neutral-900 text-white rounded-xl font-medium"
+                    whileHover={{ scale: 1.02, backgroundColor: "#262626" }}
+                    whileTap={{ scale: 0.98 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    Save
+                  </motion.button>
+                </motion.div>
+              )}
+
+              {step === "saving" && (
+                <motion.div
+                  key="saving"
+                  custom={direction}
+                  variants={stepVariants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  className="text-center py-12"
                 >
-                  Too tough · Skip
-                </button>
-              </div>
-            </div>
-          )}
-
-          {step === "compare" && finalPosition === null && !currentCompareBook && userBooks.length === 0 && (
-            <div className="text-center py-8">
-              <div className="w-12 h-12 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin mx-auto" />
-              <p className="text-neutral-500 mt-4">Loading your books...</p>
-            </div>
-          )}
-
-          {step === "review" && (
-            <div className="space-y-4">
-              <h2 className="text-lg font-semibold text-center">When did you finish?</h2>
-
-              {/* Date Finished */}
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Date finished
-                </label>
-                <input
-                  type="date"
-                  value={finishedAt}
-                  onChange={(e) => setFinishedAt(e.target.value)}
-                  max={new Date().toISOString().split("T")[0]}
-                  className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none"
-                />
-              </div>
-
-              {/* Review */}
-              <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1">
-                  Review (optional)
-                </label>
-                <textarea
-                  value={reviewText}
-                  onChange={(e) => setReviewText(e.target.value)}
-                  placeholder="What did you think? Any highlights, quotes, or takeaways..."
-                  className="w-full h-24 px-4 py-3 rounded-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none resize-none"
-                  maxLength={1000}
-                />
-                <p className="text-xs text-neutral-400 text-right">{reviewText.length}/1000</p>
-              </div>
-
-              <button
-                onClick={() => saveBook()}
-                className="w-full py-3 bg-neutral-900 text-white rounded-lg font-medium hover:bg-neutral-800 transition-colors"
-              >
-                Save
-              </button>
-            </div>
-          )}
-
-          {step === "saving" && (
-            <div className="text-center py-8">
-              <div className="w-12 h-12 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin mx-auto" />
-              <p className="text-neutral-500 mt-4">Saving to your list...</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
+                  <motion.div
+                    className="w-16 h-16 mx-auto mb-4 relative"
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  >
+                    <motion.div
+                      className="absolute inset-0 border-3 border-neutral-200 border-t-neutral-800 rounded-full"
+                      animate={{ rotate: 360 }}
+                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                    />
+                    <motion.div
+                      className="absolute inset-2 border-2 border-neutral-100 border-b-neutral-600 rounded-full"
+                      animate={{ rotate: -360 }}
+                      transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
+                    />
+                  </motion.div>
+                  <motion.p
+                    className="text-neutral-600 font-medium"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    Saving to your list...
+                  </motion.p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }
