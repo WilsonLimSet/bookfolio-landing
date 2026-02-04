@@ -289,11 +289,21 @@ export default async function ProfilePage({ params }: PageProps) {
           </div>
 
           {/* Favorite Books - User curated selection */}
-          {hasFavorites && (
+          {(hasFavorites || isOwner) && (
             <section className="mb-8">
-              <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-4">
-                Favorite Books
-              </h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+                  Favorite Books
+                </h2>
+                {isOwner && (
+                  <Link
+                    href="/profile/edit#favorites"
+                    className="text-xs text-neutral-500 hover:text-neutral-700 transition-colors"
+                  >
+                    Edit
+                  </Link>
+                )}
+              </div>
               <div className="grid grid-cols-4 gap-3">
                 {favoriteBooks?.map((book) => (
                   <Link
@@ -302,7 +312,7 @@ export default async function ProfilePage({ params }: PageProps) {
                     className="group relative aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all hover:scale-105"
                   >
                     {book.cover_url ? (
-                      <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" loading="lazy" />
+                      <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center p-2 text-center">
                         <span className="text-xs text-neutral-400">{book.title}</span>
@@ -316,13 +326,23 @@ export default async function ProfilePage({ params }: PageProps) {
                     </div>
                   </Link>
                 ))}
-                {/* Empty slots if less than 4 */}
-                {Array.from({ length: Math.max(0, 4 - (favoriteBooks?.length || 0)) }).map((_, i) => (
-                  <div
-                    key={`empty-${i}`}
-                    className="aspect-[2/3] bg-neutral-100 rounded-lg border-2 border-dashed border-neutral-200"
-                  />
-                ))}
+                {/* Empty slots - clickable for owner */}
+                {Array.from({ length: Math.max(0, 4 - (favoriteBooks?.length || 0)) }).map((_, i) =>
+                  isOwner ? (
+                    <Link
+                      key={`empty-${i}`}
+                      href="/profile/edit#favorites"
+                      className="aspect-[2/3] bg-neutral-100 rounded-lg border-2 border-dashed border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 transition-all flex items-center justify-center"
+                    >
+                      <span className="text-neutral-300 text-2xl">+</span>
+                    </Link>
+                  ) : (
+                    <div
+                      key={`empty-${i}`}
+                      className="aspect-[2/3] bg-neutral-100 rounded-lg border-2 border-dashed border-neutral-200"
+                    />
+                  )
+                )}
               </div>
             </section>
           )}

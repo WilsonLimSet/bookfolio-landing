@@ -279,6 +279,39 @@ export default function EditProfilePage() {
     setFavorites((prev) => prev.filter((f) => f.id !== favoriteId));
   };
 
+  const swapFavorites = async (position1: number, position2: number) => {
+    const fav1 = favorites.find(f => f.position === position1);
+    const fav2 = favorites.find(f => f.position === position2);
+
+    if (!fav1 || !fav2) return;
+
+    // Optimistic update
+    setFavorites(prev => prev.map(f => {
+      if (f.id === fav1.id) return { ...f, position: position2 };
+      if (f.id === fav2.id) return { ...f, position: position1 };
+      return f;
+    }).sort((a, b) => a.position - b.position));
+
+    // Update in database
+    await Promise.all([
+      supabase.from("favorite_books").update({ position: position2 }).eq("id", fav1.id),
+      supabase.from("favorite_books").update({ position: position1 }).eq("id", fav2.id),
+    ]);
+  };
+
+  const moveFavorite = async (favoriteId: string, direction: "left" | "right") => {
+    const fav = favorites.find(f => f.id === favoriteId);
+    if (!fav) return;
+
+    const newPosition = direction === "left" ? fav.position - 1 : fav.position + 1;
+    if (newPosition < 1 || newPosition > 4) return;
+
+    const otherFav = favorites.find(f => f.position === newPosition);
+    if (otherFav) {
+      await swapFavorites(fav.position, newPosition);
+    }
+  };
+
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -584,7 +617,7 @@ export default function EditProfilePage() {
           </section>
 
           {/* Favorite Books */}
-          <section className="space-y-4">
+          <section className="space-y-4" id="favorites">
             <h2 className="text-lg font-semibold">Favorite Books</h2>
             <p className="text-sm text-neutral-600">
               Choose up to 4 books that are most meaningful to you. They&apos;ll be displayed prominently on your profile.
@@ -594,6 +627,8 @@ export default function EditProfilePage() {
             <div className="grid grid-cols-4 gap-3">
               {[1, 2, 3, 4].map((position) => {
                 const favorite = favorites.find((f) => f.position === position);
+                const canMoveLeft = favorite && position > 1 && favorites.some(f => f.position === position - 1);
+                const canMoveRight = favorite && position < 4 && favorites.some(f => f.position === position + 1);
 
                 return favorite ? (
                   <div key={position} className="relative group">
@@ -610,12 +645,32 @@ export default function EditProfilePage() {
                         </div>
                       )}
                     </div>
+                    {/* Remove button */}
                     <button
                       onClick={() => removeFavorite(favorite.id)}
                       className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-sm font-bold"
                     >
                       ×
                     </button>
+                    {/* Reorder buttons */}
+                    <div className="absolute bottom-0 inset-x-0 flex justify-center gap-1 pb-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                      {canMoveLeft && (
+                        <button
+                          onClick={() => moveFavorite(favorite.id, "left")}
+                          className="w-6 h-6 bg-black/70 text-white rounded-full flex items-center justify-center text-xs hover:bg-black transition-colors"
+                        >
+                          ←
+                        </button>
+                      )}
+                      {canMoveRight && (
+                        <button
+                          onClick={() => moveFavorite(favorite.id, "right")}
+                          className="w-6 h-6 bg-black/70 text-white rounded-full flex items-center justify-center text-xs hover:bg-black transition-colors"
+                        >
+                          →
+                        </button>
+                      )}
+                    </div>
                     <p className="text-xs text-neutral-600 mt-1 truncate">{favorite.title}</p>
                   </div>
                 ) : (
