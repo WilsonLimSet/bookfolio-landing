@@ -79,6 +79,21 @@ export interface BookDetails {
   pageCount: number | null;
 }
 
+// Fetch description from Google Books API as fallback
+async function getGoogleBooksDescription(title: string, author: string | null): Promise<string | null> {
+  try {
+    const query = author ? `${title} ${author}` : title;
+    const response = await fetch(
+      `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=1`
+    );
+    if (!response.ok) return null;
+    const data = await response.json();
+    return data.items?.[0]?.volumeInfo?.description || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function getBookDetails(workKey: string): Promise<BookDetails | null> {
   try {
     // Fetch work details
@@ -135,6 +150,11 @@ export async function getBookDetails(workKey: string): Promise<BookDetails | nul
       if (sentence) {
         description = sentence;
       }
+    }
+
+    // 4. Fallback to Google Books API
+    if (!description) {
+      description = await getGoogleBooksDescription(work.title, authorName);
     }
 
     // Get publish year - try multiple sources
