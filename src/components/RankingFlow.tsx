@@ -174,10 +174,6 @@ export default function RankingFlow({
 
       if (cancelled) return;
 
-      // Log for debugging (remove after fixing)
-      console.log("Fiction books:", fictionResult.data?.length, fictionResult.error);
-      console.log("Nonfiction books:", nonfictionResult.data?.length, nonfictionResult.error);
-
       setUserBooksCache({
         fiction: (fictionResult.data || []).filter(b => b.open_library_key !== book.key),
         nonfiction: (nonfictionResult.data || []).filter(b => b.open_library_key !== book.key),
@@ -244,19 +240,8 @@ export default function RankingFlow({
   function handleTierSelect(t: Tier) {
     setTier(t);
 
-    // Debug logging (remove after fixing)
-    console.log("handleTierSelect:", {
-      tier: t,
-      category,
-      loadingBooks,
-      cacheKeys: Object.keys(userBooksCache),
-      allBooksInCategory: userBooksCache[category!]?.length,
-      booksInTier: userBooksCache[category!]?.filter(b => b.tier === t).length
-    });
-
     // If still loading, go to compare step and let the effect handle initialization
     if (loadingBooks) {
-      console.log("Still loading books, going to compare step");
       goToStep("compare");
       return;
     }
@@ -265,23 +250,19 @@ export default function RankingFlow({
     const allBooks = userBooksCache[category!] || [];
     const booksInTier = allBooks.filter(b => b.tier === t);
 
-    console.log("Books to compare:", booksInTier.map(b => ({ title: b.title, tier: b.tier })));
-
     if (booksInTier.length === 0) {
       // No books in this tier - skip comparison, go straight to review
       const tierOrder = { liked: 0, fine: 1, disliked: 2 };
       const higherTierBooks = allBooks.filter(b => tierOrder[b.tier as Tier] < tierOrder[t]);
       setFinalPosition(higherTierBooks.length + 1);
       setComparisonInitialized(true);
-      console.log("No books in tier, skipping to review. Position:", higherTierBooks.length + 1);
-      goToStep("review"); // Skip compare step entirely
+      goToStep("review");
     } else {
       // Initialize comparison and go to compare step
       setLow(0);
       setHigh(booksInTier.length);
       setCompareIndex(Math.floor(booksInTier.length / 2));
       setComparisonInitialized(true);
-      console.log("Going to compare step with", booksInTier.length, "books");
       goToStep("compare");
     }
   }
@@ -447,20 +428,6 @@ export default function RankingFlow({
   }
 
   const currentCompareBook = tierBooks[compareIndex];
-
-  // Debug logging for render
-  if (step === "compare") {
-    console.log("RENDER compare step:", {
-      tierBooksLength: tierBooks.length,
-      compareIndex,
-      currentCompareBook: currentCompareBook?.title || "UNDEFINED",
-      tier,
-      loadingBooks,
-      finalPosition,
-      comparisonInitialized
-    });
-  }
-
   const stepIndex = ["cover", "category", "tier", "compare", "review", "saving"].indexOf(step);
   const progress = ((stepIndex + 1) / 5) * 100;
 
