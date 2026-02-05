@@ -133,16 +133,15 @@ export default async function BookPage({ params }: PageProps) {
           <div className="flex-shrink-0">
             <div className="w-48 md:w-64 bg-neutral-50 rounded-xl overflow-hidden shadow-lg mx-auto md:mx-0 relative group">
               {book.coverUrl ? (
-                <div className="relative aspect-[2/3]">
-                  <Image
-                    src={book.coverUrl}
-                    alt={book.title}
-                    fill
-                    sizes="(max-width: 768px) 192px, 256px"
-                    className="object-cover rounded-xl"
-                    priority
-                  />
-                </div>
+                <Image
+                  src={book.coverUrl}
+                  alt={book.title}
+                  width={256}
+                  height={384}
+                  sizes="(max-width: 768px) 192px, 256px"
+                  className="w-full h-auto rounded-xl"
+                  priority
+                />
               ) : (
                 <div className="w-full aspect-[2/3] flex items-center justify-center text-neutral-400 p-4 text-center bg-neutral-100">
                   {book.title}
