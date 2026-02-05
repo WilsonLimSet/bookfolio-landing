@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { Suspense } from "react";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import PostHogProvider, { PostHogPageview } from "@/components/PostHogProvider";
 import "./globals.css";
 
 const inter = Inter({
@@ -21,7 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} antialiased`}>
-        {children}
+        <PostHogProvider>
+          <Suspense fallback={null}>
+            <PostHogPageview />
+          </Suspense>
+          {children}
+        </PostHogProvider>
         <Analytics />
         <ServiceWorkerRegistration />
       </body>
