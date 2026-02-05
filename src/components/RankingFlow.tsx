@@ -896,10 +896,10 @@ export default function RankingFlow({
                               )}
                             </motion.div>
                             <p className="font-medium text-sm truncate">{currentCompareBook.title}</p>
-                            <p className="text-xs text-neutral-500">
-                              {currentCompareBook.author && <span className="truncate">{currentCompareBook.author} · </span>}
-                              <span className="text-neutral-900 font-semibold">{currentCompareBook.score}</span>
-                            </p>
+                            {currentCompareBook.author && (
+                              <p className="text-xs text-neutral-500 truncate">{currentCompareBook.author}</p>
+                            )}
+                            <p className="text-lg font-bold text-neutral-900 mt-1">{currentCompareBook.score}</p>
                           </motion.button>
                         </AnimatePresence>
                       </div>
