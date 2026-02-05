@@ -99,6 +99,14 @@ export default function Header({ user, username }: HeaderProps) {
           {/* Logo */}
           <Link
             href={user ? "/feed" : "/"}
+            onClick={(e) => {
+              // If already on the target page, just scroll to top instead of reloading
+              const targetPath = user ? "/feed" : "/";
+              if (pathname === targetPath) {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
             className="flex items-center gap-2 text-neutral-900 hover:text-neutral-600 transition-colors"
           >
             <img src="/logo-512x512.png" alt="Bookfolio" className="w-7 h-7" />
