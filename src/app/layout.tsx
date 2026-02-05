@@ -10,7 +10,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Bookfolio - Rank Your Reads",
-  description: "Compare books head-to-head and discover what readers really think. Join the waitlist.",
+  description: "Compare books head-to-head and discover what readers really think.",
 };
 
 export default function RootLayout({
