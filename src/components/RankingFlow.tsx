@@ -447,6 +447,20 @@ export default function RankingFlow({
   }
 
   const currentCompareBook = tierBooks[compareIndex];
+
+  // Debug logging for render
+  if (step === "compare") {
+    console.log("RENDER compare step:", {
+      tierBooksLength: tierBooks.length,
+      compareIndex,
+      currentCompareBook: currentCompareBook?.title || "UNDEFINED",
+      tier,
+      loadingBooks,
+      finalPosition,
+      comparisonInitialized
+    });
+  }
+
   const stepIndex = ["cover", "category", "tier", "compare", "review", "saving"].indexOf(step);
   const progress = ((stepIndex + 1) / 5) * 100;
 
