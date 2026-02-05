@@ -207,15 +207,14 @@ export default function RankingFlow({
     };
   }, [book.key]);
 
-  // Initialize binary search when entering compare step (only compare within same tier)
-  // Only runs once per compare session to prevent resetting mid-comparison
+  // Fallback: Initialize binary search if loading was in progress when tier was selected
   useEffect(() => {
     if (step === "compare" && category && tier && !loadingBooks && !comparisonInitialized) {
       const allBooks = userBooksCache[category] || [];
       const booksInTier = allBooks.filter(b => b.tier === tier);
 
       if (booksInTier.length === 0) {
-        // First book in this tier - position after all higher-tier books
+        // No books in this tier - set final position (transition effect will handle step change)
         const tierOrder = { liked: 0, fine: 1, disliked: 2 };
         const higherTierBooks = allBooks.filter(b => tierOrder[b.tier as Tier] < tierOrder[tier]);
         setFinalPosition(higherTierBooks.length + 1);
@@ -240,7 +239,32 @@ export default function RankingFlow({
 
   function handleTierSelect(t: Tier) {
     setTier(t);
-    goToStep("compare");
+
+    // If still loading, go to compare step and let the effect handle initialization
+    if (loadingBooks) {
+      goToStep("compare");
+      return;
+    }
+
+    // Check if there are books to compare against in this tier
+    const allBooks = userBooksCache[category!] || [];
+    const booksInTier = allBooks.filter(b => b.tier === t);
+
+    if (booksInTier.length === 0) {
+      // No books in this tier - skip comparison, go straight to review
+      const tierOrder = { liked: 0, fine: 1, disliked: 2 };
+      const higherTierBooks = allBooks.filter(b => tierOrder[b.tier as Tier] < tierOrder[t]);
+      setFinalPosition(higherTierBooks.length + 1);
+      setComparisonInitialized(true);
+      goToStep("review"); // Skip compare step entirely
+    } else {
+      // Initialize comparison and go to compare step
+      setLow(0);
+      setHigh(booksInTier.length);
+      setCompareIndex(Math.floor(booksInTier.length / 2));
+      setComparisonInitialized(true);
+      goToStep("compare");
+    }
   }
 
   async function handlePrefer(preferNew: boolean) {
