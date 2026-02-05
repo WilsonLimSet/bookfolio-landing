@@ -128,26 +128,33 @@ export default function RankingFlow({
 
   // For comparison step
   const [userBooksCache, setUserBooksCache] = useState<Record<string, UserBook[]>>({});
-  const [loadingBooks, setLoadingBooks] = useState(false);
+  const [loadingBooks, setLoadingBooks] = useState(true);
   const [compareIndex, setCompareIndex] = useState(0);
   const [low, setLow] = useState(0);
   const [high, setHigh] = useState(0);
   const [finalPosition, setFinalPosition] = useState<number | null>(null);
   const [selectedBook, setSelectedBook] = useState<"new" | "existing" | null>(null);
   const [isComparing, setIsComparing] = useState(false);
+  const [comparisonInitialized, setComparisonInitialized] = useState(false);
 
   // Get user books for current category from cache
   const userBooks = useMemo(() => {
     return category ? (userBooksCache[category] || []) : [];
   }, [category, userBooksCache]);
 
+  // Only compare against books in the same tier (liked vs liked, fine vs fine, etc.)
+  const tierBooks = useMemo(() => {
+    if (!tier) return [];
+    return userBooks.filter(b => b.tier === tier);
+  }, [userBooks, tier]);
+
   // Prefetch user books for BOTH categories on mount
   useEffect(() => {
+    let cancelled = false;
+
     async function prefetchBooks() {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      setLoadingBooks(true);
+      if (!user || cancelled) return;
 
       // Fetch both categories in parallel
       const [fictionResult, nonfictionResult] = await Promise.all([
@@ -165,6 +172,8 @@ export default function RankingFlow({
           .order("rank_position"),
       ]);
 
+      if (cancelled) return;
+
       setUserBooksCache({
         fiction: (fictionResult.data || []).filter(b => b.open_library_key !== book.key),
         nonfiction: (nonfictionResult.data || []).filter(b => b.open_library_key !== book.key),
@@ -174,32 +183,50 @@ export default function RankingFlow({
     }
 
     prefetchBooks();
+
+    return () => {
+      cancelled = true;
+    };
   }, [supabase, book.key]);
 
   // Load editions for cover selection
   useEffect(() => {
+    let cancelled = false;
+
     async function loadEditions() {
       setLoadingEditions(true);
       const editionList = await getEditions(book.key);
+      if (cancelled) return;
       setEditions(editionList);
       setLoadingEditions(false);
     }
     loadEditions();
+
+    return () => {
+      cancelled = true;
+    };
   }, [book.key]);
 
-  // Initialize binary search when entering compare step
+  // Initialize binary search when entering compare step (only compare within same tier)
+  // Only runs once per compare session to prevent resetting mid-comparison
   useEffect(() => {
-    if (step === "compare" && category && !loadingBooks) {
-      const books = userBooksCache[category] || [];
-      if (books.length === 0) {
-        setFinalPosition(1);
+    if (step === "compare" && category && tier && !loadingBooks && !comparisonInitialized) {
+      const allBooks = userBooksCache[category] || [];
+      const booksInTier = allBooks.filter(b => b.tier === tier);
+
+      if (booksInTier.length === 0) {
+        // First book in this tier - position after all higher-tier books
+        const tierOrder = { liked: 0, fine: 1, disliked: 2 };
+        const higherTierBooks = allBooks.filter(b => tierOrder[b.tier as Tier] < tierOrder[tier]);
+        setFinalPosition(higherTierBooks.length + 1);
       } else {
         setLow(0);
-        setHigh(books.length);
-        setCompareIndex(Math.floor(books.length / 2));
+        setHigh(booksInTier.length);
+        setCompareIndex(Math.floor(booksInTier.length / 2));
       }
+      setComparisonInitialized(true);
     }
-  }, [step, category, loadingBooks, userBooksCache]);
+  }, [step, category, tier, loadingBooks, userBooksCache, comparisonInitialized]);
 
   const goToStep = useCallback((newStep: Step, dir: number = 1) => {
     setDirection(dir);
@@ -224,7 +251,7 @@ export default function RankingFlow({
     // Wait for animation
     await new Promise(resolve => setTimeout(resolve, 400));
 
-    // Binary search logic
+    // Binary search logic within tier
     let newLow = low;
     let newHigh = high;
 
@@ -235,7 +262,10 @@ export default function RankingFlow({
     }
 
     if (newLow >= newHigh) {
-      setFinalPosition(newLow + 1);
+      // Position = higher tier books + position within this tier
+      const tierOrder = { liked: 0, fine: 1, disliked: 2 };
+      const higherTierBooks = userBooks.filter(b => tierOrder[b.tier as Tier] < tierOrder[tier!]);
+      setFinalPosition(higherTierBooks.length + newLow + 1);
     } else {
       setLow(newLow);
       setHigh(newHigh);
@@ -247,8 +277,11 @@ export default function RankingFlow({
   }
 
   function handleSkip() {
-    const midPosition = Math.floor((low + high) / 2) + 1;
-    setFinalPosition(midPosition);
+    // Position = higher tier books + mid position within this tier
+    const tierOrder = { liked: 0, fine: 1, disliked: 2 };
+    const higherTierBooks = userBooks.filter(b => tierOrder[b.tier as Tier] < tierOrder[tier!]);
+    const midPositionInTier = Math.floor((low + high) / 2);
+    setFinalPosition(higherTierBooks.length + midPositionInTier + 1);
   }
 
   // Go to review step when we have final position
@@ -370,7 +403,7 @@ export default function RankingFlow({
     return Math.round(score * 10) / 10;
   }
 
-  const currentCompareBook = userBooks[compareIndex];
+  const currentCompareBook = tierBooks[compareIndex];
   const stepIndex = ["cover", "category", "tier", "compare", "review", "saving"].indexOf(step);
   const progress = ((stepIndex + 1) / 5) * 100;
 
@@ -687,7 +720,7 @@ export default function RankingFlow({
                 </motion.div>
               )}
 
-              {step === "compare" && finalPosition === null && (
+              {step === "compare" && (
                 <motion.div
                   key="compare"
                   custom={direction}
@@ -697,7 +730,7 @@ export default function RankingFlow({
                   exit="exit"
                   className="space-y-4"
                 >
-                  {loadingBooks || !currentCompareBook ? (
+                  {loadingBooks ? (
                     <div className="text-center py-12">
                       <motion.div
                         className="w-12 h-12 border-3 border-neutral-200 border-t-neutral-800 rounded-full mx-auto"
@@ -706,13 +739,30 @@ export default function RankingFlow({
                       />
                       <p className="text-neutral-500 mt-4">Loading your books...</p>
                     </div>
+                  ) : finalPosition !== null ? (
+                    <div className="text-center py-12">
+                      <motion.div
+                        className="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center"
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                      >
+                        <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </motion.div>
+                      <p className="text-neutral-600 font-medium">
+                        {tierBooks.length === 0 ? "First in this rating!" : "Ranked!"}
+                      </p>
+                    </div>
+                  ) : !currentCompareBook ? (
+                    <div className="text-center py-12">
+                      <p className="text-neutral-500">No books to compare against yet.</p>
+                    </div>
                   ) : (
                     <>
                       <div className="text-center">
                         <h2 className="text-lg font-semibold">Which do you prefer?</h2>
-                        <p className="text-xs text-neutral-400 mt-1">
-                          {Math.ceil(Math.log2(userBooks.length + 1))} comparisons max
-                        </p>
                       </div>
 
                       <div className="flex items-stretch gap-4">
