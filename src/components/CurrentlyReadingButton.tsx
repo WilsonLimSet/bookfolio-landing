@@ -21,52 +21,56 @@ export default function CurrentlyReadingButton({ book, isReading }: CurrentlyRea
   const supabase = createClient();
 
   async function handleToggle() {
-    setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       router.push("/login");
       return;
     }
 
-    if (reading) {
-      // Remove from list
-      await supabase
-        .from("currently_reading")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("open_library_key", book.key);
-      setReading(false);
-    } else {
-      // Add to list
-      await supabase.from("currently_reading").insert({
-        user_id: user.id,
-        title: book.title,
-        author: book.author,
-        cover_url: book.coverUrl,
-        open_library_key: book.key,
-      });
+    const wasReading = reading;
+    setReading(!wasReading);
+    setLoading(true);
 
-      // Log activity
-      await supabase.from("activity").insert({
-        user_id: user.id,
-        action_type: "started_reading",
-        book_title: book.title,
-        book_author: book.author,
-        book_cover_url: book.coverUrl,
-        book_key: book.key,
-      });
+    try {
+      if (wasReading) {
+        const { error } = await supabase
+          .from("currently_reading")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("open_library_key", book.key);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("currently_reading").insert({
+          user_id: user.id,
+          title: book.title,
+          author: book.author,
+          cover_url: book.coverUrl,
+          open_library_key: book.key,
+        });
+        if (error) throw error;
 
-      // Remove from want_to_read if it was there
-      await supabase
-        .from("want_to_read")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("open_library_key", book.key);
+        // Log activity and remove from want_to_read (don't block on these)
+        supabase.from("activity").insert({
+          user_id: user.id,
+          action_type: "started_reading",
+          book_title: book.title,
+          book_author: book.author,
+          book_cover_url: book.coverUrl,
+          book_key: book.key,
+        });
 
-      setReading(true);
+        supabase
+          .from("want_to_read")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("open_library_key", book.key);
+      }
+      router.refresh();
+    } catch {
+      setReading(wasReading);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    router.refresh();
   }
 
   return (

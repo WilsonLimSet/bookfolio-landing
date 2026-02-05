@@ -219,7 +219,7 @@ export default async function ProfilePage({ params }: PageProps) {
           </div>
 
           {/* Stats Row - Beli style */}
-          <div className="grid grid-cols-4 gap-2 mb-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
             <div className="bg-white rounded-xl p-3 text-center border border-neutral-100">
               <p className="text-2xl font-bold">{totalBooksRead}</p>
               <p className="text-xs text-neutral-500">Read</p>
@@ -304,7 +304,7 @@ export default async function ProfilePage({ params }: PageProps) {
                   </Link>
                 )}
               </div>
-              <div className="grid grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {favoriteBooks?.map((book) => (
                   <Link
                     key={book.id}

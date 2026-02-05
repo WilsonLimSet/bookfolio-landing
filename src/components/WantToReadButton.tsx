@@ -21,45 +21,50 @@ export default function WantToReadButton({ book, isInList }: WantToReadButtonPro
   const supabase = createClient();
 
   async function handleToggle() {
-    setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       router.push("/login");
       return;
     }
 
-    if (inList) {
-      // Remove from list
-      await supabase
-        .from("want_to_read")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("open_library_key", book.key);
-      setInList(false);
-    } else {
-      // Add to list
-      await supabase.from("want_to_read").insert({
-        user_id: user.id,
-        title: book.title,
-        author: book.author,
-        cover_url: book.coverUrl,
-        open_library_key: book.key,
-      });
+    const wasInList = inList;
+    setInList(!wasInList);
+    setLoading(true);
 
-      // Log activity
-      await supabase.from("activity").insert({
-        user_id: user.id,
-        action_type: "want_to_read",
-        book_title: book.title,
-        book_author: book.author,
-        book_cover_url: book.coverUrl,
-        book_key: book.key,
-      });
+    try {
+      if (wasInList) {
+        const { error } = await supabase
+          .from("want_to_read")
+          .delete()
+          .eq("user_id", user.id)
+          .eq("open_library_key", book.key);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase.from("want_to_read").insert({
+          user_id: user.id,
+          title: book.title,
+          author: book.author,
+          cover_url: book.coverUrl,
+          open_library_key: book.key,
+        });
+        if (error) throw error;
 
-      setInList(true);
+        // Log activity (don't block on this)
+        supabase.from("activity").insert({
+          user_id: user.id,
+          action_type: "want_to_read",
+          book_title: book.title,
+          book_author: book.author,
+          book_cover_url: book.coverUrl,
+          book_key: book.key,
+        });
+      }
+      router.refresh();
+    } catch {
+      setInList(wasInList);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-    router.refresh();
   }
 
   return (

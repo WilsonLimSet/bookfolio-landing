@@ -31,35 +31,42 @@ export default function FollowButton({
       return;
     }
 
+    const wasFollowing = isFollowing;
+    setIsFollowing(!wasFollowing);
     setLoading(true);
 
-    if (isFollowing) {
-      await supabase
-        .from("follows")
-        .delete()
-        .eq("follower_id", currentUserId)
-        .eq("following_id", targetUserId);
-      setIsFollowing(false);
-      onFollowChange?.(false);
-    } else {
-      await supabase.from("follows").insert({
-        follower_id: currentUserId,
-        following_id: targetUserId,
-      });
+    try {
+      if (wasFollowing) {
+        const { error } = await supabase
+          .from("follows")
+          .delete()
+          .eq("follower_id", currentUserId)
+          .eq("following_id", targetUserId);
+        if (error) throw error;
+        onFollowChange?.(false);
+      } else {
+        const { error } = await supabase.from("follows").insert({
+          follower_id: currentUserId,
+          following_id: targetUserId,
+        });
+        if (error) throw error;
 
-      // Log activity
-      await supabase.from("activity").insert({
-        user_id: currentUserId,
-        action_type: "followed",
-        target_user_id: targetUserId,
-      });
+        // Log activity (don't block on this)
+        supabase.from("activity").insert({
+          user_id: currentUserId,
+          action_type: "followed",
+          target_user_id: targetUserId,
+        });
 
-      setIsFollowing(true);
-      onFollowChange?.(true);
+        onFollowChange?.(true);
+      }
+      router.refresh();
+    } catch {
+      // Revert on error
+      setIsFollowing(wasFollowing);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
-    router.refresh();
   }
 
   // Don't show follow button for own profile

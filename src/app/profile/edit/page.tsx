@@ -624,7 +624,7 @@ export default function EditProfilePage() {
             </p>
 
             {/* Current Favorites Grid */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[1, 2, 3, 4].map((position) => {
                 const favorite = favorites.find((f) => f.position === position);
                 const canMoveLeft = favorite && position > 1 && favorites.some(f => f.position === position - 1);
