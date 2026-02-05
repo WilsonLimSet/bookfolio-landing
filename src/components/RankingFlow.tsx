@@ -78,7 +78,7 @@ const stepVariants = {
 };
 
 const bookCardVariants = {
-  idle: { scale: 1, y: 0 },
+  idle: { scale: 1, y: 0, x: 0, opacity: 1 },
   hover: { scale: 1.02, y: -4, transition: { type: "spring" as const, stiffness: 400, damping: 25 } },
   tap: { scale: 0.98 },
   selected: {
