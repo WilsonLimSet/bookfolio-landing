@@ -12,7 +12,37 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
   return {
     title: `${post.title} - Bookfolio`,
     description: post.description,
+    alternates: {
+      canonical: `https://bookfolioapp.com/blog/${post.slug}`,
+    },
   };
+}
+
+function BlogJsonLd({ post }: { post: { title: string; description: string; slug: string } }) {
+  const jsonLd = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.description,
+    datePublished: "2026-02-06",
+    dateModified: "2026-02-06",
+    author: {
+      "@type": "Organization",
+      name: "Bookfolio",
+      url: "https://bookfolioapp.com",
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "Bookfolio",
+      url: "https://bookfolioapp.com",
+    },
+    mainEntityOfPage: {
+      "@type": "WebPage",
+      "@id": `https://bookfolioapp.com/blog/${post.slug}`,
+    },
+  });
+
+  return <script type="application/ld+json">{jsonLd}</script>;
 }
 
 export default function BlogPost({ params }: { params: { slug: string } }) {
@@ -24,6 +54,7 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
 
   return (
     <main className="min-h-screen px-6 py-12">
+      <BlogJsonLd post={post} />
       <div className="max-w-2xl mx-auto space-y-8">
         <Link
           href="/blog"

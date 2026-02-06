@@ -9,14 +9,14 @@ export type BlogPost = {
 export const posts: BlogPost[] = [
   {
     slug: "best-goodreads-alternative",
-    title: "The Best Goodreads Alternative in 2026",
+    title: "What Is the Best Goodreads Alternative in 2026?",
     description:
       "Looking for a modern Goodreads alternative? Bookfolio lets you rank books head-to-head, build visual rankings, and compare taste with friends.",
     date: "February 6, 2026",
     content: `
 If you've been using Goodreads, you know the frustration. The interface feels stuck in 2010, star ratings don't capture how you really feel about books, and comparing your taste with friends is basically impossible. That's why we built Bookfolio.
 
-## What Makes Bookfolio Different
+## What makes Bookfolio different from Goodreads?
 
 **Head-to-head ranking, not star ratings.** Instead of assigning arbitrary stars, Bookfolio asks you a simple question: which of these two books did you like more? Through a series of quick comparisons, your true ranking emerges naturally. No more agonizing over whether a book is a 3 or a 4.
 
@@ -26,7 +26,7 @@ If you've been using Goodreads, you know the frustration. The interface feels st
 
 **Modern, fast interface.** Bookfolio is built with modern web technology. No page refreshes, no clunky forms. Just a smooth, responsive experience on any device.
 
-## Who Is Bookfolio For?
+## Who is Bookfolio for?
 
 Bookfolio is for anyone who reads and wants more than a simple "did you like it?" rating system. Whether you read 5 books a year or 50, the ranking system works. It's especially great if you enjoy discussing books with friends and want a concrete way to compare taste.
 
@@ -37,7 +37,7 @@ Getting started takes less than a minute. Search for a book, start ranking, and 
   },
   {
     slug: "beli-for-books",
-    title: "Beli for Books: Rank Your Reading List Like You Rank Restaurants",
+    title: "Is There a Beli for Books? Rank Books Like You Rank Restaurants",
     description:
       "Love how Beli lets you rank restaurants? Bookfolio brings the same head-to-head ranking experience to books.",
     date: "February 6, 2026",
@@ -48,7 +48,7 @@ If you use Beli to rank restaurants, you already know the magic of head-to-head 
 
 The concept is simple and addictive. Finished a book? Bookfolio shows you two books and asks: which one did you prefer? A few quick picks later, your new read slots perfectly into your all-time ranking. No overthinking. No number anxiety. Just honest comparisons.
 
-## Why It Works Better Than Stars
+## Why does ranking work better than star ratings?
 
 Star ratings are broken. A 4-star book could mean "really enjoyed it" or "it was fine, I guess." When you compare two books directly, there's no ambiguity. You either preferred one or the other. The result is a ranking that genuinely reflects your taste.
 
@@ -65,7 +65,7 @@ Start ranking your books today and see where your favorites really stand.
   },
   {
     slug: "why-switch-from-goodreads",
-    title: "5 Reasons to Switch from Goodreads to Bookfolio",
+    title: "Why Are Readers Switching from Goodreads to Bookfolio?",
     description:
       "Tired of Goodreads? Here are 5 reasons readers are switching to Bookfolio for tracking and ranking their books.",
     date: "February 6, 2026",
@@ -99,18 +99,18 @@ You don't have to abandon Goodreads overnight. Start by ranking a few books on B
   },
   {
     slug: "how-to-rank-books",
-    title: "How to Rank Books: A Better Way to Track Your Reading",
+    title: "How Do You Rank Books? A Better Way to Track Your Reading",
     description:
       "Learn how head-to-head book ranking works and why it's a more accurate way to track and remember the books you've read.",
     date: "February 6, 2026",
     content: `
 We've all been there. Someone asks "what's your favorite book?" and your mind goes blank. You've read hundreds of books, but ranking them feels impossible. That's because you've never had the right tool.
 
-## The Problem with Traditional Book Tracking
+## What's wrong with traditional book tracking?
 
 Most book tracking apps give you two options: a binary "read/not read" or a star rating. Neither captures how you really feel. A 4-star rating for a thriller and a 4-star rating for a memoir tell you nothing about which one you preferred. And six months later, you won't remember why you gave either of them 4 stars.
 
-## How Head-to-Head Ranking Works
+## How does head-to-head book ranking work?
 
 Bookfolio uses a comparison-based ranking system. When you finish a book, you're shown pairs of books you've already read and asked which you preferred. Through a series of these quick, intuitive comparisons, your new book finds its perfect spot in your ranked list.
 
@@ -132,7 +132,7 @@ The more books you rank, the more accurate and interesting your list becomes. St
   },
   {
     slug: "book-tracking-apps-compared",
-    title: "Book Tracking Apps Compared: Goodreads vs StoryGraph vs Bookfolio",
+    title: "Goodreads vs StoryGraph vs Bookfolio: Which Book Tracking App Is Best?",
     description:
       "A comparison of the most popular book tracking apps in 2026. See how Goodreads, StoryGraph, and Bookfolio stack up.",
     date: "February 6, 2026",
@@ -163,7 +163,7 @@ With more book tracking options than ever, choosing the right one matters. Here'
 
 **Cons:** Newer platform with a growing community, focused on ranking rather than reading statistics.
 
-## Which Should You Choose?
+## Which book tracking app should you choose?
 
 - **Choose Goodreads** if community size and reading challenges are your priority.
 - **Choose StoryGraph** if you love reading statistics and mood tracking.
@@ -174,7 +174,7 @@ Many readers use more than one. But if you've ever struggled to answer "what's y
   },
   {
     slug: "top-10-fiction-books-2025",
-    title: "Top 10 Fiction Books of 2025",
+    title: "What Are the Best Fiction Books of 2025?",
     description:
       "The best fiction books of 2025 ranked by readers. From literary masterpieces to page-turning thrillers, these are the novels that defined the year.",
     date: "February 6, 2026",
@@ -228,7 +228,7 @@ These rankings were compiled from Bookfolio users' head-to-head comparisons. Wan
   },
   {
     slug: "top-10-nonfiction-books-2025",
-    title: "Top 10 Non-Fiction Books of 2025",
+    title: "What Are the Best Non-Fiction Books of 2025?",
     description:
       "The best non-fiction books of 2025 including memoirs, science, history, and essays that shaped the conversation.",
     date: "February 6, 2026",
@@ -282,7 +282,7 @@ Agree with this list? Disagree completely? That's the whole point. Rank these bo
   },
   {
     slug: "best-biographies-memoirs-2025",
-    title: "Best Biographies and Memoirs of 2025",
+    title: "What Are the Best Biographies and Memoirs of 2025?",
     description:
       "The most compelling biographies and memoirs published in 2025, from celebrity tell-alls to quiet literary masterpieces.",
     date: "February 6, 2026",
@@ -336,7 +336,7 @@ These are the memoirs and biographies that Bookfolio readers ranked highest in 2
   },
   {
     slug: "best-thriller-mystery-books-2025",
-    title: "Best Thriller and Mystery Books of 2025",
+    title: "What Are the Best Thriller and Mystery Books of 2025?",
     description:
       "The most gripping thrillers and mysteries of 2025, ranked by readers. Page-turners you won't be able to put down.",
     date: "February 6, 2026",
@@ -390,7 +390,7 @@ Think The God of the Woods deserves #1? Or would you put something else on top? 
   },
   {
     slug: "best-fantasy-sci-fi-books-2025",
-    title: "Best Fantasy and Sci-Fi Books of 2025",
+    title: "What Are the Best Fantasy and Sci-Fi Books of 2025?",
     description:
       "The top fantasy and science fiction books of 2025. Epic worlds, mind-bending ideas, and unforgettable characters.",
     date: "February 6, 2026",
@@ -444,7 +444,7 @@ Bookfolio is perfect for fantasy and sci-fi readers who devour series and want t
   },
   {
     slug: "best-self-help-books-2025",
-    title: "Best Self-Help and Personal Development Books of 2025",
+    title: "What Are the Best Self-Help Books of 2025?",
     description:
       "The most impactful self-help and personal development books of 2025. Books that actually change how you think and live.",
     date: "February 6, 2026",
@@ -498,7 +498,7 @@ Self-help books are deeply personal — what transforms one person might bore an
   },
   {
     slug: "best-romance-books-2025",
-    title: "Best Romance Books of 2025",
+    title: "What Are the Best Romance Books of 2025?",
     description:
       "The most swoon-worthy romance novels of 2025. From contemporary to historical, these are the love stories readers couldn't put down.",
     date: "February 6, 2026",
@@ -552,7 +552,7 @@ Romance readers are passionate about their favorites. Bookfolio's head-to-head r
   },
   {
     slug: "books-to-read-before-you-die",
-    title: "50 Books to Read Before You Die (And How to Actually Track Them)",
+    title: "What Are the Must-Read Books of All Time? 50 Books to Read Before You Die",
     description:
       "The essential books everyone should read at least once, plus how to track and rank your progress through the classics.",
     date: "February 6, 2026",
