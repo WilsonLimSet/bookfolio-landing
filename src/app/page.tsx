@@ -40,6 +40,9 @@ export default function Home() {
       </div>
 
       <footer className="w-full max-w-4xl mx-auto pt-8 flex justify-center gap-6 text-sm text-neutral-400">
+        <Link href="/blog" className="hover:text-neutral-600">
+          Blog
+        </Link>
         <Link href="/privacy" className="hover:text-neutral-600">
           Privacy Policy
         </Link>
