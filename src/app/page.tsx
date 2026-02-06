@@ -1,5 +1,6 @@
 import AuthButton from "@/components/AuthButton";
 import HomeSearch from "@/components/HomeSearch";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -37,6 +38,15 @@ export default function Home() {
           <HomeSearch />
         </div>
       </div>
+
+      <footer className="w-full max-w-4xl mx-auto pt-8 flex justify-center gap-6 text-sm text-neutral-400">
+        <Link href="/privacy" className="hover:text-neutral-600">
+          Privacy Policy
+        </Link>
+        <Link href="/terms" className="hover:text-neutral-600">
+          Terms of Service
+        </Link>
+      </footer>
     </main>
   );
 }
