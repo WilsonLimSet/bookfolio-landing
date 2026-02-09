@@ -286,6 +286,106 @@ export async function getBookDetails(workKey: string): Promise<BookDetails | nul
   }
 }
 
+export async function fetchWorkSubjects(workKey: string): Promise<string[]> {
+  try {
+    const res = await fetch(`https://openlibrary.org${workKey}.json`, {
+      next: { revalidate: 86400 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.subjects || [];
+  } catch {
+    return [];
+  }
+}
+
+export function detectCategory(
+  subjects: string[]
+): "fiction" | "nonfiction" | null {
+  if (subjects.length === 0) return null;
+
+  let fictionScore = 0;
+  let nonfictionScore = 0;
+
+  for (const subject of subjects) {
+    const lower = subject.toLowerCase();
+
+    // NYT tags (weight 3)
+    if (lower.startsWith("nyt:")) {
+      if (lower.includes("fiction")) fictionScore += 3;
+      if (lower.includes("nonfiction") || lower.includes("non-fiction"))
+        nonfictionScore += 3;
+      continue;
+    }
+
+    // BISAC prefixes (weight 2)
+    if (lower.startsWith("fiction /") || lower.startsWith("fiction/")) {
+      fictionScore += 2;
+      continue;
+    }
+    if (
+      lower.startsWith("biography & autobiography") ||
+      lower.startsWith("business") ||
+      lower.startsWith("self-help") ||
+      lower.startsWith("history /") ||
+      lower.startsWith("science /") ||
+      lower.startsWith("psychology /")
+    ) {
+      nonfictionScore += 2;
+      continue;
+    }
+
+    // Strong nonfiction markers (weight 2)
+    if (
+      /^(true crime|biography|biographies|memoir|memoirs|autobiography|case studies)$/i.test(
+        lower
+      )
+    ) {
+      nonfictionScore += 2;
+      continue;
+    }
+
+    // Exact "Fiction" (weight 2)
+    if (lower === "fiction") {
+      fictionScore += 2;
+      continue;
+    }
+
+    // Compound fiction patterns (weight 1)
+    if (
+      /fiction/i.test(lower) &&
+      lower !== "fiction" // already handled above
+    ) {
+      fictionScore += 1;
+      continue;
+    }
+
+    // Nonfiction keywords (weight 1)
+    if (
+      /^(history|science|psychology|self-help|philosophy|economics|politics|sociology|essays|journalism|mathematics|education|parenting|health|business|technology|religion|spirituality)$/i.test(
+        lower
+      )
+    ) {
+      nonfictionScore += 1;
+      continue;
+    }
+
+    // Fiction genre keywords (weight 1)
+    if (
+      /^(novel|novels|fantasy|romance|thriller|thrillers|mystery|horror|adventure|suspense|dystopia|dystopian|manga|comics|graphic novel|graphic novels|fairy tales?)$/i.test(
+        lower
+      )
+    ) {
+      fictionScore += 1;
+      continue;
+    }
+  }
+
+  if (fictionScore === 0 && nonfictionScore === 0) return null;
+  // Ties go to nonfiction (OpenLibrary over-tags "fiction")
+  return fictionScore > nonfictionScore ? "fiction" : "nonfiction";
+}
+
 export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 

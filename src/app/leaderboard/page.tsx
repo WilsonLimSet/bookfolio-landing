@@ -7,43 +7,55 @@ import { getLeaderboardData } from "@/lib/supabase/cached";
 export default async function LeaderboardPage() {
   const supabase = await createClient();
 
-  const { fiction: fictionData, nonfiction: nonfictionData, activeUsers: activeUsersData } = await getLeaderboardData();
+  const { likedBooks, activeUsers: activeUsersData } = await getLeaderboardData();
 
-  // Aggregate books by open_library_key (proper deduplication)
-  const aggregateBooks = (books: typeof fictionData) => {
-    const map = new Map<string, {
-      open_library_key: string;
-      title: string;
-      author: string | null;
-      cover_url: string | null;
-      scores: number[];
-      count: number;
-    }>();
+  // Aggregate all liked books by open_library_key, majority-rules category
+  const bookMap = new Map<string, {
+    open_library_key: string;
+    title: string;
+    author: string | null;
+    cover_url: string | null;
+    scores: number[];
+    count: number;
+    fictionVotes: number;
+    nonfictionVotes: number;
+  }>();
 
-    for (const book of books || []) {
-      const key = book.open_library_key;
-      if (!key) continue;
+  for (const book of likedBooks || []) {
+    const key = book.open_library_key;
+    if (!key) continue;
 
-      if (!map.has(key)) {
-        map.set(key, { ...book, scores: [Number(book.score)], count: 1 });
-      } else {
-        const existing = map.get(key)!;
-        existing.scores.push(Number(book.score));
-        existing.count++;
-      }
+    if (!bookMap.has(key)) {
+      bookMap.set(key, {
+        ...book,
+        scores: [Number(book.score)],
+        count: 1,
+        fictionVotes: book.category === "fiction" ? 1 : 0,
+        nonfictionVotes: book.category === "nonfiction" ? 1 : 0,
+      });
+    } else {
+      const existing = bookMap.get(key)!;
+      existing.scores.push(Number(book.score));
+      existing.count++;
+      if (book.category === "fiction") existing.fictionVotes++;
+      else existing.nonfictionVotes++;
     }
+  }
 
-    return Array.from(map.values())
-      .map(b => ({
-        ...b,
-        avgScore: (b.scores.reduce((a, c) => a + c, 0) / b.scores.length).toFixed(1),
-      }))
-      .sort((a, b) => parseFloat(b.avgScore) - parseFloat(a.avgScore))
-      .slice(0, 10);
-  };
+  const allBooks = Array.from(bookMap.values()).map(b => ({
+    ...b,
+    avgScore: (b.scores.reduce((a, c) => a + c, 0) / b.scores.length).toFixed(1),
+    category: b.fictionVotes > b.nonfictionVotes ? "fiction" as const : "nonfiction" as const,
+  }));
 
-  const topFictionAggregated = aggregateBooks(fictionData);
-  const topNonfictionAggregated = aggregateBooks(nonfictionData);
+  const topFictionAggregated = allBooks
+    .filter(b => b.category === "fiction")
+    .sort((a, b) => parseFloat(b.avgScore) - parseFloat(a.avgScore))
+    .slice(0, 10);
+  const topNonfictionAggregated = allBooks
+    .filter(b => b.category === "nonfiction")
+    .sort((a, b) => parseFloat(b.avgScore) - parseFloat(a.avgScore))
+    .slice(0, 10);
 
   // Count books per user
   const userCounts = new Map<string, number>();

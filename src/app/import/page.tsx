@@ -3,7 +3,11 @@
 import { useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { searchBooks } from "@/lib/openLibrary";
+import {
+  searchBooks,
+  fetchWorkSubjects,
+  detectCategory,
+} from "@/lib/openLibrary";
 import Link from "next/link";
 
 interface GoodreadsBook {
@@ -120,17 +124,6 @@ export default function ImportPage() {
     return books.sort((a, b) => b.rating - a.rating);
   }
 
-  async function fetchSubjects(workKey: string): Promise<string[]> {
-    try {
-      const res = await fetch(`https://openlibrary.org${workKey}.json`);
-      if (!res.ok) return [];
-      const data = await res.json();
-      return (data.subjects || []).slice(0, 10);
-    } catch {
-      return [];
-    }
-  }
-
   async function matchBooks(books: GoodreadsBook[]) {
     const matched: MatchedBook[] = [];
 
@@ -142,8 +135,7 @@ export default function ImportPage() {
 
       if (results.length > 0) {
         const best = results[0];
-        // Fetch subjects from Open Library for better categorization
-        const subjects = await fetchSubjects(best.key);
+        const subjects = await fetchWorkSubjects(best.key);
 
         matched.push({
           title: book.title,
@@ -152,7 +144,7 @@ export default function ImportPage() {
           openLibraryKey: best.key,
           coverUrl: best.coverUrl,
           category: guessCategory(book.shelves, subjects),
-          detectedSubjects: subjects,
+          detectedSubjects: subjects.slice(0, 10),
         });
       } else {
         matched.push({
@@ -175,9 +167,15 @@ export default function ImportPage() {
   }
 
   function guessCategory(shelves: string, subjects?: string[]): "fiction" | "nonfiction" {
-    const text = `${shelves} ${(subjects || []).join(" ")}`.toLowerCase();
+    // Primary signal: weighted detection from OpenLibrary subjects
+    if (subjects && subjects.length > 0) {
+      const detected = detectCategory(subjects);
+      if (detected) return detected;
+    }
 
-    // Explicit fiction indicators
+    // Fallback: keyword matching from Goodreads shelves
+    const text = shelves.toLowerCase();
+
     const fictionKeywords = [
       "fiction", "novel", "fantasy", "sci-fi", "science-fiction", "romance",
       "mystery", "thriller", "horror", "dystopia", "dystopian", "young-adult",
@@ -187,7 +185,6 @@ export default function ImportPage() {
       "magical-realism", "contemporary-fiction", "classics", "short-stories"
     ];
 
-    // Explicit nonfiction indicators
     const nonfictionKeywords = [
       "non-fiction", "nonfiction", "self-help", "biography", "autobiography",
       "memoir", "business", "history", "science", "psychology", "philosophy",
@@ -330,10 +327,13 @@ export default function ImportPage() {
     };
 
     const range = tierRanges[tier];
-    if (total === 1) return (range.min + range.max) / 2;
+    if (total <= 1) return range.max;
 
-    const ratio = (total - position) / (total - 1);
-    return Math.round((range.min + ratio * (range.max - range.min)) * 10) / 10;
+    // Match rank_book RPC: spread_factor prevents min score from hitting absolute floor
+    const fullRange = range.max - range.min;
+    const spreadFactor = (total - 1) / total;
+    const positionFraction = (position - 1) / (total - 1);
+    return Math.round((range.max - positionFraction * fullRange * spreadFactor) * 10) / 10;
   }
 
   return (

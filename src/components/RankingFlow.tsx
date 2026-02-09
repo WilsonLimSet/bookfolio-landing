@@ -4,7 +4,12 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
-import { getEditions, BookEdition } from "@/lib/openLibrary";
+import {
+  getEditions,
+  BookEdition,
+  fetchWorkSubjects,
+  detectCategory,
+} from "@/lib/openLibrary";
 import { revalidateProfile } from "@/app/actions";
 
 interface BookInfo {
@@ -120,6 +125,8 @@ export default function RankingFlow({
   const [category, setCategory] = useState<Category | null>(
     (existingEntry?.category as Category) || null
   );
+  const [categoryAutoDetected, setCategoryAutoDetected] = useState(false);
+  const [loadingDetection, setLoadingDetection] = useState(!existingEntry);
   const [tier, setTier] = useState<Tier | null>(
     (existingEntry?.tier as Tier) || null
   );
@@ -212,6 +219,28 @@ export default function RankingFlow({
       cancelled = true;
     };
   }, [book.key]);
+
+  // Auto-detect fiction/nonfiction from OpenLibrary subjects
+  useEffect(() => {
+    if (existingEntry) return; // Re-ranking: category already known
+    let cancelled = false;
+
+    async function detect() {
+      const subjects = await fetchWorkSubjects(book.key);
+      if (cancelled) return;
+      const detected = detectCategory(subjects);
+      if (detected) {
+        setCategory(detected);
+        setCategoryAutoDetected(true);
+      }
+      setLoadingDetection(false);
+    }
+    detect();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [book.key, existingEntry]);
 
   // Fallback: Initialize binary search if loading was in progress when tier was selected
   useEffect(() => {
@@ -362,8 +391,12 @@ export default function RankingFlow({
   }
 
   const currentCompareBook = tierBooks[compareIndex];
-  const stepIndex = ["cover", "category", "tier", "compare", "review", "saving"].indexOf(step);
-  const progress = ((stepIndex + 1) / 5) * 100;
+  const categorySkipped = categoryAutoDetected && !existingEntry;
+  const steps = categorySkipped
+    ? ["cover", "tier", "compare", "review", "saving"]
+    : ["cover", "category", "tier", "compare", "review", "saving"];
+  const stepIndex = steps.indexOf(step);
+  const progress = ((Math.max(stepIndex, 0) + 1) / (steps.length - 1)) * 100;
 
   return (
     <AnimatePresence>
@@ -534,13 +567,34 @@ export default function RankingFlow({
                     </>
                   )}
                   <motion.button
-                    onClick={() => goToStep("category")}
+                    onClick={() => {
+                      if (categoryAutoDetected && category && !existingEntry && !loadingDetection) {
+                        goToStep("tier");
+                      } else {
+                        goToStep("category");
+                      }
+                    }}
                     className="w-full py-3 bg-neutral-900 text-white rounded-xl font-medium"
                     whileHover={{ scale: 1.02, backgroundColor: "#262626" }}
                     whileTap={{ scale: 0.98 }}
                   >
                     {selectedCover ? "Continue" : "Skip"}
                   </motion.button>
+                  {categoryAutoDetected && category && !existingEntry && (
+                    <p className="text-center text-sm text-neutral-500 mt-2">
+                      Detected as{" "}
+                      <span className="font-medium text-neutral-700">
+                        {category === "fiction" ? "Fiction" : "Non-Fiction"}
+                      </span>
+                      {" · "}
+                      <button
+                        onClick={() => goToStep("category")}
+                        className="text-neutral-500 underline hover:text-neutral-700"
+                      >
+                        Change
+                      </button>
+                    </p>
+                  )}
                 </motion.div>
               )}
 

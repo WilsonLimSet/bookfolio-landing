@@ -114,21 +114,13 @@ export const getLeaderboardData = () =>
     async () => {
       const supabase = getAnonClient();
 
-      const [fictionResult, nonfictionResult, activeUsersResult] = await Promise.all([
+      const [likedBooksResult, activeUsersResult] = await Promise.all([
         supabase
           .from("user_books")
-          .select("open_library_key, title, author, cover_url, score")
-          .eq("category", "fiction")
+          .select("open_library_key, title, author, cover_url, score, category")
           .eq("tier", "liked")
           .order("score", { ascending: false })
-          .limit(50),
-        supabase
-          .from("user_books")
-          .select("open_library_key, title, author, cover_url, score")
-          .eq("category", "nonfiction")
-          .eq("tier", "liked")
-          .order("score", { ascending: false })
-          .limit(50),
+          .limit(200),
         supabase
           .from("user_books")
           .select("user_id")
@@ -136,8 +128,7 @@ export const getLeaderboardData = () =>
       ]);
 
       return {
-        fiction: fictionResult.data || [],
-        nonfiction: nonfictionResult.data || [],
+        likedBooks: likedBooksResult.data || [],
         activeUsers: activeUsersResult.data || [],
       };
     },
