@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 interface BookCardProps {
   title: string;
   author: string | null;
@@ -23,12 +25,14 @@ export default function BookCard({
         {position}
       </div>
 
-      <div className="w-16 h-24 bg-neutral-100 rounded overflow-hidden flex-shrink-0">
+      <div className="w-16 h-24 bg-neutral-100 rounded overflow-hidden flex-shrink-0 relative">
         {coverUrl ? (
-          <img
+          <Image
             src={coverUrl}
             alt={`Cover of ${title}`}
-            className="w-full h-full object-cover"
+            fill
+            sizes="64px"
+            className="object-cover"
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-neutral-400 text-xs text-center p-1">

@@ -1,36 +1,16 @@
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import HeaderWrapper from "@/components/HeaderWrapper";
-
-export const dynamic = "force-dynamic";
+import { getLeaderboardData } from "@/lib/supabase/cached";
 
 export default async function LeaderboardPage() {
   const supabase = await createClient();
 
-  // Run all queries in parallel
-  const [fictionResult, nonfictionResult, activeUsersResult] = await Promise.all([
-    supabase
-      .from("user_books")
-      .select("open_library_key, title, author, cover_url, score")
-      .eq("category", "fiction")
-      .eq("tier", "liked")
-      .order("score", { ascending: false })
-      .limit(50), // Fetch more to allow for aggregation
-    supabase
-      .from("user_books")
-      .select("open_library_key, title, author, cover_url, score")
-      .eq("category", "nonfiction")
-      .eq("tier", "liked")
-      .order("score", { ascending: false })
-      .limit(50),
-    supabase
-      .from("user_books")
-      .select("user_id")
-      .limit(1000),
-  ]);
+  const { fiction: fictionData, nonfiction: nonfictionData, activeUsers: activeUsersData } = await getLeaderboardData();
 
   // Aggregate books by open_library_key (proper deduplication)
-  const aggregateBooks = (books: typeof fictionResult.data) => {
+  const aggregateBooks = (books: typeof fictionData) => {
     const map = new Map<string, {
       open_library_key: string;
       title: string;
@@ -62,12 +42,12 @@ export default async function LeaderboardPage() {
       .slice(0, 10);
   };
 
-  const topFictionAggregated = aggregateBooks(fictionResult.data);
-  const topNonfictionAggregated = aggregateBooks(nonfictionResult.data);
+  const topFictionAggregated = aggregateBooks(fictionData);
+  const topNonfictionAggregated = aggregateBooks(nonfictionData);
 
   // Count books per user
   const userCounts = new Map<string, number>();
-  for (const entry of activeUsersResult.data || []) {
+  for (const entry of activeUsersData || []) {
     userCounts.set(entry.user_id, (userCounts.get(entry.user_id) || 0) + 1);
   }
 
@@ -115,9 +95,9 @@ export default async function LeaderboardPage() {
                     <span className="w-6 text-right font-mono font-bold text-neutral-300">
                       {index + 1}
                     </span>
-                    <div className="w-10 h-[60px] bg-neutral-100 rounded overflow-hidden flex-shrink-0">
+                    <div className="w-10 h-[60px] bg-neutral-100 rounded overflow-hidden flex-shrink-0 relative">
                       {book.cover_url && (
-                        <img src={book.cover_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                        <Image src={book.cover_url} alt="" fill sizes="40px" className="object-cover" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -152,9 +132,9 @@ export default async function LeaderboardPage() {
                     <span className="w-6 text-right font-mono font-bold text-neutral-300">
                       {index + 1}
                     </span>
-                    <div className="w-10 h-[60px] bg-neutral-100 rounded overflow-hidden flex-shrink-0">
+                    <div className="w-10 h-[60px] bg-neutral-100 rounded overflow-hidden flex-shrink-0 relative">
                       {book.cover_url && (
-                        <img src={book.cover_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                        <Image src={book.cover_url} alt="" fill sizes="40px" className="object-cover" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -188,9 +168,9 @@ export default async function LeaderboardPage() {
                   className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border border-neutral-100 hover:border-neutral-300 transition-colors"
                 >
                   <span className="text-lg font-bold text-neutral-300">#{index + 1}</span>
-                  <div className="w-10 h-10 bg-neutral-200 rounded-full flex items-center justify-center font-bold text-neutral-500 overflow-hidden">
+                  <div className="w-10 h-10 bg-neutral-200 rounded-full flex items-center justify-center font-bold text-neutral-500 overflow-hidden relative">
                     {user.profile?.avatar_url ? (
-                      <img src={user.profile.avatar_url} alt="" className="w-full h-full object-cover" loading="lazy" />
+                      <Image src={user.profile.avatar_url} alt="" fill sizes="40px" className="object-cover" />
                     ) : (
                       (user.profile?.username || "?")[0].toUpperCase()
                     )}

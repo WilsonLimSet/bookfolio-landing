@@ -1,10 +1,9 @@
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import ListCard from "@/components/ListCard";
-
-export const dynamic = "force-dynamic";
 
 export default async function ListsPage() {
   const supabase = await createClient();
@@ -136,14 +135,15 @@ export default async function ListsPage() {
                   <Link
                     key={`${book.open_library_key}-${index}`}
                     href={`/book/${book.open_library_key.replace("/works/", "")}`}
-                    className="w-16 h-24 bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 shadow-sm hover:shadow-md transition-shadow"
+                    className="w-16 h-24 bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 shadow-sm hover:shadow-md transition-shadow relative"
                   >
                     {book.cover_url ? (
-                      <img
+                      <Image
                         src={book.cover_url}
                         alt={book.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
+                        fill
+                        sizes="64px"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-[8px] text-neutral-400 p-1 text-center">

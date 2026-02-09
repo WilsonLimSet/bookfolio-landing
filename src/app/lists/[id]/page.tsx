@@ -1,9 +1,8 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import HeaderWrapper from "@/components/HeaderWrapper";
-
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -75,12 +74,14 @@ export default async function ListPage({ params }: PageProps) {
                   href={`/profile/${creator?.username}`}
                   className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700"
                 >
-                  <div className="w-6 h-6 bg-neutral-200 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-neutral-500">
+                  <div className="w-6 h-6 bg-neutral-200 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-neutral-500 relative">
                     {creator?.avatar_url ? (
-                      <img
+                      <Image
                         src={creator.avatar_url}
                         alt={creator.username}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="24px"
+                        className="object-cover"
                       />
                     ) : (
                       (creator?.username || "?")[0].toUpperCase()
@@ -118,13 +119,14 @@ export default async function ListPage({ params }: PageProps) {
                   href={`/book/${item.open_library_key.replace("/works/", "").replace("/books/", "")}`}
                   className="group"
                 >
-                  <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden shadow-sm group-hover:shadow-lg transition-all group-hover:scale-105">
+                  <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden shadow-sm group-hover:shadow-lg transition-all group-hover:scale-105 relative">
                     {item.cover_url ? (
-                      <img
+                      <Image
                         src={item.cover_url}
                         alt={item.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
+                        fill
+                        sizes="(min-width: 640px) 25vw, 33vw"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400 p-2 text-center">

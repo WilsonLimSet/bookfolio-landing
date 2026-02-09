@@ -20,6 +20,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://covers.openlibrary.org" />
+        <link rel="dns-prefetch" href="https://covers.openlibrary.org" />
+        <link rel="preconnect" href={process.env.NEXT_PUBLIC_SUPABASE_URL!} />
+        <link rel="dns-prefetch" href={process.env.NEXT_PUBLIC_SUPABASE_URL!} />
+      </head>
       <body className={`${inter.className} antialiased`}>
         {children}
         <Analytics />

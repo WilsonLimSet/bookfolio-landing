@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { getEditions, BookEdition } from "@/lib/openLibrary";
+import { revalidateProfile } from "@/app/actions";
 
 interface BookInfo {
   key: string;
@@ -198,6 +200,10 @@ export default function RankingFlow({
       const editionList = await getEditions(book.key);
       if (cancelled) return;
       setEditions(editionList);
+      // Default to the most popular edition cover (first = highest popularity)
+      if (editionList.length > 0 && editionList[0].coverUrl) {
+        setSelectedCover(editionList[0].coverUrl);
+      }
       setLoadingEditions(false);
     }
     loadEditions();
@@ -322,45 +328,23 @@ export default function RankingFlow({
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const totalBooks = userBooks.length + 1;
-    const score = calculateScore(finalPosition!, totalBooks, tier!);
-
-    // Delete existing entry if re-ranking
-    if (existingEntry) {
-      await supabase.from("user_books").delete().eq("id", existingEntry.id);
-    }
-
-    // Shift positions of books at or after this position (batch update)
-    const booksToShift = userBooks.filter(b => b.rank_position >= finalPosition!);
-    if (booksToShift.length > 0) {
-      await Promise.all(
-        booksToShift.map(b =>
-          supabase
-            .from("user_books")
-            .update({ rank_position: b.rank_position + 1 })
-            .eq("id", b.id)
-        )
-      );
-    }
-
-    // Insert new book
-    await supabase.from("user_books").insert({
-      user_id: user.id,
-      title: book.title,
-      author: book.author,
-      cover_url: selectedCover,
-      open_library_key: book.key,
-      category,
-      tier,
-      rank_position: finalPosition,
-      score,
-      review_text: reviewText || null,
-      finished_at: finishedAt || null,
+    // Single RPC: shift positions, insert book, recalculate all scores, clean up want_to_read
+    const { data: result } = await supabase.rpc("rank_book", {
+      p_user_id: user.id,
+      p_title: book.title,
+      p_author: book.author,
+      p_cover_url: selectedCover,
+      p_open_library_key: book.key,
+      p_category: category,
+      p_tier: tier,
+      p_rank_position: finalPosition,
+      p_review_text: reviewText || null,
+      p_finished_at: finishedAt || null,
+      p_existing_entry_id: existingEntry?.id || null,
     });
 
-    // Parallel post-insert operations
+    // Activity log in parallel with cache revalidation
     await Promise.all([
-      recalculateScores(user.id, category!),
       supabase.from("activity").insert({
         user_id: user.id,
         action_type: "ranked",
@@ -368,63 +352,13 @@ export default function RankingFlow({
         book_author: book.author,
         book_cover_url: selectedCover,
         book_key: book.key,
-        book_score: score,
+        book_score: result?.score ?? 0,
         book_category: category,
       }),
-      supabase
-        .from("want_to_read")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("open_library_key", book.key),
+      revalidateProfile(user.id),
     ]);
 
     onComplete();
-  }
-
-  async function recalculateScores(userId: string, cat: string) {
-    const { data: books } = await supabase
-      .from("user_books")
-      .select("*")
-      .eq("user_id", userId)
-      .eq("category", cat)
-      .order("rank_position");
-
-    if (!books || books.length === 0) return;
-
-    // Batch all score updates
-    await Promise.all(
-      books.map(b => {
-        const newScore = calculateScore(b.rank_position, books.length, b.tier);
-        return supabase
-          .from("user_books")
-          .update({ score: newScore, updated_at: new Date().toISOString() })
-          .eq("id", b.id);
-      })
-    );
-  }
-
-  function calculateScore(position: number, total: number, bookTier: string): number {
-    const tierRanges = {
-      liked: { min: 6.7, max: 10 },
-      fine: { min: 3.4, max: 6.6 },
-      disliked: { min: 0, max: 3.3 },
-    };
-
-    const range = tierRanges[bookTier as Tier];
-
-    if (total === 1) {
-      return Math.round(((range.min + range.max) / 2) * 10) / 10;
-    }
-
-    const booksInTier = userBooks.filter(b => b.tier === bookTier).length + 1;
-    const positionInTier = userBooks
-      .filter(b => b.tier === bookTier && b.rank_position < position)
-      .length + 1;
-
-    const ratio = (booksInTier - positionInTier) / (booksInTier - 1 || 1);
-    const score = range.min + ratio * (range.max - range.min);
-
-    return Math.round(score * 10) / 10;
   }
 
   const currentCompareBook = tierBooks[compareIndex];
@@ -470,10 +404,12 @@ export default function RankingFlow({
                 transition={{ type: "spring", stiffness: 400, damping: 25 }}
               >
                 {selectedCover ? (
-                  <img
+                  <Image
                     src={selectedCover}
                     alt=""
-                    className="w-10 h-14 object-cover rounded shadow-md"
+                    width={40}
+                    height={56}
+                    className="object-cover rounded shadow-md"
                   />
                 ) : (
                   <div className="w-10 h-14 bg-neutral-200 rounded flex items-center justify-center">
@@ -528,51 +464,67 @@ export default function RankingFlow({
                     </div>
                   ) : (
                     <>
-                      <div className="grid grid-cols-4 gap-3 max-h-64 overflow-y-auto">
+                      <div className="grid grid-cols-4 gap-3 max-h-72 overflow-y-auto">
                         {book.coverUrl && (
                           <motion.button
                             onClick={() => setSelectedCover(book.coverUrl)}
-                            className={`aspect-[2/3] rounded-lg overflow-hidden border-2 ${
-                              selectedCover === book.coverUrl
-                                ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-2"
-                                : "border-transparent hover:border-neutral-300"
-                            }`}
+                            className="flex flex-col items-center gap-1"
                             whileHover={{ scale: 1.05 }}
                             whileTap={{ scale: 0.98 }}
                           >
-                            <img
-                              src={book.coverUrl}
-                              alt="Original cover"
-                              className="w-full h-full object-cover"
-                            />
+                            <div className={`aspect-[2/3] w-full rounded-lg overflow-hidden border-2 relative ${
+                              selectedCover === book.coverUrl
+                                ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-2"
+                                : "border-transparent hover:border-neutral-300"
+                            }`}>
+                              <Image
+                                src={book.coverUrl}
+                                alt="Original cover"
+                                fill
+                                sizes="80px"
+                                className="object-cover"
+                              />
+                            </div>
                           </motion.button>
                         )}
                         {editions
                           .filter((e) => e.coverUrl !== book.coverUrl)
-                          .map((edition, i) => (
-                            <motion.button
-                              key={edition.key}
-                              onClick={() => setSelectedCover(edition.coverUrl)}
-                              className={`aspect-[2/3] rounded-lg overflow-hidden border-2 ${
-                                selectedCover === edition.coverUrl
-                                  ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-2"
-                                  : "border-transparent hover:border-neutral-300"
-                              }`}
-                              initial={{ opacity: 0, y: 20 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ delay: i * 0.05 }}
-                              whileHover={{ scale: 1.05 }}
-                              whileTap={{ scale: 0.98 }}
-                            >
-                              {edition.coverUrl && (
-                                <img
-                                  src={edition.coverUrl}
-                                  alt={edition.title}
-                                  className="w-full h-full object-cover"
-                                />
-                              )}
-                            </motion.button>
-                          ))}
+                          .map((edition, i) => {
+                            const label = edition.publisher || edition.year?.match(/\d{4}/)?.[0] || "";
+                            return (
+                              <motion.button
+                                key={edition.key}
+                                onClick={() => setSelectedCover(edition.coverUrl)}
+                                className="flex flex-col items-center gap-1"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: i * 0.03 }}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.98 }}
+                              >
+                                <div className={`aspect-[2/3] w-full rounded-lg overflow-hidden border-2 relative ${
+                                  selectedCover === edition.coverUrl
+                                    ? "border-neutral-900 ring-2 ring-neutral-900 ring-offset-2"
+                                    : "border-transparent hover:border-neutral-300"
+                                }`}>
+                                  {edition.coverUrl && (
+                                    <Image
+                                      src={edition.coverUrl}
+                                      alt={edition.title}
+                                      fill
+                                      sizes="80px"
+                                      className="object-cover"
+                                    />
+                                  )}
+                                </div>
+                                {label && (
+                                  <p className="text-[10px] text-neutral-400 truncate w-full text-center leading-tight">
+                                    {label}
+                                  </p>
+                                )}
+                              </motion.button>
+                            );
+                          })}
                       </div>
                       {editions.length === 0 && !book.coverUrl && (
                         <p className="text-center text-neutral-500 text-sm py-4">
@@ -804,11 +756,11 @@ export default function RankingFlow({
                           disabled={isComparing}
                         >
                           <motion.div
-                            className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden mb-3 mx-auto max-w-[120px]"
+                            className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden mb-3 mx-auto max-w-[120px] relative"
                             layoutId="new-book-cover"
                           >
                             {selectedCover ? (
-                              <img src={selectedCover} alt="" className="w-full h-full object-cover" />
+                              <Image src={selectedCover} alt="" fill sizes="120px" className="object-cover" />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400 p-2 text-center">
                                 {book.title}
@@ -852,10 +804,10 @@ export default function RankingFlow({
                             disabled={isComparing}
                           >
                             <motion.div
-                              className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden mb-3 mx-auto max-w-[120px]"
+                              className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden mb-3 mx-auto max-w-[120px] relative"
                             >
                               {currentCompareBook.cover_url ? (
-                                <img src={currentCompareBook.cover_url} alt="" className="w-full h-full object-cover" />
+                                <Image src={currentCompareBook.cover_url} alt="" fill sizes="120px" className="object-cover" />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400 p-2 text-center">
                                   {currentCompareBook.title}

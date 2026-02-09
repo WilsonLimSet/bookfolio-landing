@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 
@@ -189,10 +190,10 @@ export default function CommentSection({
               <div key={comment.id} className="flex gap-3">
                 <Link
                   href={`/profile/${profile?.username}`}
-                  className="w-10 h-10 bg-neutral-200 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold text-neutral-500"
+                  className="w-10 h-10 bg-neutral-200 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold text-neutral-500 relative"
                 >
                   {profile?.avatar_url ? (
-                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                    <Image src={profile.avatar_url} alt="" fill sizes="40px" className="object-cover" />
                   ) : (
                     (profile?.username || "?")[0].toUpperCase()
                   )}

@@ -1,9 +1,8 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import HeaderWrapper from "@/components/HeaderWrapper";
-
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ username: string }>;
@@ -59,13 +58,14 @@ export default async function CurrentlyReadingPage({ params }: PageProps) {
                   href={`/book/${book.open_library_key.replace("/works/", "").replace("/books/", "")}`}
                   className="flex gap-4 p-4 bg-white rounded-xl border border-blue-100 hover:bg-blue-50 transition-colors"
                 >
-                  <div className="w-16 h-24 bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 ring-2 ring-blue-500 shadow-md">
+                  <div className="w-16 h-24 bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 ring-2 ring-blue-500 shadow-md relative">
                     {book.cover_url ? (
-                      <img
+                      <Image
                         src={book.cover_url}
                         alt={book.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
+                        fill
+                        sizes="64px"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400 p-2">

@@ -12,7 +12,7 @@ export default async function AuthButton() {
       .from("profiles")
       .select("username")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
 
     return (
       <div className="flex items-center gap-4">

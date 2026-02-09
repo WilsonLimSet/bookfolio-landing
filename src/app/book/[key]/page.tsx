@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import Image from "next/image";
+import type { Metadata } from "next";
 import { getBookDetails } from "@/lib/openLibrary";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -10,10 +11,34 @@ import AddToBookListButton from "@/components/AddToBookListButton";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import ExpandableText from "@/components/ExpandableText";
 
-export const dynamic = "force-dynamic";
-
 interface PageProps {
   params: Promise<{ key: string }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { key } = await params;
+  const decodedKey = decodeURIComponent(key);
+  if (decodedKey.endsWith("M") || decodedKey.includes("/books/")) {
+    return { title: "Book | Bookfolio" };
+  }
+  const workKey = decodedKey.startsWith("/works/") ? decodedKey : `/works/${decodedKey}`;
+  const book = await getBookDetails(workKey);
+  if (!book) {
+    return { title: "Book not found | Bookfolio" };
+  }
+  const title = `${book.title} by ${book.author || "Unknown"} | Bookfolio`;
+  const description = book.description
+    ? book.description.slice(0, 160)
+    : `Read reviews of ${book.title} on Bookfolio.`;
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      ...(book.coverUrl ? { images: [book.coverUrl] } : {}),
+    },
+  };
 }
 
 async function getWorkKeyFromEdition(editionKey: string): Promise<string | null> {
@@ -84,19 +109,19 @@ export default async function BookPage({ params }: PageProps) {
             .select("*")
             .eq("user_id", user.id)
             .eq("open_library_key", workKey)
-            .single(),
+            .maybeSingle(),
           supabase
             .from("want_to_read")
             .select("id")
             .eq("user_id", user.id)
             .eq("open_library_key", workKey)
-            .single(),
+            .maybeSingle(),
           supabase
             .from("currently_reading")
             .select("id")
             .eq("user_id", user.id)
             .eq("open_library_key", workKey)
-            .single(),
+            .maybeSingle(),
         ])
       : Promise.resolve([null, null, null]),
     supabase
@@ -158,7 +183,14 @@ export default async function BookPage({ params }: PageProps) {
           <div className="flex-1">
             <h1 className="text-3xl font-bold mb-2">{book.title}</h1>
             {book.author && (
-              <p className="text-xl text-neutral-600 mb-1">{book.author}</p>
+              <p className="text-xl text-neutral-600 mb-1">
+                {book.author}
+                {book.translator && (
+                  <span className="text-base text-neutral-400">
+                    , {book.translator} <span className="text-sm">(Translator)</span>
+                  </span>
+                )}
+              </p>
             )}
             {/* Metadata row */}
             <div className="flex flex-wrap items-center gap-3 text-sm text-neutral-500 mb-4">
@@ -315,13 +347,15 @@ export default async function BookPage({ params }: PageProps) {
                     <div className="flex items-center gap-3 mb-3">
                       <Link
                         href={`/profile/${reviewer?.username}`}
-                        className="w-8 h-8 bg-neutral-200 rounded-full flex items-center justify-center text-sm font-bold text-neutral-500 hover:bg-neutral-300 transition-colors overflow-hidden"
+                        className="w-8 h-8 bg-neutral-200 rounded-full flex items-center justify-center text-sm font-bold text-neutral-500 hover:bg-neutral-300 transition-colors overflow-hidden relative"
                       >
                         {reviewer?.avatar_url ? (
-                          <img
+                          <Image
                             src={reviewer.avatar_url}
                             alt={reviewer.username}
-                            className="w-full h-full object-cover"
+                            fill
+                            sizes="32px"
+                            className="object-cover"
                           />
                         ) : (
                           (reviewer?.username || "?")[0].toUpperCase()

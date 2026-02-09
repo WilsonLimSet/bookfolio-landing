@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 interface BookItem {
   open_library_key: string;
   title: string;
@@ -27,14 +29,15 @@ export default function ListCoverStrip({ books, maxCount = 8 }: ListCoverStripPr
       {displayBooks.map((book, index) => (
         <div
           key={book.open_library_key || index}
-          className="w-12 h-[72px] bg-neutral-100 rounded overflow-hidden flex-shrink-0"
+          className="w-12 h-[72px] bg-neutral-100 rounded overflow-hidden flex-shrink-0 relative"
         >
           {book.cover_url ? (
-            <img
+            <Image
               src={book.cover_url}
               alt={book.title}
-              className="w-full h-full object-cover"
-              loading="lazy"
+              fill
+              sizes="48px"
+              className="object-cover"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-[8px] text-neutral-400 p-1 text-center leading-tight">

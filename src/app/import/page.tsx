@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import { searchBooks } from "@/lib/openLibrary";
 import Link from "next/link";
@@ -344,7 +345,7 @@ export default function ImportPage() {
             href="/feed"
             className="inline-flex items-center gap-2 text-neutral-600 hover:text-neutral-900"
           >
-            <img src="/logo-512x512.png" alt="Bookfolio logo" className="w-7 h-7" />
+            <Image src="/logo-512x512.png" alt="Bookfolio logo" width={28} height={28} />
             <span className="font-semibold">Bookfolio</span>
           </Link>
           <Link
@@ -442,9 +443,9 @@ export default function ImportPage() {
                   key={index}
                   className="flex items-start gap-3 p-3 bg-white rounded-lg border border-neutral-100"
                 >
-                  <div className="w-10 h-14 bg-neutral-100 rounded overflow-hidden flex-shrink-0">
+                  <div className="w-10 h-14 bg-neutral-100 rounded overflow-hidden flex-shrink-0 relative">
                     {book.coverUrl && (
-                      <img src={book.coverUrl} alt="" className="w-full h-full object-cover" />
+                      <Image src={book.coverUrl} alt="" fill sizes="40px" className="object-cover" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -499,9 +500,9 @@ export default function ImportPage() {
                   <span className="w-6 text-center font-mono font-bold text-neutral-300">
                     {index + 1}
                   </span>
-                  <div className="w-8 h-12 bg-neutral-100 rounded overflow-hidden flex-shrink-0">
+                  <div className="w-8 h-12 bg-neutral-100 rounded overflow-hidden flex-shrink-0 relative">
                     {book.coverUrl && (
-                      <img src={book.coverUrl} alt="" className="w-full h-full object-cover" />
+                      <Image src={book.coverUrl} alt="" fill sizes="32px" className="object-cover" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

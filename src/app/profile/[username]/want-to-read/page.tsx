@@ -1,9 +1,8 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import HeaderWrapper from "@/components/HeaderWrapper";
-
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ username: string }>;
@@ -59,13 +58,14 @@ export default async function WantToReadPage({ params }: PageProps) {
                   href={`/book/${book.open_library_key.replace("/works/", "").replace("/books/", "")}`}
                   className="group"
                 >
-                  <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden shadow-sm group-hover:shadow-lg transition-all group-hover:scale-105">
+                  <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden shadow-sm group-hover:shadow-lg transition-all group-hover:scale-105 relative">
                     {book.cover_url ? (
-                      <img
+                      <Image
                         src={book.cover_url}
                         alt={book.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
+                        fill
+                        sizes="(min-width: 640px) 25vw, 33vw"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400 p-2 text-center">

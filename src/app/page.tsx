@@ -1,3 +1,4 @@
+import Image from "next/image";
 import AuthButton from "@/components/AuthButton";
 import HomeSearch from "@/components/HomeSearch";
 import Link from "next/link";
@@ -14,10 +15,11 @@ export default function Home() {
         <div className="max-w-md w-full text-center space-y-8">
           {/* Logo */}
           <div className="flex flex-col items-center gap-3">
-            <img
+            <Image
               src="/logo-512x512.png"
               alt="Bookfolio logo"
-              className="w-16 h-16"
+              width={64}
+              height={64}
             />
             <span className="text-3xl font-semibold tracking-tight">
               Bookfolio

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import LikeButton from "./LikeButton";
@@ -59,6 +60,9 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
   const [userLikes, setUserLikes] = useState<Set<string>>(new Set());
   const [unreadCount, setUnreadCount] = useState(0);
 
+  // Cache: track which tabs have been loaded to avoid re-fetching
+  const loadedTabs = useRef<Set<Tab>>(new Set());
+
   const loadFriendsActivity = useCallback(async () => {
     // Get ranked books from people you follow (with reviews)
     let query = supabase
@@ -81,8 +85,11 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
         .select("id, username, avatar_url")
         .in("id", userIds);
 
-      const profileMap = new Map(profilesData?.map(p => [p.id, p]) || []);
-      setProfiles(profileMap);
+      setProfiles(prev => {
+        const merged = new Map(prev);
+        profilesData?.forEach(p => merged.set(p.id, p));
+        return merged;
+      });
 
       // Get like counts and user's likes
       const reviewIds = reviews.map(r => r.id);
@@ -99,20 +106,26 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
       ]);
 
       // Count likes per review
-      const counts = new Map<string, number>();
-      likesResult.data?.forEach(like => {
-        counts.set(like.review_id, (counts.get(like.review_id) || 0) + 1);
+      setLikeCounts(prev => {
+        const merged = new Map(prev);
+        likesResult.data?.forEach(like => {
+          merged.set(like.review_id, (merged.get(like.review_id) || 0) + 1);
+        });
+        return merged;
       });
-      setLikeCounts(counts);
 
       // Track user's likes
-      const liked = new Set(userLikesResult.data?.map(l => l.review_id) || []);
-      setUserLikes(liked);
+      setUserLikes(prev => {
+        const merged = new Set(prev);
+        userLikesResult.data?.forEach(l => merged.add(l.review_id));
+        return merged;
+      });
 
       setFriendsActivity(reviews);
     } else {
       setFriendsActivity([]);
     }
+    loadedTabs.current.add("friends");
   }, [supabase, followingIds, currentUserId]);
 
   const loadYourActivity = useCallback(async () => {
@@ -131,14 +144,17 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
         .select("review_id")
         .in("review_id", reviewIds);
 
-      const counts = new Map<string, number>();
-      likesData?.forEach(like => {
-        counts.set(like.review_id, (counts.get(like.review_id) || 0) + 1);
+      setLikeCounts(prev => {
+        const merged = new Map(prev);
+        likesData?.forEach(like => {
+          merged.set(like.review_id, (merged.get(like.review_id) || 0) + 1);
+        });
+        return merged;
       });
-      setLikeCounts(counts);
 
       setYourActivity(reviews);
     }
+    loadedTabs.current.add("you");
   }, [supabase, currentUserId]);
 
   const loadNotifications = useCallback(async () => {
@@ -158,8 +174,11 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
           .select("id, username, avatar_url")
           .in("id", userIds);
 
-        const profileMap = new Map(profilesData?.map(p => [p.id, p]) || []);
-        setProfiles(profileMap);
+        setProfiles(prev => {
+          const merged = new Map(prev);
+          profilesData?.forEach(p => merged.set(p.id, p));
+          return merged;
+        });
       }
 
       setNotifications(notifs);
@@ -174,10 +193,16 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
           .eq("read", false);
       }
     }
+    loadedTabs.current.add("incoming");
   }, [supabase, currentUserId]);
 
-  // Load data based on active tab
+  // Load data based on active tab - skip if already cached
   useEffect(() => {
+    if (loadedTabs.current.has(activeTab)) {
+      setLoading(false);
+      return;
+    }
+
     async function loadTabData() {
       setLoading(true);
 
@@ -256,8 +281,26 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
 
       {/* Content */}
       {loading ? (
-        <div className="flex justify-center py-12">
-          <div className="w-8 h-8 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
+        <div className="space-y-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white rounded-xl border border-neutral-100 overflow-hidden">
+              <div className="flex items-center gap-3 p-4 pb-3">
+                <div className="w-10 h-10 bg-neutral-200 rounded-full animate-pulse" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-24 bg-neutral-200 rounded animate-pulse" />
+                  <div className="h-3 w-16 bg-neutral-100 rounded animate-pulse" />
+                </div>
+              </div>
+              <div className="flex gap-4 px-4 pb-4">
+                <div className="w-20 h-[120px] bg-neutral-100 rounded-lg animate-pulse" />
+                <div className="flex-1 space-y-2 py-1">
+                  <div className="h-4 w-3/4 bg-neutral-200 rounded animate-pulse" />
+                  <div className="h-3 w-1/2 bg-neutral-100 rounded animate-pulse" />
+                  <div className="h-6 w-8 bg-neutral-100 rounded animate-pulse mt-2" />
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
       ) : activeTab === "incoming" ? (
         // Notifications
@@ -324,10 +367,10 @@ function ReviewCard({
       <div className="flex items-center gap-3 p-4 pb-3">
         <Link
           href={`/profile/${profile?.username}`}
-          className="w-10 h-10 bg-neutral-200 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold text-neutral-500"
+          className="w-10 h-10 bg-neutral-200 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold text-neutral-500 relative"
         >
           {profile?.avatar_url ? (
-            <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+            <Image src={profile.avatar_url} alt="" fill sizes="40px" className="object-cover" />
           ) : (
             (profile?.username || "?")[0].toUpperCase()
           )}
@@ -344,10 +387,10 @@ function ReviewCard({
       <div className="flex gap-4 px-4">
         <Link
           href={`/book/${review.open_library_key?.replace("/works/", "").replace("/books/", "") || ""}`}
-          className="w-20 h-[120px] bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 shadow-md"
+          className="w-20 h-[120px] bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 shadow-md relative"
         >
           {review.cover_url && (
-            <img src={review.cover_url} alt="" className="w-full h-full object-cover" />
+            <Image src={review.cover_url} alt="" fill sizes="80px" className="object-cover" />
           )}
         </Link>
         <div className="flex-1 min-w-0 py-1">
@@ -460,9 +503,9 @@ function NotificationItem({
           : "bg-blue-50 border-blue-100 hover:bg-blue-100"
       }`}
     >
-      <div className="w-10 h-10 bg-neutral-200 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold text-neutral-500">
+      <div className="w-10 h-10 bg-neutral-200 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold text-neutral-500 relative">
         {profile?.avatar_url ? (
-          <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+          <Image src={profile.avatar_url} alt="" fill sizes="40px" className="object-cover" />
         ) : (
           (profile?.username || "?")[0].toUpperCase()
         )}

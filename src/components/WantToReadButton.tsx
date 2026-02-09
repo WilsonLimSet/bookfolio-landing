@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { revalidateProfile } from "@/app/actions";
 
 interface WantToReadButtonProps {
   book: {
@@ -59,6 +60,7 @@ export default function WantToReadButton({ book, isInList }: WantToReadButtonPro
           book_key: book.key,
         });
       }
+      await revalidateProfile(user.id);
       router.refresh();
     } catch {
       setInList(wasInList);

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { revalidateProfile } from "@/app/actions";
 
 interface CurrentlyReadingButtonProps {
   book: {
@@ -65,6 +66,7 @@ export default function CurrentlyReadingButton({ book, isReading }: CurrentlyRea
           .eq("user_id", user.id)
           .eq("open_library_key", book.key);
       }
+      await revalidateProfile(user.id);
       router.refresh();
     } catch {
       setReading(wasReading);

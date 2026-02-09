@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { searchBooks, Book } from "@/lib/openLibrary";
+import { revalidateProfile } from "@/app/actions";
 import Link from "next/link";
 import RankingFlow from "@/components/RankingFlow";
 import Header from "@/components/Header";
@@ -235,6 +237,7 @@ export default function EditProfilePage() {
     }
 
     setFavorites((prev) => [...prev, data].sort((a, b) => a.position - b.position));
+    revalidateProfile(userId);
   };
 
   const handleRankingComplete = async () => {
@@ -277,6 +280,7 @@ export default function EditProfilePage() {
     }
 
     setFavorites((prev) => prev.filter((f) => f.id !== favoriteId));
+    if (userId) revalidateProfile(userId);
   };
 
   const swapFavorites = async (position1: number, position2: number) => {
@@ -386,6 +390,7 @@ export default function EditProfilePage() {
       setAvatarUrl(newAvatarUrl);
       setAvatarFile(null);
       setAvatarPreview(null);
+      revalidateProfile(userId);
       alert("Profile saved!");
     } finally {
       setSaving(false);
@@ -424,13 +429,15 @@ export default function EditProfilePage() {
             <div className="flex items-center gap-4">
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="w-20 h-20 rounded-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity overflow-hidden"
+                className="w-20 h-20 rounded-full bg-gradient-to-br from-neutral-200 to-neutral-300 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity overflow-hidden relative"
               >
                 {avatarPreview || avatarUrl ? (
-                  <img
+                  <Image
                     src={avatarPreview || avatarUrl!}
                     alt="Avatar"
-                    className="w-full h-full object-cover"
+                    fill
+                    sizes="80px"
+                    className="object-cover"
                   />
                 ) : (
                   <span className="text-2xl font-bold text-neutral-500">
@@ -632,12 +639,14 @@ export default function EditProfilePage() {
 
                 return favorite ? (
                   <div key={position} className="relative group">
-                    <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden shadow-sm">
+                    <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden shadow-sm relative">
                       {favorite.cover_url ? (
-                        <img
+                        <Image
                           src={favorite.cover_url}
                           alt={favorite.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="80px"
+                          className="object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center p-2 text-center">
@@ -704,11 +713,11 @@ export default function EditProfilePage() {
                             }, position);
                           }
                         }}
-                        className="flex-shrink-0 w-12 aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden hover:ring-2 hover:ring-neutral-900 transition-all"
+                        className="flex-shrink-0 w-12 aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden hover:ring-2 hover:ring-neutral-900 transition-all relative"
                         title={book.title}
                       >
                         {book.cover_url ? (
-                          <img src={book.cover_url} alt={book.title} className="w-full h-full object-cover" />
+                          <Image src={book.cover_url} alt={book.title} fill sizes="48px" className="object-cover" />
                         ) : (
                           <div className="w-full h-full flex items-center justify-center text-[8px] text-neutral-400 p-1">
                             {book.title}
@@ -752,12 +761,14 @@ export default function EditProfilePage() {
                             alreadyFavorite ? "opacity-50 cursor-not-allowed" : ""
                           }`}
                         >
-                          <div className="w-10 h-[60px] bg-neutral-100 rounded overflow-hidden flex-shrink-0">
+                          <div className="w-10 h-[60px] bg-neutral-100 rounded overflow-hidden flex-shrink-0 relative">
                             {book.coverUrl && (
-                              <img
+                              <Image
                                 src={book.coverUrl}
                                 alt=""
-                                className="w-full h-full object-cover"
+                                fill
+                                sizes="40px"
+                                className="object-cover"
                               />
                             )}
                           </div>

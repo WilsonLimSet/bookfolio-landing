@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { getEditions, type Book, type BookEdition } from "@/lib/openLibrary";
 
 interface EditionPickerProps {
@@ -83,12 +84,14 @@ export default function EditionPicker({
                   onClick={() => onSelect(edition)}
                   className="group"
                 >
-                  <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden ring-2 ring-transparent group-hover:ring-neutral-900 transition-all group-hover:scale-105">
+                  <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden ring-2 ring-transparent group-hover:ring-neutral-900 transition-all group-hover:scale-105 relative">
                     {edition.coverUrl ? (
-                      <img
+                      <Image
                         src={edition.coverUrl}
                         alt={edition.title}
-                        className="w-full h-full object-cover"
+                        fill
+                        sizes="80px"
+                        className="object-cover"
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-neutral-400 text-xs p-2 text-center">

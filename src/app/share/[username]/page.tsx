@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
@@ -61,12 +62,14 @@ export default async function SharePage({ params }: PageProps) {
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           {/* Header */}
           <div className="p-6 text-center border-b border-neutral-100">
-            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-neutral-200 to-neutral-300 overflow-hidden">
+            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-neutral-200 to-neutral-300 overflow-hidden relative">
               {profile.avatar_url ? (
-                <img
+                <Image
                   src={profile.avatar_url}
                   alt={profile.username}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="80px"
+                  className="object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-3xl font-bold text-neutral-500">
@@ -92,12 +95,14 @@ export default async function SharePage({ params }: PageProps) {
               <div className="grid grid-cols-4 gap-3">
                 {favorites.map((book) => (
                   <div key={book.id} className="text-center">
-                    <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden shadow-md">
+                    <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden shadow-md relative">
                       {book.cover_url ? (
-                        <img
+                        <Image
                           src={book.cover_url}
                           alt={book.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="25vw"
+                          className="object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-[8px] text-neutral-400 p-1">
@@ -141,10 +146,13 @@ export default async function SharePage({ params }: PageProps) {
         {/* Share image preview */}
         <div className="mt-8 text-center">
           <p className="text-sm text-neutral-500 mb-3">Share this image:</p>
-          <img
+          <Image
             src={`${siteUrl}/api/og/${username}`}
             alt="Share card"
+            width={600}
+            height={315}
             className="rounded-xl shadow-lg mx-auto"
+            unoptimized
           />
           <p className="text-xs text-neutral-400 mt-2">
             Right-click to save image

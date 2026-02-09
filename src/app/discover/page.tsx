@@ -4,8 +4,6 @@ import Link from "next/link";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import UserSearch from "@/components/UserSearch";
 
-export const dynamic = "force-dynamic";
-
 interface SuggestedUser {
   id: string;
   username: string;

@@ -1,11 +1,10 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import LikeButton from "@/components/LikeButton";
 import CommentSection from "@/components/CommentSection";
-
-export const dynamic = "force-dynamic";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -46,7 +45,7 @@ export default async function ReviewPage({ params }: PageProps) {
           .select("id")
           .eq("review_id", id)
           .eq("user_id", user.id)
-          .single()
+          .maybeSingle()
       : Promise.resolve({ data: null }),
   ]);
 
@@ -75,10 +74,10 @@ export default async function ReviewPage({ params }: PageProps) {
             <div className="flex items-center gap-3 p-4 border-b border-neutral-100">
               <Link
                 href={`/profile/${profile?.username}`}
-                className="w-12 h-12 bg-neutral-200 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-lg font-bold text-neutral-500"
+                className="w-12 h-12 bg-neutral-200 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-lg font-bold text-neutral-500 relative"
               >
                 {profile?.avatar_url ? (
-                  <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                  <Image src={profile.avatar_url} alt="" fill sizes="48px" className="object-cover" />
                 ) : (
                   (profile?.username || "?")[0].toUpperCase()
                 )}
@@ -102,10 +101,10 @@ export default async function ReviewPage({ params }: PageProps) {
             <div className="flex gap-4 p-4">
               <Link
                 href={`/book/${review.open_library_key?.replace("/works/", "").replace("/books/", "") || ""}`}
-                className="w-24 h-36 bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 shadow-md"
+                className="w-24 h-36 bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 shadow-md relative"
               >
                 {review.cover_url && (
-                  <img src={review.cover_url} alt="" className="w-full h-full object-cover" />
+                  <Image src={review.cover_url} alt="" fill sizes="96px" className="object-cover" />
                 )}
               </Link>
               <div className="flex-1 min-w-0">

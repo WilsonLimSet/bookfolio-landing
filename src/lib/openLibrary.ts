@@ -6,7 +6,6 @@ export interface BookSearchResult {
   cover_edition_key?: string;
   first_publish_year?: number;
   edition_count?: number;
-  alternative_title?: string[];
 }
 
 export interface Book {
@@ -16,7 +15,6 @@ export interface Book {
   coverUrl: string | null;
   year: number | null;
   editions: number;
-  alternativeTitles?: string[];
 }
 
 export interface Edition {
@@ -27,6 +25,12 @@ export interface Edition {
   publish_date?: string;
   isbn_13?: string[];
   isbn_10?: string[];
+  languages?: { key: string }[];
+  contributors?: { role: string; name: string }[];
+  contributions?: string[];
+  by_statement?: string;
+  description?: string | { value: string };
+  number_of_pages?: number;
 }
 
 export interface BookEdition {
@@ -35,13 +39,58 @@ export interface BookEdition {
   coverUrl: string | null;
   publisher: string | null;
   year: string | null;
+  translator: string | null;
+}
+
+function extractTranslator(edition: Edition): string | null {
+  // 1. Structured contributors: [{role: "Translator", name: "Matthew Ward"}]
+  const structured = edition.contributors?.find(
+    (c) => c.role?.toLowerCase() === "translator"
+  );
+  if (structured) return structured.name;
+
+  // 2. Free-text contributions: ["Matthew Ward (Translator)"] or ["Ward, Matthew, translator"]
+  if (edition.contributions) {
+    for (const c of edition.contributions) {
+      const match = c.match(/^(.+?)\s*\(?\btranslat/i);
+      if (match) return match[1].replace(/,\s*$/, "").trim();
+    }
+  }
+
+  // 3. by_statement: "translated from the French by Stuart Gilbert"
+  if (edition.by_statement) {
+    const match = edition.by_statement.match(
+      /translat(?:ed|ion)\s+(?:from\s+\w+\s+)?by\s+(.+?)(?:[;,.]|$)/i
+    );
+    if (match) return match[1].trim();
+  }
+
+  return null;
+}
+
+function editionPopularity(edition: Edition): number {
+  let score = 0;
+  // English editions are most relevant for our users
+  if (
+    edition.languages?.some((l) => l.key === "/languages/eng") ||
+    !edition.languages // no language = usually English
+  ) {
+    score += 10;
+  }
+  // Editions with ISBNs are widely distributed (more popular)
+  if (edition.isbn_13?.length || edition.isbn_10?.length) score += 5;
+  // Editions with covers are better
+  if (edition.covers && edition.covers.length > 0) score += 3;
+  // Editions with publishers are more established
+  if (edition.publishers?.length) score += 1;
+  return score;
 }
 
 export async function getEditions(workKey: string): Promise<BookEdition[]> {
   try {
-    // workKey is like "/works/OL123W"
+    // Fetch more editions to find diverse covers (books like The Stranger have 400+)
     const response = await fetch(
-      `https://openlibrary.org${workKey}/editions.json?limit=50`
+      `https://openlibrary.org${workKey}/editions.json?limit=200`
     );
 
     if (!response.ok) {
@@ -52,16 +101,32 @@ export async function getEditions(workKey: string): Promise<BookEdition[]> {
     const data = await response.json();
     const editions: Edition[] = data.entries || [];
 
-    return editions
-      .filter((edition) => edition.covers && edition.covers.length > 0)
-      .map((edition) => ({
+    // Sort by popularity: English editions with ISBNs first
+    editions.sort((a, b) => editionPopularity(b) - editionPopularity(a));
+
+    // Deduplicate by cover ID so users see unique covers only
+    const seenCoverIds = new Set<number>();
+    const unique: BookEdition[] = [];
+
+    for (const edition of editions) {
+      if (!edition.covers || edition.covers.length === 0) continue;
+      const coverId = edition.covers[0];
+      if (seenCoverIds.has(coverId)) continue;
+      seenCoverIds.add(coverId);
+
+      unique.push({
         key: edition.key,
         title: edition.title,
-        coverUrl: `https://covers.openlibrary.org/b/id/${edition.covers![0]}-M.jpg`,
+        coverUrl: `https://covers.openlibrary.org/b/id/${coverId}-M.jpg`,
         publisher: edition.publishers?.[0] || null,
         year: edition.publish_date || null,
-      }))
-      .slice(0, 24); // Show more editions with covers
+        translator: extractTranslator(edition),
+      });
+
+      if (unique.length >= 24) break;
+    }
+
+    return unique;
   } catch (error) {
     console.error("Failed to fetch editions:", error);
     return [];
@@ -72,6 +137,7 @@ export interface BookDetails {
   key: string;
   title: string;
   author: string | null;
+  translator: string | null;
   coverUrl: string | null;
   description: string | null;
   firstPublishYear: number | null;
@@ -104,22 +170,32 @@ export async function getBookDetails(workKey: string): Promise<BookDetails | nul
     if (!workRes.ok) return null;
     const work = await workRes.json();
 
-    // Parallel fetch: author and first edition (for fallback description)
+    // Parallel fetch: author and editions (for translator, cover, fallback description)
     const authorKey = work.authors?.[0]?.author?.key;
     const [authorResult, editionsResult] = await Promise.all([
       authorKey
         ? fetch(`https://openlibrary.org${authorKey}.json`, { next: { revalidate: 86400 } })
             .then(r => r.ok ? r.json() : null).catch(() => null)
         : Promise.resolve(null),
-      // Fetch first edition for fallback description
-      fetch(`https://openlibrary.org${workKey}/editions.json?limit=1`, { next: { revalidate: 86400 } })
+      // Fetch editions sorted by popularity to find best English edition
+      fetch(`https://openlibrary.org${workKey}/editions.json?limit=50`, { next: { revalidate: 86400 } })
         .then(r => r.ok ? r.json() : null).catch(() => null),
     ]);
 
     const authorName = authorResult?.name || null;
 
-    // Get cover
-    const coverId = work.covers?.[0];
+    // Find best English edition (for cover + translator)
+    const allEditions: Edition[] = editionsResult?.entries || [];
+    allEditions.sort((a: Edition, b: Edition) => editionPopularity(b) - editionPopularity(a));
+    const bestEdition = allEditions[0] || null;
+
+    // Get translator from best English edition
+    const translator = bestEdition ? extractTranslator(bestEdition) : null;
+
+    // Get cover — prefer best English edition's cover, fall back to work cover
+    const bestEditionCoverId = bestEdition?.covers?.[0];
+    const workCoverId = work.covers?.[0];
+    const coverId = bestEditionCoverId || workCoverId;
     const coverUrl = coverId
       ? `https://covers.openlibrary.org/b/id/${coverId}-L.jpg`
       : null;
@@ -134,14 +210,11 @@ export async function getBookDetails(workKey: string): Promise<BookDetails | nul
         : work.description.value || null;
     }
 
-    // 2. Fallback to first edition description
-    if (!description && editionsResult?.entries?.[0]) {
-      const firstEdition = editionsResult.entries[0];
-      if (firstEdition.description) {
-        description = typeof firstEdition.description === 'string'
-          ? firstEdition.description
-          : firstEdition.description.value || null;
-      }
+    // 2. Fallback to best edition description
+    if (!description && bestEdition?.description) {
+      description = typeof bestEdition.description === 'string'
+        ? bestEdition.description
+        : bestEdition.description.value || null;
     }
 
     // 3. Fallback to excerpts or first_sentence
@@ -157,9 +230,11 @@ export async function getBookDetails(workKey: string): Promise<BookDetails | nul
       }
     }
 
-    // 4. Fallback to Google Books API
-    if (!description) {
-      description = await getGoogleBooksDescription(work.title, authorName);
+    // 4. Fallback to Google Books API (also for non-English descriptions)
+    const looksNonEnglish = description && /[àáâãäéèêëíîïóôõöúùûüçñæœ]/i.test(description);
+    if (!description || looksNonEnglish) {
+      const googleDesc = await getGoogleBooksDescription(work.title, authorName);
+      if (googleDesc) description = googleDesc;
     }
 
     // Get publish year - try multiple sources
@@ -178,16 +253,16 @@ export async function getBookDetails(workKey: string): Promise<BookDetails | nul
         }
       }
     }
-    // Try first edition publish date
-    if (!firstPublishYear && editionsResult?.entries?.[0]?.publish_date) {
-      const match = editionsResult.entries[0].publish_date.match(/\d{4}/);
+    // Try best edition publish date
+    if (!firstPublishYear && bestEdition?.publish_date) {
+      const match = bestEdition.publish_date.match(/\d{4}/);
       if (match) {
         firstPublishYear = parseInt(match[0]);
       }
     }
 
-    // Get page count from first edition
-    const pageCount = editionsResult?.entries?.[0]?.number_of_pages || null;
+    // Get page count from best edition
+    const pageCount = bestEdition?.number_of_pages || null;
 
     // Filter out NYT subjects and clean up subject names
     const cleanSubjects = (work.subjects || [])
@@ -198,6 +273,7 @@ export async function getBookDetails(workKey: string): Promise<BookDetails | nul
       key: workKey,
       title: work.title,
       author: authorName,
+      translator,
       coverUrl,
       description,
       firstPublishYear,
@@ -214,10 +290,11 @@ export async function searchBooks(query: string): Promise<Book[]> {
   if (!query.trim()) return [];
 
   try {
-    // Search using title field which also matches alternative_title (translations)
-    // This helps find books like "The Stranger" which is stored as "L'Étranger"
+    // Use general `q=` search — it matches across title, alternative_title, author, etc.
+    // This finds translated works like "The Stranger" (stored as "L'étranger")
+    // and "Three Body Problem" (stored as "三体")
     const response = await fetch(
-      `https://openlibrary.org/search.json?title=${encodeURIComponent(query)}&limit=12&fields=key,title,author_name,cover_i,cover_edition_key,first_publish_year,edition_count,alternative_title`
+      `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=20&fields=key,title,author_name,cover_i,cover_edition_key,first_publish_year,edition_count`
     );
 
     if (!response.ok) {
@@ -228,36 +305,45 @@ export async function searchBooks(query: string): Promise<Book[]> {
     const data = await response.json();
     const results: BookSearchResult[] = data.docs || [];
 
-    // If few results with title search, also do general search
-    if (results.filter(b => b.cover_i).length < 4) {
-      const generalResponse = await fetch(
-        `https://openlibrary.org/search.json?q=${encodeURIComponent(query)}&limit=12&fields=key,title,author_name,cover_i,cover_edition_key,first_publish_year,edition_count`
-      );
-      if (generalResponse.ok) {
-        const generalData = await generalResponse.json();
-        const generalResults: BookSearchResult[] = generalData.docs || [];
-        // Merge results, avoiding duplicates
-        const existingKeys = new Set(results.map(r => r.key));
-        for (const book of generalResults) {
-          if (!existingKeys.has(book.key)) {
-            results.push(book);
-          }
-        }
-      }
-    }
+    const queryLower = query.toLowerCase();
+    const queryWords = queryLower.split(/\s+/);
 
     return results
       .filter((book) => book.cover_i) // Only show books with covers
+      .sort((a, b) => {
+        // Boost results whose title closely matches the query
+        const aTitle = a.title.toLowerCase();
+        const bTitle = b.title.toLowerCase();
+        const aMatch = queryWords.every((w) => aTitle.includes(w)) ? 1 : 0;
+        const bMatch = queryWords.every((w) => bTitle.includes(w)) ? 1 : 0;
+        if (aMatch !== bMatch) return bMatch - aMatch;
+        // Then sort by edition count (more editions = more popular)
+        return (b.edition_count || 0) - (a.edition_count || 0);
+      })
       .slice(0, 8)
-      .map((book) => ({
-        key: book.key,
-        title: book.title,
-        author: book.author_name?.[0] || null,
-        coverUrl: `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`,
-        year: book.first_publish_year || null,
-        editions: book.edition_count || 1,
-        alternativeTitles: book.alternative_title?.slice(0, 3),
-      }));
+      .map((book) => {
+        // For translated works, show the English title if the original is non-Latin
+        // e.g. "三体" → "The Three-Body Problem", "L'étranger" → "The Stranger"
+        let displayTitle = book.title;
+        const hasNonLatin = /[^\u0000-\u024F\s]/.test(book.title);
+        const hasAccents = /[àáâãäéèêëíîïóôõöúùûüçñæœ]/i.test(book.title);
+
+        if (hasNonLatin || (hasAccents && !book.title.toLowerCase().includes(queryLower))) {
+          // Try to build a better title from the query + author context
+          // The query itself is usually the English title the user wants
+          const capitalizedQuery = query.replace(/\b\w/g, (c) => c.toUpperCase());
+          displayTitle = capitalizedQuery;
+        }
+
+        return {
+          key: book.key,
+          title: displayTitle,
+          author: book.author_name?.[0] || null,
+          coverUrl: `https://covers.openlibrary.org/b/id/${book.cover_i}-M.jpg`,
+          year: book.first_publish_year || null,
+          editions: book.edition_count || 1,
+        };
+      });
   } catch (error) {
     console.error("Failed to search books:", error);
     return [];

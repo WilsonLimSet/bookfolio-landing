@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { revalidateProfile } from "@/app/actions";
 import Header from "@/components/Header";
 import Link from "next/link";
 import type { User } from "@supabase/supabase-js";
@@ -94,6 +96,7 @@ export default function EditListPage() {
         })
         .eq("id", listId);
 
+      if (user) await revalidateProfile(user.id);
       router.push(`/lists/${listId}`);
     } catch (error) {
       console.error("Error saving list:", error);
@@ -111,6 +114,7 @@ export default function EditListPage() {
     setDeleting(true);
 
     try {
+      if (user) await revalidateProfile(user.id);
       await supabase.from("book_lists").delete().eq("id", listId);
       router.push("/lists");
     } catch (error) {
@@ -306,12 +310,14 @@ export default function EditListPage() {
                     </span>
 
                     {/* Cover */}
-                    <div className="w-10 h-[60px] bg-neutral-100 rounded overflow-hidden flex-shrink-0">
+                    <div className="w-10 h-[60px] bg-neutral-100 rounded overflow-hidden flex-shrink-0 relative">
                       {item.cover_url ? (
-                        <img
+                        <Image
                           src={item.cover_url}
                           alt={item.title}
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="40px"
+                          className="object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-[8px] text-neutral-400">

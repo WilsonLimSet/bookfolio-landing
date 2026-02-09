@@ -4,8 +4,6 @@ import Link from "next/link";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import ListCard from "@/components/ListCard";
 
-export const dynamic = "force-dynamic";
-
 interface PageProps {
   params: Promise<{ username: string }>;
 }

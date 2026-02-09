@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import ListCoverStrip from "./ListCoverStrip";
 
@@ -36,12 +37,14 @@ export default function ListCard({ list, creator, books }: ListCardProps) {
         {creator && (
           <div className="flex items-center gap-2 flex-shrink-0 ml-3">
             <span className="text-sm text-neutral-500">{creator.username}</span>
-            <div className="w-7 h-7 bg-neutral-200 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-neutral-500">
+            <div className="w-7 h-7 bg-neutral-200 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-neutral-500 relative">
               {creator.avatar_url ? (
-                <img
+                <Image
                   src={creator.avatar_url}
                   alt={creator.username}
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="28px"
+                  className="object-cover"
                 />
               ) : (
                 creator.username[0].toUpperCase()

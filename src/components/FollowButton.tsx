@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
+import { revalidateProfile } from "@/app/actions";
 
 interface FollowButtonProps {
   targetUserId: string;
@@ -60,6 +61,11 @@ export default function FollowButton({
 
         onFollowChange?.(true);
       }
+      // Invalidate cached profile stats for both users
+      await Promise.all([
+        revalidateProfile(targetUserId),
+        revalidateProfile(currentUserId),
+      ]);
       router.refresh();
     } catch {
       // Revert on error

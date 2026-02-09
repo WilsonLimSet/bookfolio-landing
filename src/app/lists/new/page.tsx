@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { revalidateProfile } from "@/app/actions";
 import Header from "@/components/Header";
 import ListForm from "@/components/ListForm";
 import Link from "next/link";
@@ -56,6 +57,10 @@ export default function NewListPage() {
         .single();
 
       if (error) throw error;
+
+      if (data.is_public) {
+        await revalidateProfile(authUser.id);
+      }
 
       // Redirect to the edit page to add books
       router.push(`/lists/${newList.id}/edit`);

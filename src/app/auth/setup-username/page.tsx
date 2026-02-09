@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { setupUsername } from "./actions";
 import Link from "next/link";
 
@@ -26,10 +27,11 @@ export default function SetupUsernamePage() {
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
           <Link href="/" className="inline-flex flex-col items-center gap-2">
-            <img
+            <Image
               src="/logo-512x512.png"
               alt="Bookfolio logo"
-              className="w-12 h-12"
+              width={48}
+              height={48}
             />
             <span className="text-2xl font-semibold tracking-tight">
               Bookfolio

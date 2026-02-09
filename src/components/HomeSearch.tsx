@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { searchBooks, type Book } from "@/lib/openLibrary";
@@ -160,14 +161,16 @@ export default function HomeSearch() {
                     whileHover={{ backgroundColor: "#f5f5f5" }}
                   >
                     <motion.div
-                      className="w-10 h-14 bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 shadow-sm"
+                      className="w-10 h-14 bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 shadow-sm relative"
                       whileHover={{ scale: 1.05 }}
                     >
                       {book.coverUrl ? (
-                        <img
+                        <Image
                           src={book.coverUrl}
                           alt=""
-                          className="w-full h-full object-cover"
+                          fill
+                          sizes="40px"
+                          className="object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-neutral-400 text-xs">
@@ -183,11 +186,6 @@ export default function HomeSearch() {
                         {book.author}
                         {book.year && <span className="text-neutral-400"> ({book.year})</span>}
                       </p>
-                      {book.alternativeTitles && book.alternativeTitles.length > 0 && (
-                        <p className="text-xs text-neutral-400 truncate">
-                          aka {book.alternativeTitles[0]}
-                        </p>
-                      )}
                     </div>
                   </motion.button>
                 ))

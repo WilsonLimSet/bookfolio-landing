@@ -11,7 +11,7 @@ export default async function HeaderWrapper() {
       .from("profiles")
       .select("username")
       .eq("id", user.id)
-      .single();
+      .maybeSingle();
     username = profile?.username || null;
   }
 

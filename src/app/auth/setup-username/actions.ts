@@ -25,7 +25,7 @@ export async function setupUsername(
     .from("profiles")
     .select("username")
     .eq("username", username)
-    .single();
+    .maybeSingle();
 
   if (existingUser) {
     return { error: "Username is already taken" };

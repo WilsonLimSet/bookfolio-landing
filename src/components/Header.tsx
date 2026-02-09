@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -109,7 +110,7 @@ export default function Header({ user, username }: HeaderProps) {
             }}
             className="flex items-center gap-2 text-neutral-900 hover:text-neutral-600 transition-colors"
           >
-            <img src="/logo-512x512.png" alt="Bookfolio" className="w-7 h-7" />
+            <Image src="/logo-512x512.png" alt="Bookfolio" width={28} height={28} />
             <span className="font-semibold hidden sm:inline">Bookfolio</span>
           </Link>
 
@@ -184,9 +185,9 @@ export default function Header({ user, username }: HeaderProps) {
                                 }}
                                 className="flex items-center gap-3 p-3 hover:bg-neutral-50 transition-colors"
                               >
-                                <div className="w-8 h-8 bg-neutral-200 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold text-neutral-500">
+                                <div className="w-8 h-8 bg-neutral-200 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-sm font-bold text-neutral-500 relative">
                                   {profile.avatar_url ? (
-                                    <img src={profile.avatar_url} alt="" className="w-full h-full object-cover" />
+                                    <Image src={profile.avatar_url} alt="" fill sizes="32px" className="object-cover" />
                                   ) : (
                                     profile.username[0].toUpperCase()
                                   )}
@@ -215,9 +216,9 @@ export default function Header({ user, username }: HeaderProps) {
                                 }}
                                 className="flex items-center gap-3 p-3 hover:bg-neutral-50 transition-colors"
                               >
-                                <div className="w-8 h-12 bg-neutral-100 rounded overflow-hidden flex-shrink-0">
+                                <div className="w-8 h-12 bg-neutral-100 rounded overflow-hidden flex-shrink-0 relative">
                                   {book.coverUrl && (
-                                    <img src={book.coverUrl} alt="" className="w-full h-full object-cover" />
+                                    <Image src={book.coverUrl} alt="" fill sizes="32px" className="object-cover" />
                                   )}
                                 </div>
                                 <div className="flex-1 min-w-0">

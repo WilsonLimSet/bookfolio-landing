@@ -39,7 +39,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
     .from("profiles")
     .select("username")
     .eq("username", username)
-    .single();
+    .maybeSingle();
 
   if (existingUser) {
     return { error: "Username is already taken" };
