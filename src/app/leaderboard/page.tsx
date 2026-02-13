@@ -45,7 +45,7 @@ export default async function LeaderboardPage() {
   const allBooks = Array.from(bookMap.values()).map(b => ({
     ...b,
     avgScore: (b.scores.reduce((a, c) => a + c, 0) / b.scores.length).toFixed(1),
-    category: b.fictionVotes > b.nonfictionVotes ? "fiction" as const : "nonfiction" as const,
+    category: b.fictionVotes >= b.nonfictionVotes ? "fiction" as const : "nonfiction" as const,
   }));
 
   const topFictionAggregated = allBooks
