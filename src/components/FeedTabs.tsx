@@ -64,18 +64,18 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
   const loadedTabs = useRef<Set<Tab>>(new Set());
 
   const loadFriendsActivity = useCallback(async () => {
-    // Get ranked books from people you follow (with reviews)
-    let query = supabase
-      .from("user_books")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(50);
-
-    if (followingIds.length > 0) {
-      query = query.in("user_id", followingIds);
+    if (followingIds.length === 0) {
+      setFriendsActivity([]);
+      loadedTabs.current.add("friends");
+      return;
     }
 
-    const { data: reviews } = await query;
+    const { data: reviews } = await supabase
+      .from("user_books")
+      .select("id, user_id, title, author, cover_url, open_library_key, score, tier, category, review_text, finished_at, created_at")
+      .in("user_id", followingIds)
+      .order("created_at", { ascending: false })
+      .limit(50);
 
     if (reviews && reviews.length > 0) {
       // Get profiles
@@ -131,7 +131,7 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
   const loadYourActivity = useCallback(async () => {
     const { data: reviews } = await supabase
       .from("user_books")
-      .select("*")
+      .select("id, user_id, title, author, cover_url, open_library_key, score, tier, category, review_text, finished_at, created_at")
       .eq("user_id", currentUserId)
       .order("created_at", { ascending: false })
       .limit(50);
@@ -160,7 +160,7 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
   const loadNotifications = useCallback(async () => {
     const { data: notifs } = await supabase
       .from("notifications")
-      .select("*")
+      .select("id, type, from_user_id, book_title, book_key, review_id, read, created_at")
       .eq("user_id", currentUserId)
       .order("created_at", { ascending: false })
       .limit(50);
