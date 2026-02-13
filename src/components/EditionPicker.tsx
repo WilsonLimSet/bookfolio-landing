@@ -11,25 +11,17 @@ interface EditionPickerProps {
   onUseDefault: () => void;
 }
 
-function EditionCover({ edition }: { edition: BookEdition }) {
-  const [errored, setErrored] = useState(false);
-
+function EditionCover({ edition, onBroken }: { edition: BookEdition; onBroken: () => void }) {
   return (
     <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden ring-2 ring-transparent group-hover:ring-neutral-900 transition-all group-hover:scale-105 relative">
-      {edition.coverUrl && !errored ? (
-        <Image
-          src={edition.coverUrl}
-          alt={edition.title}
-          fill
-          sizes="80px"
-          className="object-cover"
-          onError={() => setErrored(true)}
-        />
-      ) : (
-        <div className="w-full h-full flex items-center justify-center text-neutral-400 text-xs p-2 text-center">
-          No cover
-        </div>
-      )}
+      <Image
+        src={edition.coverUrl!}
+        alt={edition.title}
+        fill
+        sizes="80px"
+        className="object-cover"
+        onError={onBroken}
+      />
     </div>
   );
 }
@@ -42,6 +34,7 @@ export default function EditionPicker({
 }: EditionPickerProps) {
   const [editions, setEditions] = useState<BookEdition[]>([]);
   const [loading, setLoading] = useState(true);
+  const [brokenKeys, setBrokenKeys] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     let cancelled = false;
@@ -57,8 +50,7 @@ export default function EditionPicker({
     return () => { cancelled = true; };
   }, [book.key]);
 
-  // Filter out editions with broken covers after load
-  const visibleEditions = editions.filter((e) => e.coverUrl);
+  const visibleEditions = editions.filter((e) => e.coverUrl && !brokenKeys.has(e.key));
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -114,7 +106,7 @@ export default function EditionPicker({
                   onClick={() => onSelect(edition)}
                   className="group"
                 >
-                  <EditionCover edition={edition} />
+                  <EditionCover edition={edition} onBroken={() => setBrokenKeys(prev => new Set(prev).add(edition.key))} />
                   <p className="text-xs text-neutral-500 mt-1.5 truncate text-center">
                     {edition.year || edition.publisher || "—"}
                   </p>
