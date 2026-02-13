@@ -11,6 +11,29 @@ interface EditionPickerProps {
   onUseDefault: () => void;
 }
 
+function EditionCover({ edition }: { edition: BookEdition }) {
+  const [errored, setErrored] = useState(false);
+
+  return (
+    <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden ring-2 ring-transparent group-hover:ring-neutral-900 transition-all group-hover:scale-105 relative">
+      {edition.coverUrl && !errored ? (
+        <Image
+          src={edition.coverUrl}
+          alt={edition.title}
+          fill
+          sizes="80px"
+          className="object-cover"
+          onError={() => setErrored(true)}
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center text-neutral-400 text-xs p-2 text-center">
+          No cover
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function EditionPicker({
   book,
   onSelect,
@@ -33,6 +56,9 @@ export default function EditionPicker({
     fetchEditions();
     return () => { cancelled = true; };
   }, [book.key]);
+
+  // Filter out editions with broken covers after load
+  const visibleEditions = editions.filter((e) => e.coverUrl);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -80,29 +106,15 @@ export default function EditionPicker({
             <div className="flex items-center justify-center py-16">
               <div className="w-8 h-8 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
             </div>
-          ) : editions.length > 0 ? (
+          ) : visibleEditions.length > 0 ? (
             <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3">
-              {editions.map((edition) => (
+              {visibleEditions.map((edition) => (
                 <button
                   key={edition.key}
                   onClick={() => onSelect(edition)}
                   className="group"
                 >
-                  <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden ring-2 ring-transparent group-hover:ring-neutral-900 transition-all group-hover:scale-105 relative">
-                    {edition.coverUrl ? (
-                      <Image
-                        src={edition.coverUrl}
-                        alt={edition.title}
-                        fill
-                        sizes="80px"
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-neutral-400 text-xs p-2 text-center">
-                        No cover
-                      </div>
-                    )}
-                  </div>
+                  <EditionCover edition={edition} />
                   <p className="text-xs text-neutral-500 mt-1.5 truncate text-center">
                     {edition.year || edition.publisher || "—"}
                   </p>
