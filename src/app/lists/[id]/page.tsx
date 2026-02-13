@@ -16,7 +16,7 @@ export default async function ListPage({ params }: PageProps) {
   // Get the list
   const { data: list } = await supabase
     .from("book_lists")
-    .select("*")
+    .select("id, name, description, user_id, is_public, created_at")
     .eq("id", id)
     .single();
 
@@ -31,23 +31,23 @@ export default async function ListPage({ params }: PageProps) {
 
   const isOwner = user?.id === list.user_id;
 
-  // Get creator profile
-  const { data: creator } = await supabase
-    .from("profiles")
-    .select("id, username, avatar_url")
-    .eq("id", list.user_id)
-    .single();
-
-  // Get list items
-  const { data: items } = await supabase
-    .from("book_list_items")
-    .select("*")
-    .eq("list_id", id)
-    .order("position", { ascending: true });
+  // Parallel fetch: creator profile + list items
+  const [{ data: creator }, { data: items }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, username, avatar_url")
+      .eq("id", list.user_id)
+      .single(),
+    supabase
+      .from("book_list_items")
+      .select("id, open_library_key, title, author, cover_url, position")
+      .eq("list_id", id)
+      .order("position", { ascending: true }),
+  ]);
 
   return (
     <>
-      <HeaderWrapper />
+      <HeaderWrapper user={user} />
       <main className="min-h-screen px-4 sm:px-6 py-6">
         <div className="max-w-2xl mx-auto">
           {/* Back button */}

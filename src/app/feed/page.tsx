@@ -11,24 +11,24 @@ export default async function FeedPage() {
     redirect("/login");
   }
 
-  // Get users this person follows
-  const { data: following } = await supabase
-    .from("follows")
-    .select("following_id")
-    .eq("follower_id", user.id);
+  // Parallel fetch: following + profile
+  const [{ data: following }, { data: currentProfile }] = await Promise.all([
+    supabase
+      .from("follows")
+      .select("following_id")
+      .eq("follower_id", user.id),
+    supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .single(),
+  ]);
 
   const followingIds = following?.map(f => f.following_id) || [];
 
-  // Get current user's profile
-  const { data: currentProfile } = await supabase
-    .from("profiles")
-    .select("username")
-    .eq("id", user.id)
-    .single();
-
   return (
     <>
-      <HeaderWrapper />
+      <HeaderWrapper user={user} username={currentProfile?.username} />
       <main className="min-h-screen px-4 sm:px-6 py-6">
         <div className="max-w-2xl mx-auto">
           <FeedTabs

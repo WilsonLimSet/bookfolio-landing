@@ -18,20 +18,32 @@ export default async function DiscoverPage() {
     redirect("/login");
   }
 
-  // Get suggested users (most active, not already following)
-  const { data: following } = await supabase
-    .from("follows")
-    .select("following_id")
-    .eq("follower_id", user.id);
+  // Parallel fetch: following + activeUsers + recentActivity + profile (all independent)
+  const [{ data: following }, { data: activeUsers }, { data: recentActivity }, { data: profile }] = await Promise.all([
+    supabase
+      .from("follows")
+      .select("following_id")
+      .eq("follower_id", user.id),
+    supabase
+      .from("user_books")
+      .select("user_id")
+      .limit(500),
+    supabase
+      .from("activity")
+      .select("user_id")
+      .neq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(50),
+    supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .single(),
+  ]);
 
   const followingIds = following?.map(f => f.following_id) || [];
 
-  // Get active users with book counts
-  const { data: activeUsers } = await supabase
-    .from("user_books")
-    .select("user_id")
-    .limit(500);
-
+  // Process suggested users
   const userCounts = new Map<string, number>();
   for (const entry of activeUsers || []) {
     if (entry.user_id !== user.id && !followingIds.includes(entry.user_id)) {
@@ -44,38 +56,33 @@ export default async function DiscoverPage() {
     .slice(0, 12)
     .map(([id]) => id);
 
-  const { data: suggestedProfiles } = await supabase
-    .from("profiles")
-    .select("id, username")
-    .in("id", suggestedUserIds.length > 0 ? suggestedUserIds : ["none"]);
-
-  const suggestedUsers: SuggestedUser[] = suggestedUserIds
-    .map(id => {
-      const profile = suggestedProfiles?.find(p => p.id === id);
-      return profile ? { ...profile, bookCount: userCounts.get(id) || 0 } : null;
-    })
-    .filter((user): user is SuggestedUser => user !== null);
-
-  // Get recently active users (from activity)
-  const { data: recentActivity } = await supabase
-    .from("activity")
-    .select("user_id")
-    .neq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(50);
-
+  // Process recent users
   const recentUserIds = [...new Set(recentActivity?.map(a => a.user_id) || [])]
     .filter(id => !followingIds.includes(id))
     .slice(0, 8);
 
-  const { data: recentProfiles } = await supabase
-    .from("profiles")
-    .select("id, username")
-    .in("id", recentUserIds.length > 0 ? recentUserIds : ["none"]);
+  // Parallel fetch: suggested profiles + recent profiles
+  const [{ data: suggestedProfiles }, { data: recentProfiles }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, username")
+      .in("id", suggestedUserIds.length > 0 ? suggestedUserIds : ["none"]),
+    supabase
+      .from("profiles")
+      .select("id, username")
+      .in("id", recentUserIds.length > 0 ? recentUserIds : ["none"]),
+  ]);
+
+  const suggestedUsers: SuggestedUser[] = suggestedUserIds
+    .map(id => {
+      const p = suggestedProfiles?.find(p => p.id === id);
+      return p ? { ...p, bookCount: userCounts.get(id) || 0 } : null;
+    })
+    .filter((u): u is SuggestedUser => u !== null);
 
   return (
     <>
-      <HeaderWrapper />
+      <HeaderWrapper user={user} username={profile?.username} />
       <main className="min-h-screen px-4 sm:px-6 py-6">
         <div className="max-w-2xl mx-auto">
           <h1 className="text-2xl font-bold mb-6">Discover</h1>

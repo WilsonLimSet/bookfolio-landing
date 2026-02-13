@@ -18,7 +18,7 @@ export default async function ReviewPage({ params }: PageProps) {
   // Get the review
   const { data: review } = await supabase
     .from("user_books")
-    .select("*")
+    .select("id, user_id, title, author, cover_url, open_library_key, category, tier, score, review_text, finished_at, created_at")
     .eq("id", id)
     .single();
 
@@ -26,15 +26,13 @@ export default async function ReviewPage({ params }: PageProps) {
     notFound();
   }
 
-  // Get reviewer profile
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("id, username, avatar_url")
-    .eq("id", review.user_id)
-    .single();
-
-  // Get like count and check if current user liked
-  const [likesResult, userLikeResult] = await Promise.all([
+  // Parallel fetch: reviewer profile + like count + user like check
+  const [{ data: profile }, likesResult, userLikeResult] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("id, username, avatar_url")
+      .eq("id", review.user_id)
+      .single(),
     supabase
       .from("review_likes")
       .select("id", { count: "exact", head: true })
@@ -54,7 +52,7 @@ export default async function ReviewPage({ params }: PageProps) {
 
   return (
     <>
-      <HeaderWrapper />
+      <HeaderWrapper user={user} />
       <main className="min-h-screen px-4 sm:px-6 py-6">
         <div className="max-w-2xl mx-auto">
           {/* Back button */}

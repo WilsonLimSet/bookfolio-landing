@@ -125,41 +125,59 @@ export default function ImportPage() {
   }
 
   async function matchBooks(books: GoodreadsBook[]) {
-    const matched: MatchedBook[] = [];
+    const matched: MatchedBook[] = new Array(books.length);
+    const BATCH_SIZE = 5;
 
-    for (let i = 0; i < books.length; i++) {
-      setProgress(Math.round((i / books.length) * 100));
+    for (let batchStart = 0; batchStart < books.length; batchStart += BATCH_SIZE) {
+      const batch = books.slice(batchStart, batchStart + BATCH_SIZE);
 
-      const book = books[i];
-      const results = await searchBooks(`${book.title} ${book.author}`);
+      const results = await Promise.all(
+        batch.map(async (book, i) => {
+          const idx = batchStart + i;
+          const searchResults = await searchBooks(`${book.title} ${book.author}`);
 
-      if (results.length > 0) {
-        const best = results[0];
-        const subjects = await fetchWorkSubjects(best.key);
+          if (searchResults.length > 0) {
+            const best = searchResults[0];
+            const subjects = await fetchWorkSubjects(best.key);
+            return {
+              idx,
+              match: {
+                title: book.title,
+                author: book.author,
+                rating: book.rating,
+                openLibraryKey: best.key,
+                coverUrl: best.coverUrl,
+                category: guessCategory(book.shelves, subjects),
+                detectedSubjects: subjects.slice(0, 10),
+              } as MatchedBook,
+            };
+          }
 
-        matched.push({
-          title: book.title,
-          author: book.author,
-          rating: book.rating,
-          openLibraryKey: best.key,
-          coverUrl: best.coverUrl,
-          category: guessCategory(book.shelves, subjects),
-          detectedSubjects: subjects.slice(0, 10),
-        });
-      } else {
-        matched.push({
-          title: book.title,
-          author: book.author,
-          rating: book.rating,
-          openLibraryKey: null,
-          coverUrl: null,
-          category: guessCategory(book.shelves),
-          detectedSubjects: [],
-        });
+          return {
+            idx,
+            match: {
+              title: book.title,
+              author: book.author,
+              rating: book.rating,
+              openLibraryKey: null,
+              coverUrl: null,
+              category: guessCategory(book.shelves),
+              detectedSubjects: [],
+            } as MatchedBook,
+          };
+        })
+      );
+
+      for (const { idx, match } of results) {
+        matched[idx] = match;
       }
 
-      // Rate limit
-      await new Promise((r) => setTimeout(r, 100));
+      setProgress(Math.round(((batchStart + batch.length) / books.length) * 100));
+
+      // Rate limit between batches
+      if (batchStart + BATCH_SIZE < books.length) {
+        await new Promise((r) => setTimeout(r, 200));
+      }
     }
 
     setMatchedBooks(matched);
@@ -262,59 +280,44 @@ export default function ImportPage() {
 
     const allRanked = [...rankedBooks, ...getBooksInRatingGroup(currentRatingGroup)];
 
-    // Group by category
-    const fiction = allRanked.filter((b) => b.category === "fiction");
-    const nonfiction = allRanked.filter((b) => b.category === "nonfiction");
+    // Group by category and build batch rows
+    const fiction = allRanked.filter((b) => b.category === "fiction" && b.openLibraryKey);
+    const nonfiction = allRanked.filter((b) => b.category === "nonfiction" && b.openLibraryKey);
 
-    // Import fiction
-    for (let i = 0; i < fiction.length; i++) {
-      const book = fiction[i];
-      if (!book.openLibraryKey) continue;
-
-      const tier = book.rating >= 4 ? "liked" : book.rating >= 3 ? "fine" : "disliked";
-      const score = calculateImportScore(i + 1, fiction.length, tier);
-
-      await supabase.from("user_books").upsert({
-        user_id: user.id,
-        title: book.title,
-        author: book.author,
-        cover_url: book.coverUrl,
-        open_library_key: book.openLibraryKey,
-        category: "fiction",
-        tier,
-        rank_position: i + 1,
-        score,
-      }, {
-        onConflict: "user_id,open_library_key,category",
+    const buildRows = (books: MatchedBook[], category: string) =>
+      books.map((book, i) => {
+        const tier = book.rating >= 4 ? "liked" : book.rating >= 3 ? "fine" : "disliked";
+        return {
+          user_id: user.id,
+          title: book.title,
+          author: book.author,
+          cover_url: book.coverUrl,
+          open_library_key: book.openLibraryKey,
+          category,
+          tier,
+          rank_position: i + 1,
+          score: calculateImportScore(i + 1, books.length, tier),
+        };
       });
 
-      setProgress(Math.round(((i + 1) / allRanked.length) * 100));
-    }
+    const fictionRows = buildRows(fiction, "fiction");
+    const nonfictionRows = buildRows(nonfiction, "nonfiction");
 
-    // Import nonfiction
-    for (let i = 0; i < nonfiction.length; i++) {
-      const book = nonfiction[i];
-      if (!book.openLibraryKey) continue;
-
-      const tier = book.rating >= 4 ? "liked" : book.rating >= 3 ? "fine" : "disliked";
-      const score = calculateImportScore(i + 1, nonfiction.length, tier);
-
-      await supabase.from("user_books").upsert({
-        user_id: user.id,
-        title: book.title,
-        author: book.author,
-        cover_url: book.coverUrl,
-        open_library_key: book.openLibraryKey,
-        category: "nonfiction",
-        tier,
-        rank_position: i + 1,
-        score,
-      }, {
+    // Batch upsert fiction
+    if (fictionRows.length > 0) {
+      await supabase.from("user_books").upsert(fictionRows, {
         onConflict: "user_id,open_library_key,category",
       });
-
-      setProgress(Math.round(((fiction.length + i + 1) / allRanked.length) * 100));
     }
+    setProgress(50);
+
+    // Batch upsert nonfiction
+    if (nonfictionRows.length > 0) {
+      await supabase.from("user_books").upsert(nonfictionRows, {
+        onConflict: "user_id,open_library_key,category",
+      });
+    }
+    setProgress(100);
 
     setStep("done");
   }

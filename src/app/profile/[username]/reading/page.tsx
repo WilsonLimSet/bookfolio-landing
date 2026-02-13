@@ -24,7 +24,7 @@ export default async function CurrentlyReadingPage({ params }: PageProps) {
 
   const { data: books } = await supabase
     .from("currently_reading")
-    .select("*")
+    .select("id, title, author, cover_url, open_library_key, started_at")
     .eq("user_id", profile.id)
     .order("started_at", { ascending: false });
 

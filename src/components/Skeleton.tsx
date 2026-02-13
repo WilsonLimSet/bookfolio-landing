@@ -1,7 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-
 interface SkeletonProps {
   className?: string;
   animate?: boolean;
@@ -10,17 +8,9 @@ interface SkeletonProps {
 
 export function Skeleton({ className = "", animate = true, style }: SkeletonProps) {
   return (
-    <motion.div
-      className={`bg-neutral-200 rounded ${className}`}
+    <div
+      className={`bg-neutral-200 rounded ${animate ? "animate-pulse" : ""} ${className}`}
       style={style}
-      animate={animate ? {
-        opacity: [0.5, 1, 0.5],
-      } : undefined}
-      transition={{
-        repeat: Infinity,
-        duration: 1.5,
-        ease: "easeInOut",
-      }}
     />
   );
 }
@@ -41,14 +31,9 @@ export function SearchResultsSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="space-y-1">
       {Array.from({ length: count }).map((_, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.05 }}
-        >
+        <div key={i}>
           <BookCardSkeleton />
-        </motion.div>
+        </div>
       ))}
     </div>
   );
@@ -77,17 +62,14 @@ export function ProfileBookListSkeleton({ count = 6 }: { count?: number }) {
   return (
     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
       {Array.from({ length: count }).map((_, i) => (
-        <motion.div
+        <div
           key={i}
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: i * 0.05 }}
           className="space-y-2"
         >
           <BookCoverSkeleton size="md" />
           <Skeleton className="h-3 w-full rounded" />
           <Skeleton className="h-3 w-2/3 rounded" />
-        </motion.div>
+        </div>
       ))}
     </div>
   );
@@ -122,14 +104,9 @@ export function FeedSkeleton({ count = 3 }: { count?: number }) {
   return (
     <div>
       {Array.from({ length: count }).map((_, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.1 }}
-        >
+        <div key={i}>
           <FeedItemSkeleton />
-        </motion.div>
+        </div>
       ))}
     </div>
   );

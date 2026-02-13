@@ -207,8 +207,9 @@ export default function RankingFlow({
       const editionList = await getEditions(book.key);
       if (cancelled) return;
       setEditions(editionList);
-      // Default to the most popular edition cover (first = highest popularity)
-      if (editionList.length > 0 && editionList[0].coverUrl) {
+      // Only set a cover if we don't already have one from the search result
+      // The search API's cover_i is OpenLibrary's curated "most popular" cover
+      if (!selectedCover && editionList.length > 0 && editionList[0].coverUrl) {
         setSelectedCover(editionList[0].coverUrl);
       }
       setLoadingEditions(false);

@@ -63,7 +63,7 @@ export default async function ProfilePage({ params }: PageProps) {
 
   return (
     <>
-      <HeaderWrapper />
+      <HeaderWrapper user={user} username={profile.username} />
       <main className="min-h-screen px-4 sm:px-6 py-6">
         <div className="max-w-2xl mx-auto">
           {/* Profile Info - renders immediately */}

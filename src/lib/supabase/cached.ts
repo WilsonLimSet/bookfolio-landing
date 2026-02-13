@@ -62,12 +62,12 @@ export const getProfileStats = (profileId: string) =>
           .eq("user_id", profileId),
         supabase
           .from("favorite_books")
-          .select("*")
+          .select("id, open_library_key, title, author, cover_url, position")
           .eq("user_id", profileId)
           .order("position"),
         supabase
           .from("currently_reading")
-          .select("*")
+          .select("open_library_key, title, author, cover_url")
           .eq("user_id", profileId)
           .order("started_at", { ascending: false }),
         supabase

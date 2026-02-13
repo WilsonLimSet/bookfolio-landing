@@ -13,15 +13,67 @@ export default async function ListsPage() {
     redirect("/login");
   }
 
-  // Get users this person follows
-  const { data: following } = await supabase
-    .from("follows")
-    .select("following_id")
-    .eq("follower_id", user.id);
+  // Parallel fetch: following + publicLists + profile (all independent)
+  const [{ data: following }, { data: publicLists }, { data: profile }] = await Promise.all([
+    supabase
+      .from("follows")
+      .select("following_id")
+      .eq("follower_id", user.id),
+    supabase
+      .from("book_lists")
+      .select("id, name, description, user_id, created_at")
+      .eq("is_public", true)
+      .order("updated_at", { ascending: false })
+      .limit(20),
+    supabase
+      .from("profiles")
+      .select("username")
+      .eq("id", user.id)
+      .single(),
+  ]);
 
   const followingIds = following?.map(f => f.following_id) || [];
 
-  // Get recent books added to friends' lists
+  // Second parallel batch: friends' books + creator profiles + list items (all depend on first batch)
+  const creatorIds = [...new Set(publicLists?.map(l => l.user_id) || [])];
+  const listIds = publicLists?.map(l => l.id) || [];
+
+  const [friendsResult, { data: profiles }, itemsResult] = await Promise.all([
+    followingIds.length > 0
+      ? supabase
+          .from("book_list_items")
+          .select(`
+            open_library_key,
+            title,
+            cover_url,
+            added_at,
+            list_id,
+            book_lists!inner (
+              id,
+              name,
+              user_id,
+              is_public
+            )
+          `)
+          .in("book_lists.user_id", followingIds)
+          .eq("book_lists.is_public", true)
+          .order("added_at", { ascending: false })
+          .limit(20)
+      : Promise.resolve({ data: null }),
+    supabase
+      .from("profiles")
+      .select("id, username, avatar_url")
+      .in("id", creatorIds.length > 0 ? creatorIds : ["none"]),
+    listIds.length > 0
+      ? supabase
+          .from("book_list_items")
+          .select("list_id, open_library_key, title, cover_url, position")
+          .in("list_id", listIds)
+          .order("position", { ascending: true })
+      : Promise.resolve({ data: null }),
+  ]);
+
+  // Process friends' books
   let friendsBooks: Array<{
     open_library_key: string;
     title: string;
@@ -30,84 +82,39 @@ export default async function ListsPage() {
     added_at: string;
   }> = [];
 
-  if (followingIds.length > 0) {
-    const { data: recentItems } = await supabase
-      .from("book_list_items")
-      .select(`
-        open_library_key,
-        title,
-        cover_url,
-        added_at,
-        list_id,
-        book_lists!inner (
-          id,
-          name,
-          user_id,
-          is_public
-        )
-      `)
-      .in("book_lists.user_id", followingIds)
-      .eq("book_lists.is_public", true)
-      .order("added_at", { ascending: false })
-      .limit(20);
-
-    if (recentItems) {
-      friendsBooks = recentItems.map((item) => {
-        const bookList = item.book_lists as unknown as { name: string } | { name: string }[];
-        const listName = Array.isArray(bookList) ? bookList[0]?.name : bookList?.name;
-        return {
-          open_library_key: item.open_library_key,
-          title: item.title,
-          cover_url: item.cover_url,
-          list_name: listName || "Unknown",
-          added_at: item.added_at,
-        };
-      });
-    }
-  }
-
-  // Get all public lists with their items and creators
-  const { data: publicLists } = await supabase
-    .from("book_lists")
-    .select("id, name, description, user_id, created_at")
-    .eq("is_public", true)
-    .order("updated_at", { ascending: false })
-    .limit(20);
-
-  // Get profiles for list creators
-  const creatorIds = [...new Set(publicLists?.map(l => l.user_id) || [])];
-  const { data: profiles } = await supabase
-    .from("profiles")
-    .select("id, username, avatar_url")
-    .in("id", creatorIds.length > 0 ? creatorIds : ["none"]);
-
-  const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
-
-  // Get items for each list (first 8)
-  const listItems = new Map<string, Array<{ open_library_key: string; title: string; cover_url: string | null }>>();
-  if (publicLists && publicLists.length > 0) {
-    const { data: items } = await supabase
-      .from("book_list_items")
-      .select("list_id, open_library_key, title, cover_url, position")
-      .in("list_id", publicLists.map(l => l.id))
-      .order("position", { ascending: true });
-
-    items?.forEach(item => {
-      const existing = listItems.get(item.list_id) || [];
-      if (existing.length < 8) {
-        existing.push({
-          open_library_key: item.open_library_key,
-          title: item.title,
-          cover_url: item.cover_url,
-        });
-        listItems.set(item.list_id, existing);
-      }
+  if (friendsResult.data) {
+    friendsBooks = friendsResult.data.map((item) => {
+      const bookList = item.book_lists as unknown as { name: string } | { name: string }[];
+      const listName = Array.isArray(bookList) ? bookList[0]?.name : bookList?.name;
+      return {
+        open_library_key: item.open_library_key,
+        title: item.title,
+        cover_url: item.cover_url,
+        list_name: listName || "Unknown",
+        added_at: item.added_at,
+      };
     });
   }
 
+  const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+
+  // Process list items
+  const listItems = new Map<string, Array<{ open_library_key: string; title: string; cover_url: string | null }>>();
+  itemsResult.data?.forEach(item => {
+    const existing = listItems.get(item.list_id) || [];
+    if (existing.length < 8) {
+      existing.push({
+        open_library_key: item.open_library_key,
+        title: item.title,
+        cover_url: item.cover_url,
+      });
+      listItems.set(item.list_id, existing);
+    }
+  });
+
   return (
     <>
-      <HeaderWrapper />
+      <HeaderWrapper user={user} username={profile?.username} />
       <main className="min-h-screen px-4 sm:px-6 py-6">
         <div className="max-w-2xl mx-auto">
           {/* Header */}

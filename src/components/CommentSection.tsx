@@ -43,7 +43,8 @@ export default function CommentSection({
       .from("review_comments")
       .select("*")
       .eq("review_id", reviewId)
-      .order("created_at", { ascending: true });
+      .order("created_at", { ascending: true })
+      .limit(50);
 
     if (commentsData && commentsData.length > 0) {
       setComments(commentsData);

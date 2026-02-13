@@ -106,7 +106,7 @@ export default async function BookPage({ params }: PageProps) {
       ? Promise.all([
           supabase
             .from("user_books")
-            .select("*")
+            .select("id, user_id, title, author, cover_url, open_library_key, category, tier, rank_position, score, review_text, finished_at")
             .eq("user_id", user.id)
             .eq("open_library_key", workKey)
             .maybeSingle(),
@@ -139,6 +139,9 @@ export default async function BookPage({ params }: PageProps) {
 
   const profileMap = new Map(reviewerProfiles?.map(p => [p.id, p]) || []);
 
+  // Use user's chosen cover if they ranked this book, otherwise OpenLibrary's best edition
+  const displayCover = userBookEntry?.cover_url || book.coverUrl;
+
   // Calculate average score
   const avgScore = allRatings && allRatings.length > 0
     ? (allRatings.reduce((sum, r) => sum + parseFloat(r.score), 0) / allRatings.length).toFixed(1)
@@ -149,7 +152,7 @@ export default async function BookPage({ params }: PageProps) {
 
   return (
     <>
-      <HeaderWrapper />
+      <HeaderWrapper user={user} />
       <main className="min-h-screen px-4 sm:px-6 py-6">
         <div className="max-w-4xl mx-auto">
           {/* Book Details */}
@@ -157,9 +160,9 @@ export default async function BookPage({ params }: PageProps) {
           {/* Cover */}
           <div className="flex-shrink-0">
             <div className="w-48 md:w-64 bg-neutral-50 rounded-xl overflow-hidden shadow-lg mx-auto md:mx-0 relative group">
-              {book.coverUrl ? (
+              {displayCover ? (
                 <Image
-                  src={book.coverUrl}
+                  src={displayCover}
                   alt={book.title}
                   width={256}
                   height={384}

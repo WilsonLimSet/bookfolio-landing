@@ -21,13 +21,17 @@ export default function EditionPicker({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     async function fetchEditions() {
       setLoading(true);
       const results = await getEditions(book.key);
-      setEditions(results);
-      setLoading(false);
+      if (!cancelled) {
+        setEditions(results);
+        setLoading(false);
+      }
     }
     fetchEditions();
+    return () => { cancelled = true; };
   }, [book.key]);
 
   return (

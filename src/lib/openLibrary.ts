@@ -70,12 +70,23 @@ function extractTranslator(edition: Edition): string | null {
 
 function editionPopularity(edition: Edition): number {
   let score = 0;
-  // English editions are most relevant for our users
-  if (
-    edition.languages?.some((l) => l.key === "/languages/eng") ||
-    !edition.languages // no language = usually English
-  ) {
-    score += 10;
+  const hasLanguageData = edition.languages && edition.languages.length > 0;
+  const isEnglish = edition.languages?.some(
+    (l) => l.key === "/languages/eng"
+  );
+
+  if (isEnglish) {
+    // Confirmed English — strong boost
+    score += 15;
+  } else if (hasLanguageData) {
+    // Explicitly non-English — penalize
+    score -= 10;
+  } else {
+    // No language data — check title for non-English clues
+    const looksNonEnglish =
+      /[àáâãäéèêëíîïóôõöúùûüçñæœ¿¡]/i.test(edition.title) ||
+      /[^\u0000-\u024F\s\d\-:,.'"!?()&]/u.test(edition.title);
+    score += looksNonEnglish ? -5 : 5;
   }
   // Editions with ISBNs are widely distributed (more popular)
   if (edition.isbn_13?.length || edition.isbn_10?.length) score += 5;
@@ -192,10 +203,11 @@ export async function getBookDetails(workKey: string): Promise<BookDetails | nul
     // Get translator from best English edition
     const translator = bestEdition ? extractTranslator(bestEdition) : null;
 
-    // Get cover — prefer best English edition's cover, fall back to work cover
-    const bestEditionCoverId = bestEdition?.covers?.[0];
+    // Get cover — prefer work cover (curated by OpenLibrary as canonical),
+    // fall back to best edition's cover
     const workCoverId = work.covers?.[0];
-    const coverId = bestEditionCoverId || workCoverId;
+    const bestEditionCoverId = bestEdition?.covers?.[0];
+    const coverId = workCoverId || bestEditionCoverId;
     const coverUrl = coverId
       ? `https://covers.openlibrary.org/b/id/${coverId}-L.jpg`
       : null;

@@ -25,13 +25,13 @@ export default async function ReadBooksPage({ params }: PageProps) {
   const [fictionResult, nonfictionResult] = await Promise.all([
     supabase
       .from("user_books")
-      .select("*")
+      .select("id, title, author, cover_url, open_library_key, tier, rank_position, score, category, review_text, finished_at")
       .eq("user_id", profile.id)
       .eq("category", "fiction")
       .order("rank_position"),
     supabase
       .from("user_books")
-      .select("*")
+      .select("id, title, author, cover_url, open_library_key, tier, rank_position, score, category, review_text, finished_at")
       .eq("user_id", profile.id)
       .eq("category", "nonfiction")
       .order("rank_position"),
