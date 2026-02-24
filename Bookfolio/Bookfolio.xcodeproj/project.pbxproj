@@ -15,6 +15,7 @@
 		3D08D101EB87390DDF7F080E /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 75A54410B3DB998992C79122 /* Supabase */; };
 		404541C13F3B8DD1AEA74127 /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8A00F6393320A9FD2499E0 /* Notification.swift */; };
 		440007686F38778ECC4F5415 /* BookfolioApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7CB46FA56D562C70EF50DE96 /* BookfolioApp.swift */; };
+		48DB8A4ACA21A6DCCC7DD12E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F33B665A8CD6C68E83501292 /* LoginView.swift */; };
 		4B91C30AA5378539D4F2906A /* ReviewLike.swift in Sources */ = {isa = PBXBuildFile; fileRef = C810FA17EACAF311EC0DD419 /* ReviewLike.swift */; };
 		4F3858409401D1D145787D55 /* Referral.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2C75BD7BF9C109E68C7AA13 /* Referral.swift */; };
 		52E8926F35D5E917711064BA /* OpenLibraryTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F58CB3B1B2625498229DAE18 /* OpenLibraryTypes.swift */; };
@@ -85,6 +86,7 @@
 		EEF62D81A51A2017B06A7F47 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		F0139D7BB6A2CAACAB2D15D3 /* LeaderboardTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardTab.swift; sourceTree = "<group>"; };
 		F2C75BD7BF9C109E68C7AA13 /* Referral.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Referral.swift; sourceTree = "<group>"; };
+		F33B665A8CD6C68E83501292 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		F58CB3B1B2625498229DAE18 /* OpenLibraryTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenLibraryTypes.swift; sourceTree = "<group>"; };
 		F7BEFB44B7FCAE7A0C100154 /* WantToRead.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WantToRead.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -122,6 +124,7 @@
 			isa = PBXGroup;
 			children = (
 				0E7652B47A896B0566553584 /* AuthError+Display.swift */,
+				F33B665A8CD6C68E83501292 /* LoginView.swift */,
 			);
 			path = Auth;
 			sourceTree = "<group>";
@@ -359,6 +362,7 @@
 				63576D980D1FEDF2A3EF9581 /* Follow.swift in Sources */,
 				2B6C7C8B34EF838297F692F8 /* LeaderboardTab.swift in Sources */,
 				963FE8A741E657F052DDBC71 /* ListsTab.swift in Sources */,
+				48DB8A4ACA21A6DCCC7DD12E /* LoginView.swift in Sources */,
 				404541C13F3B8DD1AEA74127 /* Notification.swift in Sources */,
 				52E8926F35D5E917711064BA /* OpenLibraryTypes.swift in Sources */,
 				940AF755276D38A12560BA5B /* Profile.swift in Sources */,
