@@ -100,6 +100,26 @@ struct ProfileView: View {
                             }
                             .buttonStyle(.plain)
                         }
+
+                        // Lists link
+                        NavigationLink(value: AppRoute.myLists(userId: userId)) {
+                            HStack {
+                                Image(systemName: "list.bullet")
+                                    .foregroundColor(.blue)
+                                Text(isOwner ? "Your Lists" : "\(profile.username ?? "User")'s Lists")
+                                    .font(.subheadline)
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.horizontal)
+                            .padding(.vertical, 10)
+                            .background(Color(.systemGray6))
+                            .cornerRadius(10)
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.horizontal)
                         .padding(.bottom, 20)
                     }
                 }

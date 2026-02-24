@@ -16,7 +16,13 @@ struct RouteDestination: ViewModifier {
                 case .following(let userId):
                     FollowListView(userId: userId, listType: .following)
                 case .listDetail(let listId):
-                    PlaceholderDestination(title: "List Detail", detail: listId.uuidString)
+                    ListDetailView(listId: listId)
+                case .myLists(let userId):
+                    MyListsView(userId: userId)
+                case .createList:
+                    CreateListView(onCreated: nil)
+                case .browseLists:
+                    ListsView { listId in }
                 case .reviewDetail(let reviewId):
                     ReviewDetailView(reviewId: reviewId)
                 case .rankBook(let bookKey, let title, let author, let coverUrl):
@@ -27,6 +33,8 @@ struct RouteDestination: ViewModifier {
                     CurrentlyReadingView(userId: userId)
                 case .wantToRead(let userId):
                     WantToReadView(userId: userId)
+                case .importBooks:
+                    GoodreadsImportView()
                 }
             }
     }
