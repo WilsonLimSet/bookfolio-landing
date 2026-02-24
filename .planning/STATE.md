@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** The ranking flow must feel incredible on iOS — haptic feedback on every comparison, buttery spring animations, gesture-driven interactions.
-**Current focus:** Phase 6 complete — ready for Phase 7 (Lists, Import & Polish)
+**Current focus:** ALL PHASES COMPLETE — App ready for App Store submission
 
 ## Current Position
 
-Phase: 6 complete
-Plan: 06-04 complete
-Status: Ready for Phase 7 planning
-Last activity: 2026-02-24 — Social features, discover, leaderboard, push notifications
+Phase: 7 complete (FINAL)
+Plan: 07-04 complete
+Status: All 7 phases complete
+Last activity: 2026-02-24 — Lists, import, polish, App Store prep complete
 
-Progress: █████████░ 84%
+Progress: ██████████ 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
+- Total plans completed: 25
 - Average duration: ~7min
-- Total execution time: ~148min
+- Total execution time: ~176min
 
 **By Phase:**
 
@@ -33,10 +33,11 @@ Progress: █████████░ 84%
 | 04-book-discovery | 3/3 | ~22min | ~7min |
 | 05-ranking-flow | 4/4 | ~28min | ~7min |
 | 06-social-notifications | 4/4 | ~28min | ~7min |
+| 07-lists-import-polish | 4/4 | ~28min | ~7min |
 
 **Recent Trend:**
-- Last 5 plans: 05-04 (8min), 06-01 (5min), 06-02 (3min), 06-03 (5min), 06-04 (3min)
-- Trend: Stable ~3-8min/plan
+- Last 5 plans: 06-04 (3min), 07-01 (5min), 07-02 (5min), 07-03 (5min), 07-04 (2min)
+- Trend: Stable ~2-5min/plan
 
 ## Accumulated Context
 
@@ -108,17 +109,29 @@ Recent decisions affecting current work:
 - AppDelegate adapter via @UIApplicationDelegateAdaptor for device token handling
 - Push permission requested after authentication via .task modifier
 - device_tokens upsert uses try? (table may not exist yet)
+- ListService uses enum with static methods + private Decodable row types for joined queries
+- Lists accessed from Profile (not a tab) — .myLists, .createList, .browseLists routes
+- ListDetailView uses NavigationLink(value:) for book navigation (no callbacks)
+- Goodreads CSV import: custom parser handling quoted fields + escaped quotes
+- Import score calculation: tier ranges (liked 6.7-10, fine 3.4-6.6, disliked 0-3.3)
+- Import uses direct upsert (not rank_book RPC) with calculated scores
+- OpenLibrary rate limited: 5 books/batch with 500ms delay
+- AddToListSheet toggles books in/out of lists with haptic feedback
+- Pull-to-refresh via .refreshable on Profile, Discover, Feed tabs
+- Haptic feedback on like (.light), follow (.light), comment post (.success)
+- PrivacyInfo.xcprivacy declares no tracking, collected data (email, userId, photos)
+- NSPhotoLibraryUsageDescription in Info.plist for avatar upload
 
 ### Deferred Issues
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
-None yet.
+None.
 
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Phase 6 complete, social features verified
+Stopped at: ALL PHASES COMPLETE — app ready for App Store
 Resume file: None
