@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ProfileTab: View {
     @EnvironmentObject var appRouter: AppRouter
+    @EnvironmentObject var authService: AuthService
     @ObservedObject var router: TabRouter
 
     var body: some View {
@@ -9,6 +10,14 @@ struct ProfileTab: View {
             ProfilePlaceholderView()
                 .withRouteDestinations()
                 .navigationTitle("Profile")
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("Sign Out") {
+                            Task { try? await authService.signOut() }
+                        }
+                        .font(.subheadline)
+                    }
+                }
         }
     }
 }

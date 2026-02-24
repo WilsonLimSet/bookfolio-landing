@@ -36,6 +36,7 @@
 		940AF755276D38A12560BA5B /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179E73F6152A324D75AB04AE /* Profile.swift */; };
 		963FE8A741E657F052DDBC71 /* ListsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 553F233E3E0F83EB26C60A76 /* ListsTab.swift */; };
 		97D46EE806468137DC432D0F /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D01179B0507342E54EF07804 /* GoogleSignInSwift */; };
+		9EA0985F78AE18E5B2222556 /* UsernameSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C61570B13BED7FFE5DDD46 /* UsernameSetupView.swift */; };
 		A42DD9D6B49C66B1373BDB07 /* TabRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526B5EC6D449D663E7B2C826 /* TabRouter.swift */; };
 		A8226D17DE59D0DB29B6A18B /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26572BFF35D1002E3E8CB8A7 /* Config.swift */; };
 		AD83D1E83B0FCAA6FBA308A9 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E727FD933A5EB9D56E0A3A4 /* AppRouter.swift */; };
@@ -88,6 +89,7 @@
 		C810FA17EACAF311EC0DD419 /* ReviewLike.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewLike.swift; sourceTree = "<group>"; };
 		CBAB09B84F6FC3092E42BC54 /* GoogleAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleAuthService.swift; sourceTree = "<group>"; };
 		D3EECCE09C65F54475795ABA /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
+		D4C61570B13BED7FFE5DDD46 /* UsernameSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameSetupView.swift; sourceTree = "<group>"; };
 		DF7A6C8BD6698F410CA126C3 /* SearchTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTab.swift; sourceTree = "<group>"; };
 		EEF62D81A51A2017B06A7F47 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		F0139D7BB6A2CAACAB2D15D3 /* LeaderboardTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardTab.swift; sourceTree = "<group>"; };
@@ -133,6 +135,7 @@
 			children = (
 				0E7652B47A896B0566553584 /* AuthError+Display.swift */,
 				F33B665A8CD6C68E83501292 /* LoginView.swift */,
+				D4C61570B13BED7FFE5DDD46 /* UsernameSetupView.swift */,
 			);
 			path = Auth;
 			sourceTree = "<group>";
@@ -390,6 +393,7 @@
 				82EBC25FCFFB5D0C7E7C76F9 /* SupabaseService.swift in Sources */,
 				A42DD9D6B49C66B1373BDB07 /* TabRouter.swift in Sources */,
 				7677B6A46A782C79DC2014A4 /* UserBook.swift in Sources */,
+				9EA0985F78AE18E5B2222556 /* UsernameSetupView.swift in Sources */,
 				0A460AC41911317776B8D784 /* WantToRead.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

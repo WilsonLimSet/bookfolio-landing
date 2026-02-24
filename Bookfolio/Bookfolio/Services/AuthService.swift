@@ -4,11 +4,21 @@ import Supabase
 
 @MainActor
 class AuthService: ObservableObject {
-    enum AuthState: Sendable {
+    enum AuthState: Sendable, Equatable {
         case loading
         case unauthenticated
         case authenticated(User)
         case needsUsername(User)
+
+        static func == (lhs: AuthState, rhs: AuthState) -> Bool {
+            switch (lhs, rhs) {
+            case (.loading, .loading): return true
+            case (.unauthenticated, .unauthenticated): return true
+            case (.authenticated(let a), .authenticated(let b)): return a.id == b.id
+            case (.needsUsername(let a), .needsUsername(let b)): return a.id == b.id
+            default: return false
+            }
+        }
     }
 
     @Published var state: AuthState = .loading
