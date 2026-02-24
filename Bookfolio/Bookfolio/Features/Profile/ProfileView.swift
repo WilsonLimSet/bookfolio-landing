@@ -120,7 +120,30 @@ struct ProfileView: View {
                         }
                         .buttonStyle(.plain)
                         .padding(.horizontal)
-                        .padding(.bottom, 20)
+
+                        // Import from Goodreads
+                        if isOwner {
+                            NavigationLink(value: AppRoute.importBooks) {
+                                HStack {
+                                    Image(systemName: "square.and.arrow.down")
+                                        .foregroundColor(.purple)
+                                    Text("Import from Goodreads")
+                                        .font(.subheadline)
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                                .padding(.horizontal)
+                                .padding(.vertical, 10)
+                                .background(Color(.systemGray6))
+                                .cornerRadius(10)
+                            }
+                            .buttonStyle(.plain)
+                            .padding(.horizontal)
+                        }
+
+                        Spacer().frame(height: 20)
                     }
                 }
             } else {
