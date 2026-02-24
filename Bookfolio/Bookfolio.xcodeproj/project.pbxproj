@@ -55,6 +55,11 @@
 		8D4FB892CA96E4692E3EA141 /* BookList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59E11A8F654E2E7AE6BDCFB8 /* BookList.swift */; };
 		940AF755276D38A12560BA5B /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179E73F6152A324D75AB04AE /* Profile.swift */; };
 		963FE8A741E657F052DDBC71 /* ListsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 553F233E3E0F83EB26C60A76 /* ListsTab.swift */; };
+		LS02020202020202020202 /* ListService.swift in Sources */ = {isa = PBXBuildFile; fileRef = LS01010101010101010101 /* ListService.swift */; };
+		LV02020202020202020202 /* ListsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LV01010101010101010101 /* ListsView.swift */; };
+		LD02020202020202020202 /* ListDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = LD01010101010101010101 /* ListDetailView.swift */; };
+		CL02020202020202020202 /* CreateListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CL01010101010101010101 /* CreateListView.swift */; };
+		ML02020202020202020202 /* MyListsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ML01010101010101010101 /* MyListsView.swift */; };
 		97D46EE806468137DC432D0F /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D01179B0507342E54EF07804 /* GoogleSignInSwift */; };
 		9EA0985F78AE18E5B2222556 /* UsernameSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4C61570B13BED7FFE5DDD46 /* UsernameSetupView.swift */; };
 		A42DD9D6B49C66B1373BDB07 /* TabRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526B5EC6D449D663E7B2C826 /* TabRouter.swift */; };
@@ -82,6 +87,8 @@
 		FF0604010101010101010101 /* PushNotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0604010101010101010101 /* PushNotificationService.swift */; };
 		CC0601020202020202020202 /* CommentSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0601020202020202020202 /* CommentSectionView.swift */; };
 		CC0601030303030303030303 /* ReviewDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0601030303030303030303 /* ReviewDetailView.swift */; };
+		IM02020202020202020202 /* ImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = IM01010101010101010101 /* ImportService.swift */; };
+		GI02020202020202020202 /* GoodreadsImportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = GI01010101010101010101 /* GoodreadsImportView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -115,6 +122,11 @@
 		4F2F7F907227CA11AFBACB85 /* AppRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppRoute.swift; sourceTree = "<group>"; };
 		526B5EC6D449D663E7B2C826 /* TabRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabRouter.swift; sourceTree = "<group>"; };
 		553F233E3E0F83EB26C60A76 /* ListsTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListsTab.swift; sourceTree = "<group>"; };
+		LS01010101010101010101 /* ListService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListService.swift; sourceTree = "<group>"; };
+		LV01010101010101010101 /* ListsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListsView.swift; sourceTree = "<group>"; };
+		LD01010101010101010101 /* ListDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListDetailView.swift; sourceTree = "<group>"; };
+		CL01010101010101010101 /* CreateListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateListView.swift; sourceTree = "<group>"; };
+		ML01010101010101010101 /* MyListsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyListsView.swift; sourceTree = "<group>"; };
 		55D235089074E47177103A3B /* ReadBooksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadBooksView.swift; sourceTree = "<group>"; };
 		59E11A8F654E2E7AE6BDCFB8 /* BookList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookList.swift; sourceTree = "<group>"; };
 		5E7F3B5EB350756F3BF524D4 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -171,6 +183,8 @@
 		DD0601010101010101010101 /* CommentService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentService.swift; sourceTree = "<group>"; };
 		DD0601020202020202020202 /* CommentSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentSectionView.swift; sourceTree = "<group>"; };
 		DD0601030303030303030303 /* ReviewDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewDetailView.swift; sourceTree = "<group>"; };
+		IM01010101010101010101 /* ImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportService.swift; sourceTree = "<group>"; };
+		GI01010101010101010101 /* GoodreadsImportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoodreadsImportView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -190,7 +204,11 @@
 		078AB36D460861790F50AE5D /* Lists */ = {
 			isa = PBXGroup;
 			children = (
+				CL01010101010101010101 /* CreateListView.swift */,
+				LD01010101010101010101 /* ListDetailView.swift */,
 				553F233E3E0F83EB26C60A76 /* ListsTab.swift */,
+				LV01010101010101010101 /* ListsView.swift */,
+				ML01010101010101010101 /* MyListsView.swift */,
 			);
 			path = Lists;
 			sourceTree = "<group>";
@@ -254,6 +272,7 @@
 				FFEC649270B4ECEC1EFF1056 /* FeedService.swift */,
 				CBAB09B84F6FC3092E42BC54 /* GoogleAuthService.swift */,
 				AA0603040404040404040404 /* LeaderboardService.swift */,
+				LS01010101010101010101 /* ListService.swift */,
 				C76AE8997AF56791BC2C9516 /* OpenLibraryService.swift */,
 				E5E71D2F2459912AF982E5A8 /* ProfileService.swift */,
 				EE0604010101010101010101 /* PushNotificationService.swift */,
@@ -549,6 +568,11 @@
 				BB0603070707070707070707 /* DiscoverView.swift in Sources */,
 				BB0603090909090909090909 /* UserSearchView.swift in Sources */,
 				963FE8A741E657F052DDBC71 /* ListsTab.swift in Sources */,
+				LS02020202020202020202 /* ListService.swift in Sources */,
+				LV02020202020202020202 /* ListsView.swift in Sources */,
+				LD02020202020202020202 /* ListDetailView.swift in Sources */,
+				CL02020202020202020202 /* CreateListView.swift in Sources */,
+				ML02020202020202020202 /* MyListsView.swift in Sources */,
 				48DB8A4ACA21A6DCCC7DD12E /* LoginView.swift in Sources */,
 				404541C13F3B8DD1AEA74127 /* Notification.swift in Sources */,
 				B50461093051B6610037ECA3 /* NotificationItemView.swift in Sources */,
