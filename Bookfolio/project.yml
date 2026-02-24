@@ -1,0 +1,51 @@
+name: Bookfolio
+options:
+  bundleIdPrefix: com.bookfolio
+  deploymentTarget:
+    iOS: "16.0"
+  xcodeVersion: "16.0"
+  createIntermediateGroups: true
+
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: "2.0.0"
+
+targets:
+  Bookfolio:
+    type: application
+    platform: iOS
+    sources:
+      - path: Bookfolio
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bookfolio.ios
+        PRODUCT_NAME: Bookfolio
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        SWIFT_VERSION: "6.0"
+        INFOPLIST_FILE: Bookfolio/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Bookfolio/Bookfolio.entitlements
+        GENERATE_INFOPLIST_FILE: false
+        SWIFT_STRICT_CONCURRENCY: complete
+    dependencies:
+      - package: Supabase
+    entitlements:
+      path: Bookfolio/Bookfolio.entitlements
+      properties:
+        com.apple.developer.associated-domains:
+          - "applinks:bookfolio.app"
+        keychain-access-groups:
+          - "$(AppIdentifierPrefix)com.bookfolio.ios"
+
+  BookfolioTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: BookfolioTests
+    dependencies:
+      - target: Bookfolio
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.bookfolio.ios.tests
+        SWIFT_VERSION: "6.0"
