@@ -47,21 +47,32 @@ struct ProfileView: View {
 
                         // Reading status pills
                         HStack(spacing: 12) {
-                            StatusPill(
-                                label: "Currently Reading",
-                                count: stats.currentlyReadingCount,
-                                color: .blue
-                            )
-                            StatusPill(
-                                label: "Read",
-                                count: stats.totalBooksRead,
-                                color: .green
-                            )
-                            StatusPill(
-                                label: "Want to Read",
-                                count: stats.wantToReadCount,
-                                color: .orange
-                            )
+                            NavigationLink(value: AppRoute.currentlyReading(userId: userId)) {
+                                StatusPill(
+                                    label: "Currently Reading",
+                                    count: stats.currentlyReadingCount,
+                                    color: .blue
+                                )
+                            }
+                            .buttonStyle(.plain)
+
+                            NavigationLink(value: AppRoute.readBooks(userId: userId)) {
+                                StatusPill(
+                                    label: "Read",
+                                    count: stats.totalBooksRead,
+                                    color: .green
+                                )
+                            }
+                            .buttonStyle(.plain)
+
+                            NavigationLink(value: AppRoute.wantToRead(userId: userId)) {
+                                StatusPill(
+                                    label: "Want to Read",
+                                    count: stats.wantToReadCount,
+                                    color: .orange
+                                )
+                            }
+                            .buttonStyle(.plain)
                         }
                         .padding(.horizontal)
 
