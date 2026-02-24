@@ -71,6 +71,7 @@
 		AA3344556677889900112233 /* CoverSelectionStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB3344556677889900112233 /* CoverSelectionStep.swift */; };
 		AA4455667788990011223344 /* CategoryStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB4455667788990011223344 /* CategoryStep.swift */; };
 		AA5566778899001122334455 /* TierStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5566778899001122334455 /* TierStep.swift */; };
+		AA6677889900112233445566 /* CompareStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6677889900112233445566 /* CompareStep.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -149,6 +150,7 @@
 		BB3344556677889900112233 /* CoverSelectionStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoverSelectionStep.swift; sourceTree = "<group>"; };
 		BB4455667788990011223344 /* CategoryStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryStep.swift; sourceTree = "<group>"; };
 		BB5566778899001122334455 /* TierStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TierStep.swift; sourceTree = "<group>"; };
+		BB6677889900112233445566 /* CompareStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareStep.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -356,6 +358,7 @@
 			isa = PBXGroup;
 			children = (
 				BB4455667788990011223344 /* CategoryStep.swift */,
+				BB6677889900112233445566 /* CompareStep.swift */,
 				BB3344556677889900112233 /* CoverSelectionStep.swift */,
 				BB2233445566778899001122 /* RankingFlowView.swift */,
 				BB5566778899001122334455 /* TierStep.swift */,
@@ -514,6 +517,7 @@
 				AA3344556677889900112233 /* CoverSelectionStep.swift in Sources */,
 				AA4455667788990011223344 /* CategoryStep.swift in Sources */,
 				AA5566778899001122334455 /* TierStep.swift in Sources */,
+				AA6677889900112233445566 /* CompareStep.swift in Sources */,
 				B88878F93F7BD97471E3D866 /* RouteDestination.swift in Sources */,
 				72F38D5FBED62DB5A916A94B /* SearchTab.swift in Sources */,
 				82EBC25FCFFB5D0C7E7C76F9 /* SupabaseService.swift in Sources */,

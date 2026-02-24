@@ -80,7 +80,15 @@ struct RankingFlowView: View {
                 handleTierSelection(selectedTier)
             }
         case .compare:
-            placeholderStep("Compare Books")
+            CompareStep(
+                newBookTitle: title,
+                newBookAuthor: author,
+                newBookCover: selectedCover ?? coverUrl,
+                tierBooks: tierBooksForCompare
+            ) { positionInTier in
+                finalPosition = higherTierBooksCount + positionInTier + 1
+                goToStep(.review)
+            }
         case .review:
             placeholderStep("Write Review")
         case .saving:
@@ -95,6 +103,22 @@ struct RankingFlowView: View {
             Text("Coming soon")
                 .foregroundColor(.secondary)
         }
+    }
+
+    // MARK: - Computed Properties
+
+    private var tierBooksForCompare: [UserBook] {
+        guard let category = category, let tier = tier else { return [] }
+        return (userBooksCache[category.rawValue] ?? []).filter { $0.tier == tier }
+    }
+
+    private var higherTierBooksCount: Int {
+        guard let category = category, let tier = tier else { return 0 }
+        let tierOrder: [BookTier: Int] = [.liked: 0, .fine: 1, .disliked: 2]
+        let selectedOrder = tierOrder[tier] ?? 0
+        return (userBooksCache[category.rawValue] ?? []).filter {
+            (tierOrder[$0.tier] ?? 0) < selectedOrder
+        }.count
     }
 
     // MARK: - Navigation
