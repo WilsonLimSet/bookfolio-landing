@@ -20,6 +20,11 @@
 		1F5EBB1D80855B843263FED4 /* BookCoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95FF63E1C1042E3D9CB9735 /* BookCoverView.swift */; };
 		2787B2ADD0A3961053CB9AFF /* EditionPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1088A299700DAAB80A06694 /* EditionPickerView.swift */; };
 		2B6C7C8B34EF838297F692F8 /* LeaderboardTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0139D7BB6A2CAACAB2D15D3 /* LeaderboardTab.swift */; };
+		AA0603010101010101010101 /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0603020202020202020202 /* LeaderboardView.swift */; };
+		AA0603030303030303030303 /* LeaderboardService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA0603040404040404040404 /* LeaderboardService.swift */; };
+		BB0603050505050505050505 /* DiscoverTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0603060606060606060606 /* DiscoverTab.swift */; };
+		BB0603070707070707070707 /* DiscoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0603080808080808080808 /* DiscoverView.swift */; };
+		BB0603090909090909090909 /* UserSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB0603100101010101010101 /* UserSearchView.swift */; };
 		2D346057A0531FA45D9BFA4E /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF62D81A51A2017B06A7F47 /* AuthService.swift */; };
 		38BCA4770442541AE96B9956 /* CurrentlyReading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 913D61A37F2B1C21DF4FC7E0 /* CurrentlyReading.swift */; };
 		39CF22880DE094DB0FB5345A /* BookSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28F6590CD187B30AD0DBF387 /* BookSearchView.swift */; };
@@ -142,6 +147,11 @@
 		EDC7179592EE347A38CD09ED /* EditProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditProfileView.swift; sourceTree = "<group>"; };
 		EEF62D81A51A2017B06A7F47 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		F0139D7BB6A2CAACAB2D15D3 /* LeaderboardTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardTab.swift; sourceTree = "<group>"; };
+		AA0603020202020202020202 /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
+		AA0603040404040404040404 /* LeaderboardService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardService.swift; sourceTree = "<group>"; };
+		BB0603060606060606060606 /* DiscoverTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverTab.swift; sourceTree = "<group>"; };
+		BB0603080808080808080808 /* DiscoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiscoverView.swift; sourceTree = "<group>"; };
+		BB0603100101010101010101 /* UserSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSearchView.swift; sourceTree = "<group>"; };
 		F2C75BD7BF9C109E68C7AA13 /* Referral.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Referral.swift; sourceTree = "<group>"; };
 		F33B665A8CD6C68E83501292 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		F58CB3B1B2625498229DAE18 /* OpenLibraryTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenLibraryTypes.swift; sourceTree = "<group>"; };
@@ -213,10 +223,21 @@
 			path = Auth;
 			sourceTree = "<group>";
 		};
+		BB0603110111011101110111 /* Discover */ = {
+			isa = PBXGroup;
+			children = (
+				BB0603060606060606060606 /* DiscoverTab.swift */,
+				BB0603080808080808080808 /* DiscoverView.swift */,
+				BB0603100101010101010101 /* UserSearchView.swift */,
+			);
+			path = Discover;
+			sourceTree = "<group>";
+		};
 		615B580C3E006715DF9F9D10 /* Leaderboard */ = {
 			isa = PBXGroup;
 			children = (
 				F0139D7BB6A2CAACAB2D15D3 /* LeaderboardTab.swift */,
+				AA0603020202020202020202 /* LeaderboardView.swift */,
 			);
 			path = Leaderboard;
 			sourceTree = "<group>";
@@ -230,6 +251,7 @@
 				DD0601010101010101010101 /* CommentService.swift */,
 				FFEC649270B4ECEC1EFF1056 /* FeedService.swift */,
 				CBAB09B84F6FC3092E42BC54 /* GoogleAuthService.swift */,
+				AA0603040404040404040404 /* LeaderboardService.swift */,
 				C76AE8997AF56791BC2C9516 /* OpenLibraryService.swift */,
 				E5E71D2F2459912AF982E5A8 /* ProfileService.swift */,
 				BB1122334455667788990011 /* RankingService.swift */,
@@ -279,6 +301,7 @@
 			children = (
 				51D29D594C210F399A521193 /* Auth */,
 				32755F19D904BB93277CBCD6 /* Book */,
+				BB0603110111011101110111 /* Discover */,
 				D13976CDDE1D5427CFFA6E7C /* Feed */,
 				615B580C3E006715DF9F9D10 /* Leaderboard */,
 				078AB36D460861790F50AE5D /* Lists */,
@@ -517,6 +540,11 @@
 				8386211142BCE045AA67F163 /* FollowListView.swift in Sources */,
 				141114D554B12CF4A1327F35 /* GoogleAuthService.swift in Sources */,
 				2B6C7C8B34EF838297F692F8 /* LeaderboardTab.swift in Sources */,
+				AA0603010101010101010101 /* LeaderboardView.swift in Sources */,
+				AA0603030303030303030303 /* LeaderboardService.swift in Sources */,
+				BB0603050505050505050505 /* DiscoverTab.swift in Sources */,
+				BB0603070707070707070707 /* DiscoverView.swift in Sources */,
+				BB0603090909090909090909 /* UserSearchView.swift in Sources */,
 				963FE8A741E657F052DDBC71 /* ListsTab.swift in Sources */,
 				48DB8A4ACA21A6DCCC7DD12E /* LoginView.swift in Sources */,
 				404541C13F3B8DD1AEA74127 /* Notification.swift in Sources */,
