@@ -11,6 +11,8 @@ struct BookDetailView: View {
     @State private var isLoading = true
     @State private var showEditionPicker = false
     @State private var isDescriptionExpanded = false
+    @State private var isWantToRead = false
+    @State private var isCurrentlyReading = false
 
     var body: some View {
         Group {
@@ -138,41 +140,51 @@ struct BookDetailView: View {
         }
     }
 
-    // MARK: - Action Buttons (Placeholders for Plan 03)
+    // MARK: - Action Buttons
 
+    @ViewBuilder
     private func actionButtonsSection() -> some View {
-        // TODO: Plan 03 will implement real want-to-read/currently-reading toggles
-        HStack(spacing: 12) {
-            if userBook == nil {
-                Button {} label: {
-                    Label("Add to my list", systemImage: "plus.circle")
-                        .font(.subheadline.bold())
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
+        if case .authenticated = authService.state, let book = bookDetails {
+            let metadata = BookMetadata(
+                openLibraryKey: bookKey,
+                title: book.title,
+                author: book.author,
+                coverUrl: book.coverUrl
+            )
+
+            VStack(spacing: 10) {
+                if userBook == nil {
+                    NavigationLink(value: AppRoute.rankBook(
+                        bookKey: bookKey,
+                        title: book.title,
+                        author: book.author,
+                        coverUrl: book.coverUrl
+                    )) {
+                        Label("Add to my list", systemImage: "plus.circle")
+                            .font(.subheadline.bold())
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(true)
-            }
 
-            Button {} label: {
-                Label("Reading", systemImage: "book")
-                    .font(.subheadline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-            }
-            .buttonStyle(.bordered)
-            .disabled(true)
+                HStack(spacing: 12) {
+                    CurrentlyReadingButton(
+                        book: metadata,
+                        isCurrentlyReading: $isCurrentlyReading,
+                        isWantToRead: $isWantToRead
+                    )
 
-            Button {} label: {
-                Label("Want", systemImage: "bookmark")
-                    .font(.subheadline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
+                    if !isCurrentlyReading {
+                        WantToReadButton(
+                            book: metadata,
+                            isWantToRead: $isWantToRead
+                        )
+                    }
+                }
             }
-            .buttonStyle(.bordered)
-            .disabled(true)
+            .padding(.horizontal)
         }
-        .padding(.horizontal)
     }
 
     // MARK: - Description
@@ -334,27 +346,19 @@ struct BookDetailView: View {
 
         // 2. If authenticated, fetch Supabase data in parallel
         if case .authenticated(let user) = authService.state {
-            async let userBookResult: Void = loadUserBook(userId: user.id)
+            async let statusResult: Void = loadBookStatus(userId: user.id)
             async let communityResult: Void = loadCommunityRatings()
-            _ = await (userBookResult, communityResult)
+            _ = await (statusResult, communityResult)
         }
 
         isLoading = false
     }
 
-    private func loadUserBook(userId: UUID) async {
-        do {
-            let results: [UserBook] = try await supabase.from("user_books")
-                .select()
-                .eq("user_id", value: userId)
-                .eq("open_library_key", value: bookKey)
-                .limit(1)
-                .execute()
-                .value
-            userBook = results.first
-        } catch {
-            // User may not have rated this book — silently ignore
-        }
+    private func loadBookStatus(userId: UUID) async {
+        let status = await BookActionService.checkBookStatus(userId: userId, bookKey: bookKey)
+        isWantToRead = status.isWantToRead
+        isCurrentlyReading = status.isCurrentlyReading
+        userBook = status.userBook
     }
 
     private func loadCommunityRatings() async {

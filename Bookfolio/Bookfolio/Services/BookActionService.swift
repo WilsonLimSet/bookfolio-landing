@@ -1,7 +1,7 @@
 import Foundation
 import Supabase
 
-struct BookMetadata {
+struct BookMetadata: Sendable {
     let openLibraryKey: String
     let title: String
     let author: String?
@@ -24,11 +24,13 @@ enum BookActionService {
             .insert(insert)
             .execute()
 
-        Task {
+        let capturedUserId = userId
+        let capturedBook = book
+        Task { @Sendable in
             try? await logActivity(
-                userId: userId,
+                userId: capturedUserId,
                 actionType: .wantToRead,
-                book: book
+                book: capturedBook
             )
         }
     }
@@ -56,20 +58,23 @@ enum BookActionService {
             .execute()
 
         // Fire-and-forget: auto-remove from want_to_read
-        Task {
-            try? await supabase.from("want_to_read")
+        let capturedUserId = userId
+        let capturedBookKey = book.openLibraryKey
+        Task { @Sendable in
+            _ = try? await supabase.from("want_to_read")
                 .delete()
-                .eq("user_id", value: userId)
-                .eq("open_library_key", value: book.openLibraryKey)
+                .eq("user_id", value: capturedUserId)
+                .eq("open_library_key", value: capturedBookKey)
                 .execute()
         }
 
         // Fire-and-forget: log activity
-        Task {
+        let capturedBook = book
+        Task { @Sendable in
             try? await logActivity(
-                userId: userId,
+                userId: capturedUserId,
                 actionType: .startedReading,
-                book: book
+                book: capturedBook
             )
         }
     }
