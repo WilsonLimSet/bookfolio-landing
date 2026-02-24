@@ -44,9 +44,9 @@ struct BookfolioApp: App {
             LeaderboardTab(router: appRouter.leaderboardRouter)
                 .tabItem { Label(Tab.leaderboard.title, systemImage: Tab.leaderboard.icon) }
                 .tag(Tab.leaderboard)
-            ListsTab(router: appRouter.listsRouter)
-                .tabItem { Label(Tab.lists.title, systemImage: Tab.lists.icon) }
-                .tag(Tab.lists)
+            DiscoverTab(router: appRouter.discoverRouter)
+                .tabItem { Label(Tab.discover.title, systemImage: Tab.discover.icon) }
+                .tag(Tab.discover)
         }
         .environmentObject(appRouter)
     }

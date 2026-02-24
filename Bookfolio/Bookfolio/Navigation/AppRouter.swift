@@ -5,7 +5,7 @@ enum Tab: Int, CaseIterable, Hashable {
     case search
     case profile
     case leaderboard
-    case lists
+    case discover
 
     var title: String {
         switch self {
@@ -13,7 +13,7 @@ enum Tab: Int, CaseIterable, Hashable {
         case .search: "Search"
         case .profile: "Profile"
         case .leaderboard: "Leaderboard"
-        case .lists: "Lists"
+        case .discover: "Discover"
         }
     }
 
@@ -23,7 +23,7 @@ enum Tab: Int, CaseIterable, Hashable {
         case .search: "magnifyingglass"
         case .profile: "person.fill"
         case .leaderboard: "trophy.fill"
-        case .lists: "list.bullet"
+        case .discover: "person.2.fill"
         }
     }
 }
@@ -35,7 +35,7 @@ final class AppRouter: ObservableObject {
     let searchRouter = TabRouter()
     let profileRouter = TabRouter()
     let leaderboardRouter = TabRouter()
-    let listsRouter = TabRouter()
+    let discoverRouter = TabRouter()
 
     func router(for tab: Tab) -> TabRouter {
         switch tab {
@@ -43,7 +43,7 @@ final class AppRouter: ObservableObject {
         case .search: searchRouter
         case .profile: profileRouter
         case .leaderboard: leaderboardRouter
-        case .lists: listsRouter
+        case .discover: discoverRouter
         }
     }
 
