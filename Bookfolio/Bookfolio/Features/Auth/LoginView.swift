@@ -3,6 +3,8 @@ import SwiftUI
 struct LoginView: View {
     @EnvironmentObject var authService: AuthService
 
+    private let googleAuth = GoogleAuthService()
+
     @State private var isSignUp = false
     @State private var email = ""
     @State private var password = ""
@@ -145,12 +147,19 @@ struct LoginView: View {
                         .foregroundStyle(Color(.systemGray4))
                 }
 
-                // Google Sign-In Placeholder
+                // Google Sign-In
                 Button {
-                    // Wired up in Plan 02-02
+                    Task {
+                        do {
+                            try await googleAuth.signIn()
+                            // AuthService handles state change via authStateChanges
+                        } catch {
+                            errorMessage = error.localizedDescription
+                        }
+                    }
                 } label: {
                     HStack(spacing: 8) {
-                        Image(systemName: "globe")
+                        Image(systemName: "g.circle.fill")
                         Text("Continue with Google")
                     }
                     .frame(maxWidth: .infinity)
@@ -160,6 +169,7 @@ struct LoginView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .fontWeight(.medium)
                 }
+                .disabled(authService.isLoading)
 
                 Spacer()
             }
