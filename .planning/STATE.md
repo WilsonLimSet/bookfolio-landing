@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** The ranking flow must feel incredible on iOS — haptic feedback on every comparison, buttery spring animations, gesture-driven interactions.
-**Current focus:** Phase 2 complete — ready for Phase 3
+**Current focus:** Phase 3 in progress — Feed & Profile
 
 ## Current Position
 
-Phase: 2 complete
-Plan: 02-03 complete
-Status: Ready to plan Phase 3
-Last activity: 2026-02-24 — Plan 02-03 Apple Sign-In + Username Setup + Auth Routing complete
+Phase: 3 in progress
+Plan: 03-01 complete
+Status: Ready for plan 03-02
+Last activity: 2026-02-24 — Plan 03-01 Feed Tab with 3-tab segmented control complete
 
-Progress: ████░░░░░░ 30%
+Progress: ████▓░░░░░ 35%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 6
-- Average duration: 6.5min
-- Total execution time: 39min
+- Total plans completed: 7
+- Average duration: 6.7min
+- Total execution time: 47min
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: ████░░░░░░ 30%
 |-------|-------|-------|----------|
 | 01-foundation | 3/3 | 18min | 6min |
 | 02-authentication | 3/3 | 21min | 7min |
+| 03-feed-and-profile | 1/4 | 8min | 8min |
 
 **Recent Trend:**
-- Last 5 plans: 01-03 (5min), 02-01 (8min), 02-02 (5min), 02-03 (8min)
+- Last 5 plans: 02-01 (8min), 02-02 (5min), 02-03 (8min), 03-01 (8min)
 - Trend: Stable ~5-8min/plan
 
 ## Accumulated Context
@@ -61,6 +62,10 @@ Recent decisions affecting current work:
 - AuthState is Equatable for animated transitions between auth states
 - Username validation uses String.range(of:options:.regularExpression) instead of Regex literal for SourceKit compat
 - Auth-state routing: BookfolioApp switches on AuthService.state for root view selection
+- FeedService uses private Decodable row types for lightweight Supabase query responses
+- Review likes fetched separately and merged in Swift (no complex JOINs)
+- Inner tab content uses Group+switch instead of nested TabView to avoid conflicts
+- Tab caching via loadedTabs Set to avoid re-fetching on tab switch
 
 ### Deferred Issues
 
@@ -73,5 +78,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Phase 2 complete, ready to plan Phase 3 (Feed & Profile)
+Stopped at: Plan 03-01 complete, ready for 03-02 (Profile)
 Resume file: None
