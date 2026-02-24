@@ -41,6 +41,7 @@
 		686698413BFE3CD21A6B64F5 /* AppleAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DDBC1D64939BAFC7B657A89 /* AppleAuthService.swift */; };
 		72F38D5FBED62DB5A916A94B /* SearchTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF7A6C8BD6698F410CA126C3 /* SearchTab.swift */; };
 		747FA723B5C24BA27798B448 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5E7F3B5EB350756F3BF524D4 /* Assets.xcassets */; };
+		PP0704020202020202020202 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = PP0704010101010101010101 /* PrivacyInfo.xcprivacy */; };
 		7677B6A46A782C79DC2014A4 /* UserBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D861B1088E04F2F9F9BC304 /* UserBook.swift */; };
 		77DD17ED33C5F343EA7F5816 /* AuthError+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E7652B47A896B0566553584 /* AuthError+Display.swift */; };
 		7EA090D93940FB1CCFD16835 /* EditProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDC7179592EE347A38CD09ED /* EditProfileView.swift */; };
@@ -110,6 +111,7 @@
 		0D8A00F6393320A9FD2499E0 /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
 		0E7652B47A896B0566553584 /* AuthError+Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuthError+Display.swift"; sourceTree = "<group>"; };
 		1364936A66779B3F6DFED284 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		PP0704010101010101010101 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		179E73F6152A324D75AB04AE /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
 		1FA4E7BC65434C33CD1BE039 /* Bookfolio.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Bookfolio.entitlements; sourceTree = "<group>"; };
 		26572BFF35D1002E3E8CB8A7 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
@@ -356,6 +358,7 @@
 				7CB46FA56D562C70EF50DE96 /* BookfolioApp.swift */,
 				26572BFF35D1002E3E8CB8A7 /* Config.swift */,
 				1364936A66779B3F6DFED284 /* Info.plist */,
+				PP0704010101010101010101 /* PrivacyInfo.xcprivacy */,
 				BF96E301B68B5AEC0E8E244D /* Features */,
 				C148A84EAF47252C54B4C004 /* Models */,
 				B9D1D1E9E08DFF41E62E04D2 /* Navigation */,
@@ -535,6 +538,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				747FA723B5C24BA27798B448 /* Assets.xcassets in Resources */,
+				PP0704020202020202020202 /* PrivacyInfo.xcprivacy in Resources */,
 				83C913832856FD55C9F49AB2 /* Preview Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
