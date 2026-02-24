@@ -12,16 +12,20 @@ struct OLSearchResult: Codable, Identifiable {
     let title: String
     let authorName: [String]?
     let coverId: Int?
+    let coverEditionKey: String?
     let firstPublishYear: Int?
     let numberOfPagesMedian: Int?
+    let editionCount: Int?
     let subject: [String]?
 
     enum CodingKeys: String, CodingKey {
         case key, title, subject
         case authorName = "author_name"
         case coverId = "cover_i"
+        case coverEditionKey = "cover_edition_key"
         case firstPublishYear = "first_publish_year"
         case numberOfPagesMedian = "number_of_pages_median"
+        case editionCount = "edition_count"
     }
 }
 
@@ -98,6 +102,10 @@ struct OLEditionsResponse: Codable {
     let entries: [OLEdition]
 }
 
+struct OLLanguageRef: Codable {
+    let key: String
+}
+
 struct OLEdition: Codable, Identifiable {
     var id: String { key }
     let key: String
@@ -108,9 +116,11 @@ struct OLEdition: Codable, Identifiable {
     let isbn13: [String]?
     let isbn10: [String]?
     let numberOfPages: Int?
+    let languages: [OLLanguageRef]?
+    let description: OLDescription?
 
     enum CodingKeys: String, CodingKey {
-        case key, title, covers, publishers
+        case key, title, covers, publishers, languages, description
         case publishDate = "publish_date"
         case isbn13 = "isbn_13"
         case isbn10 = "isbn_10"
