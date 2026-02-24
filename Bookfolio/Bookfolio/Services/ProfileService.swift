@@ -275,4 +275,74 @@ enum ProfileService {
             .eq("following_id", value: targetUserId.uuidString)
             .execute()
     }
+
+    // MARK: - Edit Profile
+
+    static func updateProfile(_ update: ProfileUpdate, userId: UUID) async throws {
+        try await supabase.from("profiles")
+            .update(update)
+            .eq("id", value: userId.uuidString)
+            .execute()
+    }
+
+    static func uploadAvatar(data: Data, userId: UUID) async throws -> String {
+        let path = "\(userId.uuidString)/avatar.jpg"
+        try await supabase.storage.from("avatars")
+            .upload(
+                path: path,
+                file: data,
+                options: .init(contentType: "image/jpeg", upsert: true)
+            )
+        let publicURL = try supabase.storage.from("avatars")
+            .getPublicURL(path: path)
+        return publicURL.absoluteString
+    }
+
+    static func fetchUserBooks(userId: UUID) async throws -> [UserBook] {
+        try await supabase.from("user_books")
+            .select()
+            .eq("user_id", value: userId.uuidString)
+            .order("score", ascending: false)
+            .execute()
+            .value
+    }
+
+    static func updateFavorites(_ favorites: [FavoriteBook], userId: UUID) async throws {
+        // Delete existing favorites
+        try await supabase.from("favorite_books")
+            .delete()
+            .eq("user_id", value: userId.uuidString)
+            .execute()
+
+        // Insert new favorites with updated positions
+        for (index, favorite) in favorites.enumerated() {
+            let insert = NewFavoriteBook(
+                userId: userId,
+                openLibraryKey: favorite.openLibraryKey,
+                title: favorite.title,
+                author: favorite.author,
+                coverUrl: favorite.coverUrl,
+                position: index + 1
+            )
+            try await supabase.from("favorite_books")
+                .insert(insert)
+                .execute()
+        }
+    }
+}
+
+private struct NewFavoriteBook: Encodable {
+    let userId: UUID
+    let openLibraryKey: String
+    let title: String
+    let author: String?
+    let coverUrl: String?
+    let position: Int
+
+    enum CodingKeys: String, CodingKey {
+        case title, author, position
+        case userId = "user_id"
+        case openLibraryKey = "open_library_key"
+        case coverUrl = "cover_url"
+    }
 }
