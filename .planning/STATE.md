@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** The ranking flow must feel incredible on iOS — haptic feedback on every comparison, buttery spring animations, gesture-driven interactions.
-**Current focus:** Phase 5 complete — ready for Phase 6 (Social & Notifications)
+**Current focus:** Phase 6 complete — ready for Phase 7 (Lists, Import & Polish)
 
 ## Current Position
 
-Phase: 5 complete
-Plan: 05-04 complete
-Status: Ready for Phase 6 planning
-Last activity: 2026-02-24 — Ranking flow complete with haptics and animations
+Phase: 6 complete
+Plan: 06-04 complete
+Status: Ready for Phase 7 planning
+Last activity: 2026-02-24 — Social features, discover, leaderboard, push notifications
 
-Progress: ████████░░ 68%
+Progress: █████████░ 84%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
+- Total plans completed: 21
 - Average duration: ~7min
-- Total execution time: ~120min
+- Total execution time: ~148min
 
 **By Phase:**
 
@@ -32,10 +32,11 @@ Progress: ████████░░ 68%
 | 03-feed-and-profile | 4/4 | ~30min | ~7.5min |
 | 04-book-discovery | 3/3 | ~22min | ~7min |
 | 05-ranking-flow | 4/4 | ~28min | ~7min |
+| 06-social-notifications | 4/4 | ~28min | ~7min |
 
 **Recent Trend:**
-- Last 5 plans: 04-03 (8min), 05-01 (6min), 05-02 (7min), 05-03 (7min), 05-04 (8min)
-- Trend: Stable ~6-8min/plan
+- Last 5 plans: 05-04 (8min), 06-01 (5min), 06-02 (3min), 06-03 (5min), 06-04 (3min)
+- Trend: Stable ~3-8min/plan
 
 ## Accumulated Context
 
@@ -94,6 +95,19 @@ Recent decisions affecting current work:
 - Empty tier skips compare step, calculates position directly
 - Compact DatePicker style for review step
 - TextEditor with placeholder overlay (no native placeholder support)
+- CommentService uses enum with static methods + private CommentRow Decodable for joined query
+- Comment notifications fire-and-forget only when commenter != review owner
+- ReviewDetailView fetches userBook, profile, like status, like count separately
+- Discover tab replaced Lists placeholder — renamed tab case from .lists to .discover
+- UserSearchView debounced search (300ms) with ilike on username
+- Suggested readers: top 12 most active users not already followed
+- LeaderboardService aggregates liked books by open_library_key with majority-rules category
+- Fiction wins ties in leaderboard category voting
+- Rank badges: gold (#1), silver (#2), bronze (#3)
+- PushNotificationService is a class (UNUserNotificationCenterDelegate requires NSObject)
+- AppDelegate adapter via @UIApplicationDelegateAdaptor for device token handling
+- Push permission requested after authentication via .task modifier
+- device_tokens upsert uses try? (table may not exist yet)
 
 ### Deferred Issues
 
@@ -106,5 +120,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Phase 5 complete, ranking flow built and verified
+Stopped at: Phase 6 complete, social features verified
 Resume file: None

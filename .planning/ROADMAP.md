@@ -19,7 +19,7 @@ None
 - [x] **Phase 3: Feed & Profile** — Feed tabs, profile screen, edit profile, read/reading/want lists
 - [x] **Phase 4: Book Discovery** — Search, book detail, edition picker, want-to-read/currently-reading
 - [x] **Phase 5: Ranking Flow** — Cover selection, category, tier, binary comparisons, review, save
-- [ ] **Phase 6: Social & Notifications** — Follow, like, comment, push notifications, discover, leaderboard
+- [x] **Phase 6: Social & Notifications** — Follow, like, comment, push notifications, discover, leaderboard
 - [ ] **Phase 7: Lists, Import & Polish** — Book lists, Goodreads import, haptics, offline caching, App Store prep
 
 ## Phase Details
@@ -121,5 +121,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 3. Feed & Profile | 4/4 | Complete | 2026-02-24 |
 | 4. Book Discovery | 3/3 | Complete | 2026-02-24 |
 | 5. Ranking Flow | 4/4 | Complete | 2026-02-24 |
-| 6. Social & Notifications | 0/4 | Not started | - |
+| 6. Social & Notifications | 4/4 | Complete | 2026-02-24 |
 | 7. Lists, Import & Polish | 0/4 | Not started | - |
