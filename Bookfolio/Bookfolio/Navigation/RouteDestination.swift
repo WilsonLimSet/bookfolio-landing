@@ -6,7 +6,7 @@ struct RouteDestination: ViewModifier {
             .navigationDestination(for: AppRoute.self) { route in
                 switch route {
                 case .bookDetail(let bookKey):
-                    PlaceholderDestination(title: "Book Detail", detail: bookKey)
+                    BookDetailView(bookKey: bookKey)
                 case .userProfile(let userId):
                     ProfileView(userId: userId)
                 case .editProfile:
