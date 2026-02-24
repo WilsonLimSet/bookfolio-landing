@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 3 in progress
-Plan: 03-01 complete
-Status: Ready for plan 03-02
-Last activity: 2026-02-24 — Plan 03-01 Feed Tab with 3-tab segmented control complete
+Plan: 03-02 complete
+Status: Ready for plan 03-03
+Last activity: 2026-02-24 — Plan 03-02 Profile screen with stats, favorites, follow/unfollow complete
 
-Progress: ████▓░░░░░ 35%
+Progress: █████░░░░░ 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 7
-- Average duration: 6.7min
-- Total execution time: 47min
+- Total plans completed: 8
+- Average duration: 6.9min
+- Total execution time: 55min
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: ████▓░░░░░ 35%
 |-------|-------|-------|----------|
 | 01-foundation | 3/3 | 18min | 6min |
 | 02-authentication | 3/3 | 21min | 7min |
-| 03-feed-and-profile | 1/4 | 8min | 8min |
+| 03-feed-and-profile | 2/4 | 16min | 8min |
 
 **Recent Trend:**
-- Last 5 plans: 02-01 (8min), 02-02 (5min), 02-03 (8min), 03-01 (8min)
+- Last 5 plans: 02-02 (5min), 02-03 (8min), 03-01 (8min), 03-02 (8min)
 - Trend: Stable ~5-8min/plan
 
 ## Accumulated Context
@@ -66,6 +66,10 @@ Recent decisions affecting current work:
 - Review likes fetched separately and merged in Swift (no complex JOINs)
 - Inner tab content uses Group+switch instead of nested TabView to avoid conflicts
 - Tab caching via loadedTabs Set to avoid re-fetching on tab switch
+- ProfileService uses static methods on enum (no instance state needed)
+- FollowWithProfile struct for Supabase foreign-key join queries
+- Week streak calculated client-side from activity dates grouped by ISO week
+- foregroundColor instead of foregroundStyle for ternary Color/HierarchicalShapeStyle compat
 
 ### Deferred Issues
 
@@ -78,5 +82,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Plan 03-01 complete, ready for 03-02 (Profile)
+Stopped at: Plan 03-02 complete, ready for 03-03
 Resume file: None
