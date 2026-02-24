@@ -88,7 +88,7 @@ enum CommentService {
         // Send notification if commenter is not the review owner
         if userId != reviewOwnerId {
             Task { @Sendable in
-                try? await supabase.from("notifications")
+                _ = try? await supabase.from("notifications")
                     .insert(NewNotification(
                         userId: reviewOwnerId,
                         type: .comment,

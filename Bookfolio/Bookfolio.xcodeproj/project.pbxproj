@@ -73,6 +73,9 @@
 		AA5566778899001122334455 /* TierStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB5566778899001122334455 /* TierStep.swift */; };
 		AA6677889900112233445566 /* CompareStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB6677889900112233445566 /* CompareStep.swift */; };
 		AA7788990011223344556677 /* ReviewStep.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7788990011223344556677 /* ReviewStep.swift */; };
+		CC0601010101010101010101 /* CommentService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0601010101010101010101 /* CommentService.swift */; };
+		CC0601020202020202020202 /* CommentSectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0601020202020202020202 /* CommentSectionView.swift */; };
+		CC0601030303030303030303 /* ReviewDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD0601030303030303030303 /* ReviewDetailView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -153,6 +156,9 @@
 		BB5566778899001122334455 /* TierStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TierStep.swift; sourceTree = "<group>"; };
 		BB6677889900112233445566 /* CompareStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompareStep.swift; sourceTree = "<group>"; };
 		BB7788990011223344556677 /* ReviewStep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewStep.swift; sourceTree = "<group>"; };
+		DD0601010101010101010101 /* CommentService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentService.swift; sourceTree = "<group>"; };
+		DD0601020202020202020202 /* CommentSectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommentSectionView.swift; sourceTree = "<group>"; };
+		DD0601030303030303030303 /* ReviewDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewDetailView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -221,6 +227,7 @@
 				9DDBC1D64939BAFC7B657A89 /* AppleAuthService.swift */,
 				EEF62D81A51A2017B06A7F47 /* AuthService.swift */,
 				A1B2C3D4E5F6A7B8C9D0E1FA /* BookActionService.swift */,
+				DD0601010101010101010101 /* CommentService.swift */,
 				FFEC649270B4ECEC1EFF1056 /* FeedService.swift */,
 				CBAB09B84F6FC3092E42BC54 /* GoogleAuthService.swift */,
 				C76AE8997AF56791BC2C9516 /* OpenLibraryService.swift */,
@@ -277,6 +284,7 @@
 				078AB36D460861790F50AE5D /* Lists */,
 				C977B71B99BDC8AAFBA785E4 /* Profile */,
 				CC1122334455667788990011 /* Ranking */,
+				EE0601040404040404040404 /* Review */,
 				F85B2DDABF96C8C73FAC690C /* Search */,
 			);
 			path = Features;
@@ -367,6 +375,15 @@
 				BB5566778899001122334455 /* TierStep.swift */,
 			);
 			path = Ranking;
+			sourceTree = "<group>";
+		};
+		EE0601040404040404040404 /* Review */ = {
+			isa = PBXGroup;
+			children = (
+				DD0601020202020202020202 /* CommentSectionView.swift */,
+				DD0601030303030303030303 /* ReviewDetailView.swift */,
+			);
+			path = Review;
 			sourceTree = "<group>";
 		};
 		F85B2DDABF96C8C73FAC690C /* Search */ = {
@@ -522,6 +539,9 @@
 				AA5566778899001122334455 /* TierStep.swift in Sources */,
 				AA6677889900112233445566 /* CompareStep.swift in Sources */,
 				AA7788990011223344556677 /* ReviewStep.swift in Sources */,
+				CC0601010101010101010101 /* CommentService.swift in Sources */,
+				CC0601020202020202020202 /* CommentSectionView.swift in Sources */,
+				CC0601030303030303030303 /* ReviewDetailView.swift in Sources */,
 				B88878F93F7BD97471E3D866 /* RouteDestination.swift in Sources */,
 				72F38D5FBED62DB5A916A94B /* SearchTab.swift in Sources */,
 				82EBC25FCFFB5D0C7E7C76F9 /* SupabaseService.swift in Sources */,
