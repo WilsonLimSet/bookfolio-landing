@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** The ranking flow must feel incredible on iOS — haptic feedback on every comparison, buttery spring animations, gesture-driven interactions.
-**Current focus:** Phase 4 in progress — Book Discovery
+**Current focus:** Phase 4 complete — ready for Phase 5 (Ranking Flow)
 
 ## Current Position
 
-Phase: 4 in progress
-Plan: 04-02 complete
-Status: Executing Phase 4
-Last activity: 2026-02-24 — Book search and detail UI built
+Phase: 4 complete
+Plan: 04-03 complete
+Status: Ready for Phase 5 planning
+Last activity: 2026-02-24 — Book discovery flow complete with action buttons
 
-Progress: ██████░░░░ 42%
+Progress: ███████░░░ 52%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 12
+- Total plans completed: 13
 - Average duration: ~7min
-- Total execution time: ~84min
+- Total execution time: ~92min
 
 **By Phase:**
 
@@ -30,10 +30,10 @@ Progress: ██████░░░░ 42%
 | 01-foundation | 3/3 | 18min | 6min |
 | 02-authentication | 3/3 | 21min | 7min |
 | 03-feed-and-profile | 4/4 | ~30min | ~7.5min |
-| 04-book-discovery | 2/? | 14min | 7min |
+| 04-book-discovery | 3/3 | ~22min | ~7min |
 
 **Recent Trend:**
-- Last 5 plans: 03-03 (5min), 03-04 (4min), 04-01 (6min), 04-02 (8min)
+- Last 5 plans: 03-04 (4min), 04-01 (6min), 04-02 (8min), 04-03 (8min)
 - Trend: Stable ~5-8min/plan
 
 ## Accumulated Context
@@ -79,7 +79,9 @@ Recent decisions affecting current work:
 - BookCoverView: reusable AsyncImage component with loading/fallback in SharedComponents
 - Debounced search: cancel previous Task, sleep 300ms, then search
 - User book query uses limit(1) + .first instead of maybeSingle()
-- Action buttons in BookDetailView are disabled placeholders for Plan 03
+- BookMetadata marked Sendable for Swift 6 strict concurrency
+- Fire-and-forget closures use @Sendable for concurrency compliance
+- BookActionService uses fire-and-forget for activity logging and want-to-read cleanup
 
 ### Deferred Issues
 
@@ -92,5 +94,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Phase 4 plan 02 complete, book search and detail UI built
+Stopped at: Phase 4 complete, book discovery flow built and verified
 Resume file: None

@@ -17,7 +17,7 @@ None
 - [x] **Phase 1: Foundation** — Xcode project, supabase-swift SDK, Swift models, navigation shell
 - [x] **Phase 2: Authentication** — Email/password, Google OAuth, Apple Sign-In, username setup, session persistence
 - [x] **Phase 3: Feed & Profile** — Feed tabs, profile screen, edit profile, read/reading/want lists
-- [ ] **Phase 4: Book Discovery** — Search, book detail, edition picker, want-to-read/currently-reading
+- [x] **Phase 4: Book Discovery** — Search, book detail, edition picker, want-to-read/currently-reading
 - [ ] **Phase 5: Ranking Flow** — Cover selection, category, tier, binary comparisons, review, save
 - [ ] **Phase 6: Social & Notifications** — Follow, like, comment, push notifications, discover, leaderboard
 - [ ] **Phase 7: Lists, Import & Polish** — Book lists, Goodreads import, haptics, offline caching, App Store prep
@@ -119,7 +119,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7
 | 1. Foundation | 3/3 | Complete | 2026-02-24 |
 | 2. Authentication | 3/3 | Complete | 2026-02-24 |
 | 3. Feed & Profile | 4/4 | Complete | 2026-02-24 |
-| 4. Book Discovery | 0/3 | Not started | - |
+| 4. Book Discovery | 3/3 | Complete | 2026-02-24 |
 | 5. Ranking Flow | 0/4 | Not started | - |
 | 6. Social & Notifications | 0/4 | Not started | - |
 | 7. Lists, Import & Polish | 0/4 | Not started | - |
