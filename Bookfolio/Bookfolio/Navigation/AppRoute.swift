@@ -9,4 +9,7 @@ enum AppRoute: Hashable {
     case listDetail(listId: UUID)
     case reviewDetail(reviewId: UUID)
     case rankBook(bookKey: String, title: String, author: String?, coverUrl: String?)
+    case readBooks(userId: UUID)
+    case currentlyReading(userId: UUID)
+    case wantToRead(userId: UUID)
 }

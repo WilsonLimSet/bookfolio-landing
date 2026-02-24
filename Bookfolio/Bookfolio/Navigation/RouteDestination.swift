@@ -10,7 +10,7 @@ struct RouteDestination: ViewModifier {
                 case .userProfile(let userId):
                     ProfileView(userId: userId)
                 case .editProfile:
-                    PlaceholderDestination(title: "Edit Profile", detail: nil)
+                    EditProfileView()
                 case .followers(let userId):
                     FollowListView(userId: userId, listType: .followers)
                 case .following(let userId):
@@ -21,6 +21,12 @@ struct RouteDestination: ViewModifier {
                     PlaceholderDestination(title: "Review Detail", detail: reviewId.uuidString)
                 case .rankBook(let bookKey, let title, _, _):
                     PlaceholderDestination(title: "Rank Book", detail: "\(title) (\(bookKey))")
+                case .readBooks(let userId):
+                    ReadBooksView(userId: userId)
+                case .currentlyReading(let userId):
+                    CurrentlyReadingView(userId: userId)
+                case .wantToRead(let userId):
+                    WantToReadView(userId: userId)
                 }
             }
     }
