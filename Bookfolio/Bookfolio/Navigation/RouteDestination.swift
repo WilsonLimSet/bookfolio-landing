@@ -8,13 +8,13 @@ struct RouteDestination: ViewModifier {
                 case .bookDetail(let bookKey):
                     PlaceholderDestination(title: "Book Detail", detail: bookKey)
                 case .userProfile(let userId):
-                    PlaceholderDestination(title: "User Profile", detail: userId.uuidString)
+                    ProfileView(userId: userId)
                 case .editProfile:
                     PlaceholderDestination(title: "Edit Profile", detail: nil)
                 case .followers(let userId):
-                    PlaceholderDestination(title: "Followers", detail: userId.uuidString)
+                    FollowListView(userId: userId, listType: .followers)
                 case .following(let userId):
-                    PlaceholderDestination(title: "Following", detail: userId.uuidString)
+                    FollowListView(userId: userId, listType: .following)
                 case .listDetail(let listId):
                     PlaceholderDestination(title: "List Detail", detail: listId.uuidString)
                 case .reviewDetail(let reviewId):
