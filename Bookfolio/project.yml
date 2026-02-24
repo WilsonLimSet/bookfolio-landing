@@ -42,6 +42,8 @@ targets:
       properties:
         com.apple.developer.associated-domains:
           - "applinks:bookfolio.app"
+        com.apple.developer.applesignin:
+          - "Default"
         keychain-access-groups:
           - "$(AppIdentifierPrefix)com.bookfolio.ios"
 

@@ -23,6 +23,7 @@
 		52E8926F35D5E917711064BA /* OpenLibraryTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F58CB3B1B2625498229DAE18 /* OpenLibraryTypes.swift */; };
 		5F52CA47B98463F09C5C72E8 /* Activity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701BB05152AA1EA8CDE87746 /* Activity.swift */; };
 		63576D980D1FEDF2A3EF9581 /* Follow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4993BD71FB2A371AB7279621 /* Follow.swift */; };
+		686698413BFE3CD21A6B64F5 /* AppleAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9DDBC1D64939BAFC7B657A89 /* AppleAuthService.swift */; };
 		72F38D5FBED62DB5A916A94B /* SearchTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF7A6C8BD6698F410CA126C3 /* SearchTab.swift */; };
 		747FA723B5C24BA27798B448 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5E7F3B5EB350756F3BF524D4 /* Assets.xcassets */; };
 		7677B6A46A782C79DC2014A4 /* UserBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D861B1088E04F2F9F9BC304 /* UserBook.swift */; };
@@ -81,6 +82,7 @@
 		8E77BB618CE287E1EB23FDE5 /* FavoriteBook.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteBook.swift; sourceTree = "<group>"; };
 		913D61A37F2B1C21DF4FC7E0 /* CurrentlyReading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentlyReading.swift; sourceTree = "<group>"; };
 		9B51171CCEB26CC8D97D1B64 /* Bookfolio.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Bookfolio.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		9DDBC1D64939BAFC7B657A89 /* AppleAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleAuthService.swift; sourceTree = "<group>"; };
 		AE97EE03E2559AE4A7970EA0 /* BookListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookListItem.swift; sourceTree = "<group>"; };
 		B60A3E5C03349E574AD45885 /* ReviewComment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewComment.swift; sourceTree = "<group>"; };
 		C810FA17EACAF311EC0DD419 /* ReviewLike.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewLike.swift; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 		7374A67B94027D025B6DA6FC /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				9DDBC1D64939BAFC7B657A89 /* AppleAuthService.swift */,
 				EEF62D81A51A2017B06A7F47 /* AuthService.swift */,
 				CBAB09B84F6FC3092E42BC54 /* GoogleAuthService.swift */,
 				D3EECCE09C65F54475795ABA /* SupabaseService.swift */,
@@ -360,6 +363,7 @@
 				5F52CA47B98463F09C5C72E8 /* Activity.swift in Sources */,
 				E174963219E8B5D1EAE289B5 /* AppRoute.swift in Sources */,
 				AD83D1E83B0FCAA6FBA308A9 /* AppRouter.swift in Sources */,
+				686698413BFE3CD21A6B64F5 /* AppleAuthService.swift in Sources */,
 				77DD17ED33C5F343EA7F5816 /* AuthError+Display.swift in Sources */,
 				2D346057A0531FA45D9BFA4E /* AuthService.swift in Sources */,
 				8D4FB892CA96E4692E3EA141 /* BookList.swift in Sources */,
