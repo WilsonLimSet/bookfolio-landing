@@ -63,12 +63,22 @@ struct RankingFlowView: View {
                 editions: editions,
                 isLoading: loadingEditions,
                 selectedCover: $selectedCover,
-                onNext: { goToStep(.category) }
+                onNext: {
+                    if categoryAutoDetected && category != nil {
+                        goToStep(.tier)
+                    } else {
+                        goToStep(.category)
+                    }
+                }
             )
         case .category:
-            placeholderStep("Category Selection")
+            CategoryStep(category: $category, categoryAutoDetected: categoryAutoDetected) {
+                goToStep(.tier)
+            }
         case .tier:
-            placeholderStep("Tier Selection")
+            TierStep(bookTitle: title, tier: $tier) { selectedTier in
+                handleTierSelection(selectedTier)
+            }
         case .compare:
             placeholderStep("Compare Books")
         case .review:
@@ -96,15 +106,43 @@ struct RankingFlowView: View {
     }
 
     private func goBack() {
-        let steps = RankingStep.allCases
-        guard let index = steps.firstIndex(of: currentStep), index > 0 else { return }
-        goToStep(steps[index - 1])
+        switch currentStep {
+        case .tier where categoryAutoDetected && category != nil:
+            goToStep(.cover) // Skip category when going back if it was auto-detected
+        default:
+            let steps = RankingStep.allCases
+            guard let index = steps.firstIndex(of: currentStep), index > 0 else { return }
+            goToStep(steps[index - 1])
+        }
     }
 
     private func goForward() {
         let steps = RankingStep.allCases
         guard let index = steps.firstIndex(of: currentStep), index < steps.count - 1 else { return }
         goToStep(steps[index + 1])
+    }
+
+    // MARK: - Tier Selection
+
+    private func handleTierSelection(_ selectedTier: BookTier) {
+        tier = selectedTier
+        guard let category = category else { return }
+
+        let allBooks = userBooksCache[category.rawValue] ?? []
+        let tierBooks = allBooks.filter { $0.tier == selectedTier }
+
+        if tierBooks.isEmpty {
+            // No books in this tier — calculate position directly
+            let tierOrder: [BookTier: Int] = [.liked: 0, .fine: 1, .disliked: 2]
+            let selectedOrder = tierOrder[selectedTier] ?? 0
+            let higherTierBooks = allBooks.filter {
+                (tierOrder[$0.tier] ?? 0) < selectedOrder
+            }
+            finalPosition = higherTierBooks.count + 1
+            goToStep(.review) // Skip compare
+        } else {
+            goToStep(.compare)
+        }
     }
 
     // MARK: - Data Loading
