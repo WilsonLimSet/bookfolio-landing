@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		0A460AC41911317776B8D784 /* WantToRead.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7BEFB44B7FCAE7A0C100154 /* WantToRead.swift */; };
+		0E7F578E621B6BE1A5413763 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 1C2718F7C24809653AD66131 /* GoogleSignIn */; };
+		141114D554B12CF4A1327F35 /* GoogleAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBAB09B84F6FC3092E42BC54 /* GoogleAuthService.swift */; };
 		1D6DC2C44A76D1280510D8D2 /* ReviewComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60A3E5C03349E574AD45885 /* ReviewComment.swift */; };
 		2B6C7C8B34EF838297F692F8 /* LeaderboardTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0139D7BB6A2CAACAB2D15D3 /* LeaderboardTab.swift */; };
 		2D346057A0531FA45D9BFA4E /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF62D81A51A2017B06A7F47 /* AuthService.swift */; };
@@ -32,6 +34,7 @@
 		8D4FB892CA96E4692E3EA141 /* BookList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59E11A8F654E2E7AE6BDCFB8 /* BookList.swift */; };
 		940AF755276D38A12560BA5B /* Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 179E73F6152A324D75AB04AE /* Profile.swift */; };
 		963FE8A741E657F052DDBC71 /* ListsTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 553F233E3E0F83EB26C60A76 /* ListsTab.swift */; };
+		97D46EE806468137DC432D0F /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = D01179B0507342E54EF07804 /* GoogleSignInSwift */; };
 		A42DD9D6B49C66B1373BDB07 /* TabRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 526B5EC6D449D663E7B2C826 /* TabRouter.swift */; };
 		A8226D17DE59D0DB29B6A18B /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26572BFF35D1002E3E8CB8A7 /* Config.swift */; };
 		AD83D1E83B0FCAA6FBA308A9 /* AppRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E727FD933A5EB9D56E0A3A4 /* AppRouter.swift */; };
@@ -81,6 +84,7 @@
 		AE97EE03E2559AE4A7970EA0 /* BookListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookListItem.swift; sourceTree = "<group>"; };
 		B60A3E5C03349E574AD45885 /* ReviewComment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewComment.swift; sourceTree = "<group>"; };
 		C810FA17EACAF311EC0DD419 /* ReviewLike.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewLike.swift; sourceTree = "<group>"; };
+		CBAB09B84F6FC3092E42BC54 /* GoogleAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleAuthService.swift; sourceTree = "<group>"; };
 		D3EECCE09C65F54475795ABA /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
 		DF7A6C8BD6698F410CA126C3 /* SearchTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTab.swift; sourceTree = "<group>"; };
 		EEF62D81A51A2017B06A7F47 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
@@ -97,6 +101,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				3D08D101EB87390DDF7F080E /* Supabase in Frameworks */,
+				0E7F578E621B6BE1A5413763 /* GoogleSignIn in Frameworks */,
+				97D46EE806468137DC432D0F /* GoogleSignInSwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -141,6 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				EEF62D81A51A2017B06A7F47 /* AuthService.swift */,
+				CBAB09B84F6FC3092E42BC54 /* GoogleAuthService.swift */,
 				D3EECCE09C65F54475795ABA /* SupabaseService.swift */,
 			);
 			path = Services;
@@ -293,6 +300,8 @@
 			name = Bookfolio;
 			packageProductDependencies = (
 				75A54410B3DB998992C79122 /* Supabase */,
+				1C2718F7C24809653AD66131 /* GoogleSignIn */,
+				D01179B0507342E54EF07804 /* GoogleSignInSwift */,
 			);
 			productName = Bookfolio;
 			productReference = 9B51171CCEB26CC8D97D1B64 /* Bookfolio.app */;
@@ -318,6 +327,7 @@
 			mainGroup = AF1619BB9D86C603FCDB62C2;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
+				A7529D3CADD843C200CFFDE0 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				6097A563444F97B6FDAF7C9C /* XCRemoteSwiftPackageReference "supabase-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -360,6 +370,7 @@
 				B3D89BFFBACD49719729B833 /* FavoriteBook.swift in Sources */,
 				ED480075F9A951D10FAB5CA4 /* FeedTab.swift in Sources */,
 				63576D980D1FEDF2A3EF9581 /* Follow.swift in Sources */,
+				141114D554B12CF4A1327F35 /* GoogleAuthService.swift in Sources */,
 				2B6C7C8B34EF838297F692F8 /* LeaderboardTab.swift in Sources */,
 				963FE8A741E657F052DDBC71 /* ListsTab.swift in Sources */,
 				48DB8A4ACA21A6DCCC7DD12E /* LoginView.swift in Sources */,
@@ -638,13 +649,31 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		A7529D3CADD843C200CFFDE0 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		1C2718F7C24809653AD66131 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A7529D3CADD843C200CFFDE0 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
 		75A54410B3DB998992C79122 /* Supabase */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 6097A563444F97B6FDAF7C9C /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Supabase;
+		};
+		D01179B0507342E54EF07804 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A7529D3CADD843C200CFFDE0 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
