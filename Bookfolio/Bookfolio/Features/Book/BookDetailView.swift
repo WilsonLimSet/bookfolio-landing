@@ -13,6 +13,7 @@ struct BookDetailView: View {
     @State private var isDescriptionExpanded = false
     @State private var isWantToRead = false
     @State private var isCurrentlyReading = false
+    @State private var showAddToList = false
 
     var body: some View {
         Group {
@@ -41,6 +42,14 @@ struct BookDetailView: View {
             EditionPickerView(workKey: bookKey) { _ in
                 // Edition selection — future use
             }
+        }
+        .sheet(isPresented: $showAddToList) {
+            AddToListSheet(
+                bookKey: bookKey,
+                title: bookDetails?.title ?? "",
+                author: bookDetails?.author,
+                coverUrl: bookDetails?.coverUrl
+            )
         }
     }
 
@@ -182,6 +191,16 @@ struct BookDetailView: View {
                         )
                     }
                 }
+
+                Button {
+                    showAddToList = true
+                } label: {
+                    Label("Add to List", systemImage: "list.bullet")
+                        .font(.subheadline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.bordered)
             }
             .padding(.horizontal)
         }
