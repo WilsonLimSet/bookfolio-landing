@@ -10,6 +10,7 @@
 		0A460AC41911317776B8D784 /* WantToRead.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7BEFB44B7FCAE7A0C100154 /* WantToRead.swift */; };
 		1D6DC2C44A76D1280510D8D2 /* ReviewComment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60A3E5C03349E574AD45885 /* ReviewComment.swift */; };
 		2B6C7C8B34EF838297F692F8 /* LeaderboardTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0139D7BB6A2CAACAB2D15D3 /* LeaderboardTab.swift */; };
+		2D346057A0531FA45D9BFA4E /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = EEF62D81A51A2017B06A7F47 /* AuthService.swift */; };
 		38BCA4770442541AE96B9956 /* CurrentlyReading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 913D61A37F2B1C21DF4FC7E0 /* CurrentlyReading.swift */; };
 		3D08D101EB87390DDF7F080E /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 75A54410B3DB998992C79122 /* Supabase */; };
 		404541C13F3B8DD1AEA74127 /* Notification.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D8A00F6393320A9FD2499E0 /* Notification.swift */; };
@@ -22,6 +23,7 @@
 		72F38D5FBED62DB5A916A94B /* SearchTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF7A6C8BD6698F410CA126C3 /* SearchTab.swift */; };
 		747FA723B5C24BA27798B448 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5E7F3B5EB350756F3BF524D4 /* Assets.xcassets */; };
 		7677B6A46A782C79DC2014A4 /* UserBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7D861B1088E04F2F9F9BC304 /* UserBook.swift */; };
+		77DD17ED33C5F343EA7F5816 /* AuthError+Display.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E7652B47A896B0566553584 /* AuthError+Display.swift */; };
 		7FC27ABD30BDDD73EDB4B059 /* ProfileTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89A66A0B7341EE53E490134C /* ProfileTab.swift */; };
 		82EBC25FCFFB5D0C7E7C76F9 /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EECCE09C65F54475795ABA /* SupabaseService.swift */; };
 		83C913832856FD55C9F49AB2 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 40727BDC00331C4741035DBF /* Preview Assets.xcassets */; };
@@ -51,6 +53,7 @@
 
 /* Begin PBXFileReference section */
 		0D8A00F6393320A9FD2499E0 /* Notification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Notification.swift; sourceTree = "<group>"; };
+		0E7652B47A896B0566553584 /* AuthError+Display.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AuthError+Display.swift"; sourceTree = "<group>"; };
 		1364936A66779B3F6DFED284 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		179E73F6152A324D75AB04AE /* Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Profile.swift; sourceTree = "<group>"; };
 		1FA4E7BC65434C33CD1BE039 /* Bookfolio.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Bookfolio.entitlements; sourceTree = "<group>"; };
@@ -79,6 +82,7 @@
 		C810FA17EACAF311EC0DD419 /* ReviewLike.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewLike.swift; sourceTree = "<group>"; };
 		D3EECCE09C65F54475795ABA /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
 		DF7A6C8BD6698F410CA126C3 /* SearchTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchTab.swift; sourceTree = "<group>"; };
+		EEF62D81A51A2017B06A7F47 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
 		F0139D7BB6A2CAACAB2D15D3 /* LeaderboardTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardTab.swift; sourceTree = "<group>"; };
 		F2C75BD7BF9C109E68C7AA13 /* Referral.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Referral.swift; sourceTree = "<group>"; };
 		F58CB3B1B2625498229DAE18 /* OpenLibraryTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenLibraryTypes.swift; sourceTree = "<group>"; };
@@ -114,6 +118,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		51D29D594C210F399A521193 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				0E7652B47A896B0566553584 /* AuthError+Display.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
 		615B580C3E006715DF9F9D10 /* Leaderboard */ = {
 			isa = PBXGroup;
 			children = (
@@ -125,6 +137,7 @@
 		7374A67B94027D025B6DA6FC /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				EEF62D81A51A2017B06A7F47 /* AuthService.swift */,
 				D3EECCE09C65F54475795ABA /* SupabaseService.swift */,
 			);
 			path = Services;
@@ -161,6 +174,7 @@
 		BF96E301B68B5AEC0E8E244D /* Features */ = {
 			isa = PBXGroup;
 			children = (
+				51D29D594C210F399A521193 /* Auth */,
 				D13976CDDE1D5427CFFA6E7C /* Feed */,
 				615B580C3E006715DF9F9D10 /* Leaderboard */,
 				078AB36D460861790F50AE5D /* Lists */,
@@ -333,6 +347,8 @@
 				5F52CA47B98463F09C5C72E8 /* Activity.swift in Sources */,
 				E174963219E8B5D1EAE289B5 /* AppRoute.swift in Sources */,
 				AD83D1E83B0FCAA6FBA308A9 /* AppRouter.swift in Sources */,
+				77DD17ED33C5F343EA7F5816 /* AuthError+Display.swift in Sources */,
+				2D346057A0531FA45D9BFA4E /* AuthService.swift in Sources */,
 				8D4FB892CA96E4692E3EA141 /* BookList.swift in Sources */,
 				8BE87EA133B9D2B7B7563ECC /* BookListItem.swift in Sources */,
 				440007686F38778ECC4F5415 /* BookfolioApp.swift in Sources */,
