@@ -1,9 +1,15 @@
 import SwiftUI
+import UserNotifications
 
 @main
 struct BookfolioApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @StateObject private var authService = AuthService()
     @StateObject private var appRouter = AppRouter()
+
+    init() {
+        UNUserNotificationCenter.current().delegate = PushNotificationService.shared
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -24,6 +30,9 @@ struct BookfolioApp: App {
                     UsernameSetupView(userId: user.id)
                 case .authenticated:
                     mainTabView
+                        .task {
+                            _ = await PushNotificationService.shared.requestPermission()
+                        }
                 }
             }
             .environmentObject(authService)
@@ -49,5 +58,25 @@ struct BookfolioApp: App {
                 .tag(Tab.discover)
         }
         .environmentObject(appRouter)
+    }
+}
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(
+        _ application: UIApplication,
+        didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+    ) {
+        Task {
+            if let user = try? await supabase.auth.session.user {
+                await PushNotificationService.shared.registerDeviceToken(deviceToken, userId: user.id)
+            }
+        }
+    }
+
+    func application(
+        _ application: UIApplication,
+        didFailToRegisterForRemoteNotificationsWithError error: Error
+    ) {
+        print("Failed to register for remote notifications: \(error)")
     }
 }
