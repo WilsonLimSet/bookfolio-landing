@@ -262,6 +262,14 @@
 			path = Leaderboard;
 			sourceTree = "<group>";
 		};
+		GI03030303030303030303 /* Import */ = {
+			isa = PBXGroup;
+			children = (
+				GI01010101010101010101 /* GoodreadsImportView.swift */,
+			);
+			path = Import;
+			sourceTree = "<group>";
+		};
 		7374A67B94027D025B6DA6FC /* Services */ = {
 			isa = PBXGroup;
 			children = (
@@ -271,6 +279,7 @@
 				DD0601010101010101010101 /* CommentService.swift */,
 				FFEC649270B4ECEC1EFF1056 /* FeedService.swift */,
 				CBAB09B84F6FC3092E42BC54 /* GoogleAuthService.swift */,
+				IM01010101010101010101 /* ImportService.swift */,
 				AA0603040404040404040404 /* LeaderboardService.swift */,
 				LS01010101010101010101 /* ListService.swift */,
 				C76AE8997AF56791BC2C9516 /* OpenLibraryService.swift */,
@@ -325,6 +334,7 @@
 				32755F19D904BB93277CBCD6 /* Book */,
 				BB0603110111011101110111 /* Discover */,
 				D13976CDDE1D5427CFFA6E7C /* Feed */,
+				GI03030303030303030303 /* Import */,
 				615B580C3E006715DF9F9D10 /* Leaderboard */,
 				078AB36D460861790F50AE5D /* Lists */,
 				C977B71B99BDC8AAFBA785E4 /* Profile */,
@@ -576,6 +586,8 @@
 				48DB8A4ACA21A6DCCC7DD12E /* LoginView.swift in Sources */,
 				404541C13F3B8DD1AEA74127 /* Notification.swift in Sources */,
 				B50461093051B6610037ECA3 /* NotificationItemView.swift in Sources */,
+				IM02020202020202020202 /* ImportService.swift in Sources */,
+				GI02020202020202020202 /* GoodreadsImportView.swift in Sources */,
 				8279664987ABF9DEA4122339 /* OpenLibraryService.swift in Sources */,
 				52E8926F35D5E917711064BA /* OpenLibraryTypes.swift in Sources */,
 				940AF755276D38A12560BA5B /* Profile.swift in Sources */,
