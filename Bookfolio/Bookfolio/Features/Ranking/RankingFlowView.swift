@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct RankingFlowView: View {
     let bookKey: String
@@ -90,9 +91,20 @@ struct RankingFlowView: View {
                 goToStep(.review)
             }
         case .review:
-            placeholderStep("Write Review")
+            ReviewStep(
+                finishedAt: $finishedAt,
+                reviewText: $reviewText,
+                isSaving: isSaving
+            ) {
+                saveBook()
+            }
         case .saving:
-            placeholderStep("Saving...")
+            VStack(spacing: 16) {
+                ProgressView()
+                    .scaleEffect(1.5)
+                Text("Saving your ranking...")
+                    .foregroundColor(.secondary)
+            }
         }
     }
 
@@ -240,6 +252,64 @@ struct RankingFlowView: View {
             }
         } catch {
             // Auto-detection is best-effort; user picks manually if it fails
+        }
+    }
+
+    // MARK: - Save
+
+    private func saveBook() {
+        guard !isSaving else { return }
+        guard let category = category, let tier = tier, let position = finalPosition else { return }
+        guard case .authenticated(let user) = authService.state else { return }
+
+        isSaving = true
+
+        Task {
+            do {
+                let resolvedCover = selectedCover ?? coverUrl
+
+                let score = try await RankingService.rankBook(
+                    userId: user.id,
+                    title: title,
+                    author: author,
+                    coverUrl: resolvedCover,
+                    openLibraryKey: bookKey,
+                    category: category,
+                    tier: tier,
+                    rankPosition: position,
+                    reviewText: reviewText.isEmpty ? nil : reviewText,
+                    finishedAt: finishedAt,
+                    existingEntryId: existingEntry?.id
+                )
+
+                // Fire-and-forget activity logging
+                let capturedUserId = user.id
+                let capturedCategory = category
+                let metadata = BookMetadata(
+                    openLibraryKey: bookKey,
+                    title: title,
+                    author: author,
+                    coverUrl: resolvedCover
+                )
+                Task { @Sendable in
+                    await RankingService.logRankingActivity(
+                        userId: capturedUserId,
+                        book: metadata,
+                        coverUrl: resolvedCover,
+                        score: score,
+                        category: capturedCategory
+                    )
+                }
+
+                // Success haptic
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+
+                // Dismiss flow
+                dismiss()
+            } catch {
+                isSaving = false
+                print("Error saving ranking: \(error)")
+            }
         }
     }
 }
