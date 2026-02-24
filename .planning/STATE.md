@@ -10,18 +10,18 @@ See: .planning/PROJECT.md (updated 2026-02-24)
 ## Current Position
 
 Phase: 3 in progress
-Plan: 03-02 complete
-Status: Ready for plan 03-03
-Last activity: 2026-02-24 — Plan 03-02 Profile screen with stats, favorites, follow/unfollow complete
+Plan: 03-03 complete
+Status: Ready for plan 03-04
+Last activity: 2026-02-24 — Plan 03-03 Edit profile with avatar upload, favorites management complete
 
-Progress: █████░░░░░ 40%
+Progress: ██████░░░░ 45%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 8
-- Average duration: 6.9min
-- Total execution time: 55min
+- Total plans completed: 9
+- Average duration: 6.7min
+- Total execution time: 60min
 
 **By Phase:**
 
@@ -29,10 +29,10 @@ Progress: █████░░░░░ 40%
 |-------|-------|-------|----------|
 | 01-foundation | 3/3 | 18min | 6min |
 | 02-authentication | 3/3 | 21min | 7min |
-| 03-feed-and-profile | 2/4 | 16min | 8min |
+| 03-feed-and-profile | 3/4 | 21min | 7min |
 
 **Recent Trend:**
-- Last 5 plans: 02-02 (5min), 02-03 (8min), 03-01 (8min), 03-02 (8min)
+- Last 5 plans: 02-03 (8min), 03-01 (8min), 03-02 (8min), 03-03 (5min)
 - Trend: Stable ~5-8min/plan
 
 ## Accumulated Context
@@ -70,6 +70,9 @@ Recent decisions affecting current work:
 - FollowWithProfile struct for Supabase foreign-key join queries
 - Week streak calculated client-side from activity dates grouped by ISO week
 - foregroundColor instead of foregroundStyle for ternary Color/HierarchicalShapeStyle compat
+- Avatar upload: compress UIImage to JPEG (0.7) then upload to Supabase Storage avatars bucket with upsert
+- NewFavoriteBook private Encodable struct for inserting favorites (avoids sending server-generated id)
+- PhotosPicker with PhotosPickerItem.loadTransferable for iOS 16+ image selection
 
 ### Deferred Issues
 
@@ -82,5 +85,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Plan 03-02 complete, ready for 03-03
+Stopped at: Plan 03-03 complete, ready for 03-04
 Resume file: None
