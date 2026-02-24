@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** The ranking flow must feel incredible on iOS — haptic feedback on every comparison, buttery spring animations, gesture-driven interactions.
-**Current focus:** Phase 3 complete — ready for Phase 4
+**Current focus:** Phase 4 in progress — Book Discovery
 
 ## Current Position
 
-Phase: 3 complete
-Plan: 03-04 complete
-Status: Ready to plan Phase 4
-Last activity: 2026-02-24 — Phase 3 Feed & Profile complete
+Phase: 4 in progress
+Plan: 04-02 complete
+Status: Executing Phase 4
+Last activity: 2026-02-24 — Book search and detail UI built
 
-Progress: ██████░░░░ 40%
+Progress: ██████░░░░ 42%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 10
+- Total plans completed: 12
 - Average duration: ~7min
-- Total execution time: ~70min
+- Total execution time: ~84min
 
 **By Phase:**
 
@@ -30,9 +30,10 @@ Progress: ██████░░░░ 40%
 | 01-foundation | 3/3 | 18min | 6min |
 | 02-authentication | 3/3 | 21min | 7min |
 | 03-feed-and-profile | 4/4 | ~30min | ~7.5min |
+| 04-book-discovery | 2/? | 14min | 7min |
 
 **Recent Trend:**
-- Last 5 plans: 03-01 (8min), 03-02 (8min), 03-03 (5min), 03-04 (4min)
+- Last 5 plans: 03-03 (5min), 03-04 (4min), 04-01 (6min), 04-02 (8min)
 - Trend: Stable ~5-8min/plan
 
 ## Accumulated Context
@@ -70,6 +71,15 @@ Recent decisions affecting current work:
 - NewFavoriteBook private Encodable struct for inserting favorites (avoids sending server-generated id)
 - PhotosPicker with PhotosPickerItem.loadTransferable for iOS 16+ image selection
 - Reading list routes: .readBooks, .currentlyReading, .wantToRead added to AppRoute
+- OpenLibraryService uses enum with static methods (no instance state)
+- Generic fetch<T: Decodable> helper for URLSession + JSONDecoder
+- OLEdition has languages ([OLLanguageRef]?) and description (OLDescription?) fields
+- OLSearchResult has coverEditionKey and editionCount for search sorting
+- Nonfiction wins ties in detectCategory (OpenLibrary over-tags fiction)
+- BookCoverView: reusable AsyncImage component with loading/fallback in SharedComponents
+- Debounced search: cancel previous Task, sleep 300ms, then search
+- User book query uses limit(1) + .first instead of maybeSingle()
+- Action buttons in BookDetailView are disabled placeholders for Plan 03
 
 ### Deferred Issues
 
@@ -82,5 +92,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-24
-Stopped at: Phase 3 complete, ready to plan Phase 4 (Book Discovery)
+Stopped at: Phase 4 plan 02 complete, book search and detail UI built
 Resume file: None
