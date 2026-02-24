@@ -20,6 +20,9 @@ struct DiscoverView: View {
                 suggestedSection
             }
         }
+        .refreshable {
+            await loadSuggestedUsers()
+        }
         .task {
             await loadSuggestedUsers()
         }

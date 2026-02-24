@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 // MARK: - Relative Date Formatting
 
@@ -141,6 +142,7 @@ struct FeedItemView: View {
             // Like row
             HStack(spacing: 4) {
                 Button {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     onLikeTap()
                 } label: {
                     Image(systemName: item.isLikedByMe ? "heart.fill" : "heart")

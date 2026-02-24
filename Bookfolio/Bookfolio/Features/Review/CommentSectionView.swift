@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct CommentSectionView: View {
     let reviewId: UUID
@@ -174,6 +175,7 @@ struct CommentSectionView: View {
                     reviewOwnerId: reviewOwnerId,
                     bookTitle: bookTitle
                 )
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
                 newCommentText = ""
                 comments = try await CommentService.loadComments(reviewId: reviewId)
             } catch {

@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct FollowButton: View {
     let targetUserId: UUID
@@ -33,6 +34,9 @@ struct FollowButton: View {
 
     private func toggleFollow() async {
         guard case .authenticated(let user) = authService.state else { return }
+
+        // Haptic feedback
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
 
         // Optimistic update
         isFollowing.toggle()

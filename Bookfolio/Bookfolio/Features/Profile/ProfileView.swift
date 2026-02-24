@@ -146,6 +146,9 @@ struct ProfileView: View {
                         Spacer().frame(height: 20)
                     }
                 }
+                .refreshable {
+                    await loadProfile()
+                }
             } else {
                 VStack(spacing: 12) {
                     Image(systemName: "exclamationmark.triangle")

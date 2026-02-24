@@ -85,6 +85,10 @@ struct FeedTab: View {
                     }
                 }
             }
+            .refreshable {
+                guard let userId = currentUserId else { return }
+                await feedService.loadFriendsActivity(userId: userId)
+            }
         }
     }
 
@@ -125,6 +129,10 @@ struct FeedTab: View {
                     }
                 }
             }
+            .refreshable {
+                guard let userId = currentUserId else { return }
+                await feedService.loadYourActivity(userId: userId)
+            }
         }
     }
 
@@ -155,6 +163,10 @@ struct FeedTab: View {
                         Divider()
                     }
                 }
+            }
+            .refreshable {
+                guard let userId = currentUserId else { return }
+                await feedService.loadNotifications(userId: userId)
             }
         }
     }
