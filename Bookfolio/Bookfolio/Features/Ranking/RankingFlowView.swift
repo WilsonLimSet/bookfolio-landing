@@ -5,7 +5,7 @@ struct RankingFlowView: View {
     let title: String
     let author: String?
     let coverUrl: String?
-    let existingEntry: UserBook?
+    var existingEntry: UserBook? = nil
 
     @EnvironmentObject var authService: AuthService
     @Environment(\.dismiss) var dismiss

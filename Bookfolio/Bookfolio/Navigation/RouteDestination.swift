@@ -19,8 +19,8 @@ struct RouteDestination: ViewModifier {
                     PlaceholderDestination(title: "List Detail", detail: listId.uuidString)
                 case .reviewDetail(let reviewId):
                     PlaceholderDestination(title: "Review Detail", detail: reviewId.uuidString)
-                case .rankBook(let bookKey, let title, _, _):
-                    PlaceholderDestination(title: "Rank Book", detail: "\(title) (\(bookKey))")
+                case .rankBook(let bookKey, let title, let author, let coverUrl):
+                    RankingFlowView(bookKey: bookKey, title: title, author: author, coverUrl: coverUrl)
                 case .readBooks(let userId):
                     ReadBooksView(userId: userId)
                 case .currentlyReading(let userId):
