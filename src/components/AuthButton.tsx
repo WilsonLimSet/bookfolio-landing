@@ -18,26 +18,26 @@ export default async function AuthButton() {
       <div className="flex items-center gap-4">
         <Link
           href="/feed"
-          className="text-sm text-neutral-600 hover:text-neutral-900"
+          className="text-sm text-neutral-900/50 hover:text-neutral-900/90"
         >
           Feed
         </Link>
         <Link
           href="/leaderboard"
-          className="text-sm text-neutral-600 hover:text-neutral-900"
+          className="text-sm text-neutral-900/50 hover:text-neutral-900/90"
         >
           Leaderboard
         </Link>
         <Link
           href={profile ? `/profile/${profile.username}` : "/profile"}
-          className="text-sm text-neutral-600 hover:text-neutral-900"
+          className="text-sm text-neutral-900/50 hover:text-neutral-900/90"
         >
           {profile?.username || "Profile"}
         </Link>
         <form action="/auth/signout" method="post">
           <button
             type="submit"
-            className="px-3 py-1.5 text-sm border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+            className="px-3 py-1.5 text-sm border border-black/10 rounded-lg hover:bg-neutral-50 transition-colors"
           >
             Sign Out
           </button>
@@ -50,7 +50,7 @@ export default async function AuthButton() {
     <div className="flex items-center gap-4">
       <Link
         href="/leaderboard"
-        className="text-sm text-neutral-600 hover:text-neutral-900"
+        className="text-sm text-neutral-900/50 hover:text-neutral-900/90"
       >
         Leaderboard
       </Link>

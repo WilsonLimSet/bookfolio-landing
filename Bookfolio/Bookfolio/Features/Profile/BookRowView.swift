@@ -36,7 +36,7 @@ struct BookRowView: View {
                         .foregroundColor(.primary)
                 }
 
-                AsyncImage(url: coverUrl.flatMap { URL(string: $0) }) { image in
+                CachedAsyncImage(url: coverUrl.flatMap { URL(string: $0) }) { image in
                     image.resizable().scaledToFill()
                 } placeholder: {
                     Image(systemName: "book.fill")

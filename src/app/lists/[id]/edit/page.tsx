@@ -6,6 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { revalidateProfile } from "@/app/actions";
 import Header from "@/components/Header";
+import { PulsingDots } from "@/components/Skeleton";
 import Link from "next/link";
 import type { User } from "@supabase/supabase-js";
 
@@ -177,7 +178,7 @@ export default function EditListPage() {
         <Header user={user} username={username} />
         <main className="min-h-screen px-4 sm:px-6 py-6">
           <div className="max-w-2xl mx-auto flex justify-center py-12">
-            <div className="w-8 h-8 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
+            <PulsingDots />
           </div>
         </main>
       </>
@@ -203,7 +204,7 @@ export default function EditListPage() {
           <h1 className="text-2xl font-bold mb-6">Edit List</h1>
 
           {/* List Settings */}
-          <div className="bg-white rounded-xl border border-neutral-100 p-4 mb-6">
+          <div className="bg-white rounded-xl border border-black/[0.05] p-4 mb-6">
             <h2 className="font-semibold mb-4">List Settings</h2>
 
             <div className="space-y-4">
@@ -218,7 +219,7 @@ export default function EditListPage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   maxLength={100}
-                  className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-neutral-400 focus:outline-none"
+                  className="w-full px-4 py-3 rounded-xl border border-black/10 focus:border-neutral-400 focus:outline-none"
                 />
               </div>
 
@@ -233,7 +234,7 @@ export default function EditListPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   maxLength={500}
                   rows={3}
-                  className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-neutral-400 focus:outline-none resize-none"
+                  className="w-full px-4 py-3 rounded-xl border border-black/10 focus:border-neutral-400 focus:outline-none resize-none"
                 />
               </div>
 
@@ -269,7 +270,7 @@ export default function EditListPage() {
           </div>
 
           {/* Books */}
-          <div className="bg-white rounded-xl border border-neutral-100 p-4 mb-6">
+          <div className="bg-white rounded-xl border border-black/[0.05] p-4 mb-6">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-semibold">Books ({items.length})</h2>
               <p className="text-xs text-neutral-500">Add books from book pages</p>
@@ -354,7 +355,7 @@ export default function EditListPage() {
           </div>
 
           {/* Delete List */}
-          <div className="border-t border-neutral-100 pt-6">
+          <div className="border-t border-black/[0.05] pt-6">
             <button
               onClick={handleDelete}
               disabled={deleting}

@@ -57,7 +57,7 @@ export default function ListForm({
           onChange={(e) => setName(e.target.value)}
           placeholder="My favorite books"
           maxLength={100}
-          className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-neutral-400 focus:outline-none"
+          className="w-full px-4 py-3 rounded-xl border border-black/10 focus:border-neutral-400 focus:outline-none"
           disabled={isLoading}
         />
       </div>
@@ -74,7 +74,7 @@ export default function ListForm({
           placeholder="What's this list about?"
           maxLength={500}
           rows={3}
-          className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-neutral-400 focus:outline-none resize-none"
+          className="w-full px-4 py-3 rounded-xl border border-black/10 focus:border-neutral-400 focus:outline-none resize-none"
           disabled={isLoading}
         />
       </div>
@@ -124,7 +124,7 @@ export default function ListForm({
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="px-6 py-3 border border-neutral-200 rounded-xl font-medium hover:bg-neutral-50 transition-colors"
+            className="px-6 py-3 border border-black/10 rounded-xl font-medium hover:bg-neutral-50 transition-colors"
           >
             Cancel
           </button>

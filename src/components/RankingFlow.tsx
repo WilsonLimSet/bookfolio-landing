@@ -430,7 +430,7 @@ export default function RankingFlow({
           </div>
 
           {/* Header */}
-          <div className="p-4 pt-5 border-b border-neutral-100 flex items-center justify-between">
+          <div className="p-4 pt-5 border-b border-black/[0.05] flex items-center justify-between">
             <div className="flex items-center gap-3">
               <motion.div
                 className="relative"
@@ -491,7 +491,7 @@ export default function RankingFlow({
                   {loadingEditions ? (
                     <div className="flex justify-center py-8">
                       <motion.div
-                        className="w-10 h-10 border-3 border-neutral-200 border-t-neutral-800 rounded-full"
+                        className="w-10 h-10 border-3 border-black/10 border-t-neutral-800 rounded-full"
                         animate={{ rotate: 360 }}
                         transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
                       />
@@ -623,7 +623,7 @@ export default function RankingFlow({
                       className={`p-6 border-2 rounded-xl ${
                         existingEntry?.category === "fiction"
                           ? "border-neutral-900 bg-neutral-50"
-                          : "border-neutral-200"
+                          : "border-black/10"
                       }`}
                       variants={bookCardVariants}
                       initial="idle"
@@ -647,7 +647,7 @@ export default function RankingFlow({
                       className={`p-6 border-2 rounded-xl ${
                         existingEntry?.category === "nonfiction"
                           ? "border-neutral-900 bg-neutral-50"
-                          : "border-neutral-200"
+                          : "border-black/10"
                       }`}
                       variants={bookCardVariants}
                       initial="idle"
@@ -764,7 +764,7 @@ export default function RankingFlow({
                   {loadingBooks ? (
                     <div className="text-center py-12">
                       <motion.div
-                        className="w-12 h-12 border-3 border-neutral-200 border-t-neutral-800 rounded-full mx-auto"
+                        className="w-12 h-12 border-3 border-black/10 border-t-neutral-800 rounded-full mx-auto"
                         animate={{ rotate: 360 }}
                         transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
                       />
@@ -801,7 +801,7 @@ export default function RankingFlow({
                         <motion.button
                           onClick={() => !isComparing && handlePrefer(true)}
                           className={`flex-1 p-4 border-2 rounded-xl overflow-hidden ${
-                            selectedBook === "new" ? "border-green-500 bg-green-50" : "border-neutral-200"
+                            selectedBook === "new" ? "border-green-500 bg-green-50" : "border-black/10"
                           }`}
                           variants={bookCardVariants}
                           initial="idle"
@@ -848,7 +848,7 @@ export default function RankingFlow({
                             key={currentCompareBook.id}
                             onClick={() => !isComparing && handlePrefer(false)}
                             className={`flex-1 p-4 border-2 rounded-xl overflow-hidden ${
-                              selectedBook === "existing" ? "border-green-500 bg-green-50" : "border-neutral-200"
+                              selectedBook === "existing" ? "border-green-500 bg-green-50" : "border-black/10"
                             }`}
                             variants={bookCardVariants}
                             initial={{ opacity: 0, x: 50 }}
@@ -925,7 +925,7 @@ export default function RankingFlow({
                       value={finishedAt}
                       onChange={(e) => setFinishedAt(e.target.value)}
                       max={new Date().toISOString().split("T")[0]}
-                      className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100 focus:outline-none transition-all"
+                      className="w-full px-4 py-3 rounded-xl border border-black/10 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100 focus:outline-none transition-all"
                     />
                   </motion.div>
 
@@ -941,7 +941,7 @@ export default function RankingFlow({
                       value={reviewText}
                       onChange={(e) => setReviewText(e.target.value)}
                       placeholder="What did you think? Any highlights, quotes, or takeaways..."
-                      className="w-full h-24 px-4 py-3 rounded-xl border border-neutral-200 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100 focus:outline-none resize-none transition-all"
+                      className="w-full h-24 px-4 py-3 rounded-xl border border-black/10 focus:border-neutral-400 focus:ring-2 focus:ring-neutral-100 focus:outline-none resize-none transition-all"
                       maxLength={1000}
                     />
                     <p className="text-xs text-neutral-400 text-right">{reviewText.length}/1000</p>
@@ -978,12 +978,12 @@ export default function RankingFlow({
                     transition={{ type: "spring", stiffness: 300, damping: 20 }}
                   >
                     <motion.div
-                      className="absolute inset-0 border-3 border-neutral-200 border-t-neutral-800 rounded-full"
+                      className="absolute inset-0 border-3 border-black/10 border-t-neutral-800 rounded-full"
                       animate={{ rotate: 360 }}
                       transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
                     />
                     <motion.div
-                      className="absolute inset-2 border-2 border-neutral-100 border-b-neutral-600 rounded-full"
+                      className="absolute inset-2 border-2 border-black/[0.05] border-b-neutral-600 rounded-full"
                       animate={{ rotate: -360 }}
                       transition={{ repeat: Infinity, duration: 1.5, ease: "linear" }}
                     />

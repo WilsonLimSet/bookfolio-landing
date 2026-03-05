@@ -3,6 +3,9 @@
 :root {
   --background: #fafafa;
   --foreground: #171717;
+  --onboarding-teal: #1a3a3a;
+  --onboarding-teal-light: #2a5a5a;
+  --onboarding-accent: #3d8b8b;
 }
 
 body {

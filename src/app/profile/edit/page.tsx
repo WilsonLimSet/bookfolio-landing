@@ -9,6 +9,7 @@ import { revalidateProfile } from "@/app/actions";
 import Link from "next/link";
 import RankingFlow from "@/components/RankingFlow";
 import Header from "@/components/Header";
+import { PulsingDots } from "@/components/Skeleton";
 
 interface FavoriteBook {
   id: string;
@@ -53,7 +54,13 @@ export default function EditProfilePage() {
   const [readingGoal, setReadingGoal] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const REFERRALS_REQUIRED = 3; // Number of referrals needed to unlock social links
+  const REFERRALS_FOR_SOCIAL = 3;
+  const REWARD_TIERS = [
+    { count: 1, label: "Connector Badge", unlocked: false },
+    { count: 3, label: "Social Links", unlocked: false },
+    { count: 5, label: "Ambassador Badge", unlocked: false },
+    { count: 10, label: "Accent Color", unlocked: false },
+  ].map(t => ({ ...t, unlocked: referralCount >= t.count }));
 
   // Search state
   const [searchQuery, setSearchQuery] = useState("");
@@ -400,7 +407,7 @@ export default function EditProfilePage() {
   if (loading) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
+        <PulsingDots />
       </main>
     );
   }
@@ -473,7 +480,7 @@ export default function EditProfilePage() {
                 type="text"
                 value={username}
                 disabled
-                className="w-full px-4 py-3 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-500"
+                className="w-full px-4 py-3 rounded-lg border border-black/10 bg-neutral-50 text-neutral-500"
               />
               <p className="text-xs text-neutral-500 mt-1">
                 Username cannot be changed
@@ -488,7 +495,7 @@ export default function EditProfilePage() {
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 placeholder="Tell others about yourself and your reading interests..."
-                className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none resize-none h-24"
+                className="w-full px-4 py-3 rounded-lg border border-black/10 focus:border-neutral-400 focus:outline-none resize-none h-24"
                 maxLength={500}
               />
               <p className="text-xs text-neutral-500 mt-1 text-right">
@@ -508,7 +515,7 @@ export default function EditProfilePage() {
                   placeholder="e.g. 24"
                   min={1}
                   max={365}
-                  className="w-24 px-4 py-3 rounded-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none"
+                  className="w-24 px-4 py-3 rounded-lg border border-black/10 focus:border-neutral-400 focus:outline-none"
                 />
                 <span className="text-neutral-600">books this year</span>
               </div>
@@ -526,86 +533,64 @@ export default function EditProfilePage() {
             </button>
           </section>
 
-          {/* Social Links */}
-          <section className="space-y-4">
-            <h2 className="text-lg font-semibold">Social Links</h2>
-            {referralCount >= REFERRALS_REQUIRED ? (
-              <>
-                <p className="text-sm text-green-600">
-                  Unlocked! Your social links are visible on your profile.
-                </p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
-                      Instagram
-                    </label>
-                    <div className="flex">
-                      <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-neutral-200 bg-neutral-50 text-neutral-500 text-sm">
-                        @
-                      </span>
-                      <input
-                        type="text"
-                        value={instagram}
-                        onChange={(e) => setInstagram(e.target.value.replace(/^@/, ""))}
-                        placeholder="username"
-                        className="flex-1 px-3 py-2 rounded-r-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-neutral-700 mb-1">
-                      Twitter / X
-                    </label>
-                    <div className="flex">
-                      <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-neutral-200 bg-neutral-50 text-neutral-500 text-sm">
-                        @
-                      </span>
-                      <input
-                        type="text"
-                        value={twitter}
-                        onChange={(e) => setTwitter(e.target.value.replace(/^@/, ""))}
-                        placeholder="username"
-                        className="flex-1 px-3 py-2 rounded-r-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </>
-            ) : (
-              <div className="p-4 bg-neutral-50 rounded-xl">
-                <p className="text-sm text-neutral-600 mb-2">
-                  Invite <span className="font-semibold">{REFERRALS_REQUIRED - referralCount} more {REFERRALS_REQUIRED - referralCount === 1 ? "friend" : "friends"}</span> to unlock social links on your profile.
-                </p>
-                <div className="flex items-center gap-2">
-                  {[...Array(REFERRALS_REQUIRED)].map((_, i) => (
-                    <div
-                      key={i}
-                      className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                        i < referralCount
-                          ? "bg-green-500 text-white"
-                          : "bg-neutral-200 text-neutral-400"
-                      }`}
-                    >
-                      {i < referralCount ? "✓" : i + 1}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </section>
-
-          {/* Referral Link */}
+          {/* Referral Rewards */}
           <section className="space-y-4">
             <h2 className="text-lg font-semibold">Invite Friends</h2>
             <p className="text-sm text-neutral-600">
-              Share your referral link. When friends sign up, you&apos;ll unlock social links on your profile.
+              Share your link and unlock rewards as friends join.
             </p>
+
+            {/* Tier Progress */}
+            <div className="p-4 bg-neutral-50 rounded-xl space-y-4">
+              <div className="flex items-center justify-between text-sm">
+                <span className="font-medium text-neutral-700">
+                  {referralCount} {referralCount === 1 ? "referral" : "referrals"}
+                </span>
+                {REWARD_TIERS.find(t => !t.unlocked) && (
+                  <span className="text-neutral-500">
+                    Next: {REWARD_TIERS.find(t => !t.unlocked)!.count - referralCount} more for {REWARD_TIERS.find(t => !t.unlocked)!.label}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center justify-between relative">
+                <div className="absolute top-4 left-[12%] right-[12%] h-0.5 bg-neutral-200" />
+                <div
+                  className="absolute top-4 left-[12%] h-0.5 bg-green-500 transition-all duration-500"
+                  style={{
+                    width: referralCount >= 10 ? "76%" :
+                           referralCount >= 5 ? "51%" :
+                           referralCount >= 3 ? "25%" :
+                           referralCount >= 1 ? "0%" : "0%",
+                  }}
+                />
+                {REWARD_TIERS.map((tier) => (
+                  <div key={tier.count} className="flex flex-col items-center z-10 relative">
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                        tier.unlocked
+                          ? "bg-green-500 text-white"
+                          : "bg-white text-neutral-400 border-2 border-black/10"
+                      }`}
+                    >
+                      {tier.unlocked ? "\u2713" : tier.count}
+                    </div>
+                    <span className={`text-[10px] mt-1 font-medium ${
+                      tier.unlocked ? "text-green-600" : "text-neutral-400"
+                    }`}>
+                      {tier.label}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Share Link */}
             <div className="flex gap-2">
               <input
                 type="text"
                 readOnly
                 value={`${typeof window !== "undefined" ? window.location.origin : ""}/login?ref=${referralCode}`}
-                className="flex-1 px-4 py-3 rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-600 text-sm"
+                className="flex-1 px-4 py-3 rounded-lg border border-black/10 bg-neutral-50 text-neutral-600 text-sm"
               />
               <button
                 onClick={() => {
@@ -618,9 +603,58 @@ export default function EditProfilePage() {
                 {copied ? "Copied!" : "Copy"}
               </button>
             </div>
-            <p className="text-xs text-neutral-500">
-              {referralCount} {referralCount === 1 ? "friend has" : "friends have"} signed up with your link
-            </p>
+          </section>
+
+          {/* Social Links */}
+          <section className="space-y-4">
+            <h2 className="text-lg font-semibold">Social Links</h2>
+            {referralCount >= REFERRALS_FOR_SOCIAL ? (
+              <>
+                <p className="text-sm text-green-600">
+                  Unlocked! Your social links are visible on your profile.
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      Instagram
+                    </label>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-black/10 bg-neutral-50 text-neutral-500 text-sm">
+                        @
+                      </span>
+                      <input
+                        type="text"
+                        value={instagram}
+                        onChange={(e) => setInstagram(e.target.value.replace(/^@/, ""))}
+                        placeholder="username"
+                        className="flex-1 px-3 py-2 rounded-r-lg border border-black/10 focus:border-neutral-400 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-neutral-700 mb-1">
+                      Twitter / X
+                    </label>
+                    <div className="flex">
+                      <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-black/10 bg-neutral-50 text-neutral-500 text-sm">
+                        @
+                      </span>
+                      <input
+                        type="text"
+                        value={twitter}
+                        onChange={(e) => setTwitter(e.target.value.replace(/^@/, ""))}
+                        placeholder="username"
+                        className="flex-1 px-3 py-2 rounded-r-lg border border-black/10 focus:border-neutral-400 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-neutral-500">
+                Invite {REFERRALS_FOR_SOCIAL - referralCount} more {REFERRALS_FOR_SOCIAL - referralCount === 1 ? "friend" : "friends"} to unlock social links on your profile.
+              </p>
+            )}
           </section>
 
           {/* Favorite Books */}
@@ -683,7 +717,7 @@ export default function EditProfilePage() {
                     <p className="text-xs text-neutral-600 mt-1 truncate">{favorite.title}</p>
                   </div>
                 ) : (
-                  <div key={position} className="aspect-[2/3] bg-neutral-100 rounded-lg border-2 border-dashed border-neutral-200 flex items-center justify-center">
+                  <div key={position} className="aspect-[2/3] bg-neutral-100 rounded-lg border-2 border-dashed border-black/10 flex items-center justify-center">
                     <span className="text-neutral-300 text-2xl">+</span>
                   </div>
                 );
@@ -737,17 +771,17 @@ export default function EditProfilePage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Or search for any book..."
-                  className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none"
+                  className="w-full px-4 py-3 rounded-lg border border-black/10 focus:border-neutral-400 focus:outline-none"
                 />
 
                 {isSearching && (
                   <div className="absolute right-4 top-1/2 -translate-y-1/2">
-                    <div className="w-4 h-4 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin" />
+                    <PulsingDots />
                   </div>
                 )}
 
                 {searchResults.length > 0 && (
-                  <div className="absolute z-10 w-full mt-2 bg-white rounded-lg border border-neutral-200 shadow-lg max-h-80 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-2 bg-white rounded-lg border border-black/10 shadow-lg max-h-80 overflow-y-auto">
                     {searchResults.map((book) => {
                       const alreadyFavorite = isBookAlreadyFavorite(book.key);
                       const ranked = isBookRanked(book.key);
@@ -821,7 +855,7 @@ export default function EditProfilePage() {
           </section>
 
           {/* Sign Out */}
-          <section className="pt-6 border-t border-neutral-200">
+          <section className="pt-6 border-t border-black/10">
             <form action="/auth/signout" method="post">
               <button
                 type="submit"

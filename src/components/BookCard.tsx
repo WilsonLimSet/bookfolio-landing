@@ -20,7 +20,7 @@ export default function BookCard({
   showRemove = false,
 }: BookCardProps) {
   return (
-    <div className="relative flex gap-3 p-3 bg-white rounded-lg border border-neutral-200 shadow-sm">
+    <div className="relative flex gap-3 p-3 bg-white rounded-lg border border-black/10 shadow-sm">
       <div className="absolute -top-2 -left-2 w-6 h-6 bg-neutral-900 text-white rounded-full flex items-center justify-center text-xs font-medium">
         {position}
       </div>

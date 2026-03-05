@@ -36,7 +36,7 @@ struct FollowListView: View {
                 List(users, id: \.0.id) { profile, date in
                     NavigationLink(value: AppRoute.userProfile(userId: profile.id)) {
                         HStack(spacing: 12) {
-                            AsyncImage(url: profile.avatarUrl.flatMap { URL(string: $0) }) { image in
+                            CachedAsyncImage(url: profile.avatarUrl.flatMap { URL(string: $0) }) { image in
                                 image.resizable().scaledToFill()
                             } placeholder: {
                                 Image(systemName: "person.circle.fill")

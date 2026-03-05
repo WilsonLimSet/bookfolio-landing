@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import { getLeaderboardData } from "@/lib/supabase/cached";
+import BookCover from "@/components/BookCover";
 
 export default async function LeaderboardPage() {
   const supabase = await createClient();
@@ -97,7 +98,7 @@ export default async function LeaderboardPage() {
               Top Fiction
             </h2>
             {topFictionAggregated.length > 0 ? (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {topFictionAggregated.map((book, index) => (
                   <Link
                     key={book.open_library_key}
@@ -107,18 +108,14 @@ export default async function LeaderboardPage() {
                     <span className="w-6 text-right font-mono font-bold text-neutral-300">
                       {index + 1}
                     </span>
-                    <div className="w-10 h-[60px] bg-neutral-100 rounded overflow-hidden flex-shrink-0 relative">
-                      {book.cover_url && (
-                        <Image src={book.cover_url} alt="" fill sizes="40px" className="object-cover" />
-                      )}
-                    </div>
+                    <BookCover src={book.cover_url} alt={book.title} size="xs" index={index} showSpine={false} />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{book.title}</p>
                       <p className="text-xs text-neutral-500 truncate">{book.author}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-green-600 font-bold">{book.avgScore}</p>
-                      <p className="text-xs text-neutral-400">{book.count} rating{book.count > 1 ? 's' : ''}</p>
+                      <p className="text-xs text-neutral-900/30">{book.count} rating{book.count > 1 ? 's' : ''}</p>
                     </div>
                   </Link>
                 ))}
@@ -134,7 +131,7 @@ export default async function LeaderboardPage() {
               Top Non-Fiction
             </h2>
             {topNonfictionAggregated.length > 0 ? (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {topNonfictionAggregated.map((book, index) => (
                   <Link
                     key={book.open_library_key}
@@ -144,18 +141,14 @@ export default async function LeaderboardPage() {
                     <span className="w-6 text-right font-mono font-bold text-neutral-300">
                       {index + 1}
                     </span>
-                    <div className="w-10 h-[60px] bg-neutral-100 rounded overflow-hidden flex-shrink-0 relative">
-                      {book.cover_url && (
-                        <Image src={book.cover_url} alt="" fill sizes="40px" className="object-cover" />
-                      )}
-                    </div>
+                    <BookCover src={book.cover_url} alt={book.title} size="xs" index={index} showSpine={false} />
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm truncate">{book.title}</p>
                       <p className="text-xs text-neutral-500 truncate">{book.author}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-green-600 font-bold">{book.avgScore}</p>
-                      <p className="text-xs text-neutral-400">{book.count} rating{book.count > 1 ? 's' : ''}</p>
+                      <p className="text-xs text-neutral-900/30">{book.count} rating{book.count > 1 ? 's' : ''}</p>
                     </div>
                   </Link>
                 ))}
@@ -177,7 +170,7 @@ export default async function LeaderboardPage() {
                 <Link
                   key={user.userId}
                   href={`/profile/${user.profile?.username}`}
-                  className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border border-neutral-100 hover:border-neutral-300 transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border border-black/[0.05] hover:border-neutral-300 transition-colors"
                 >
                   <span className="text-lg font-bold text-neutral-300">#{index + 1}</span>
                   <div className="w-10 h-10 bg-neutral-200 rounded-full flex items-center justify-center font-bold text-neutral-500 overflow-hidden relative">

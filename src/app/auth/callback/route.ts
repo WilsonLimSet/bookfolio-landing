@@ -13,7 +13,6 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Check if the user has a username set
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -21,12 +20,23 @@ export async function GET(request: NextRequest) {
       if (user) {
         const { data: profile } = await supabase
           .from("profiles")
-          .select("username")
+          .select("username, onboarding_completed")
           .eq("id", user.id)
           .single();
 
+        // New user without username → onboarding
         if (!profile?.username) {
-          redirectTo.pathname = "/auth/setup-username";
+          redirectTo.pathname = "/onboarding";
+          redirectTo.searchParams.delete("code");
+          redirectTo.searchParams.delete("next");
+          return NextResponse.redirect(redirectTo);
+        }
+
+        // User hasn't completed onboarding → onboarding
+        if (!profile?.onboarding_completed) {
+          redirectTo.pathname = "/onboarding";
+          redirectTo.searchParams.delete("code");
+          redirectTo.searchParams.delete("next");
           return NextResponse.redirect(redirectTo);
         }
       }

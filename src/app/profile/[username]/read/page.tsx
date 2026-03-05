@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import HeaderWrapper from "@/components/HeaderWrapper";
+import BookCover from "@/components/BookCover";
 
 interface PageProps {
   params: Promise<{ username: string }>;
@@ -80,15 +81,7 @@ export default async function ReadBooksPage({ params }: PageProps) {
                           <span className="w-8 text-right font-mono text-lg font-bold text-neutral-300 group-hover:text-neutral-900 transition-colors">
                             {index + 1}
                           </span>
-                          <div className="w-12 h-[72px] bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow relative">
-                            {book.cover_url ? (
-                              <Image src={book.cover_url} alt="" fill sizes="48px" className="object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-[8px] text-neutral-400 p-1">
-                                {book.title}
-                              </div>
-                            )}
-                          </div>
+                          <BookCover src={book.cover_url} alt={book.title} size="xs" index={index} />
                           <div className="flex-1 min-w-0">
                             <p className="font-medium truncate">{book.title}</p>
                             {book.author && (
@@ -135,15 +128,7 @@ export default async function ReadBooksPage({ params }: PageProps) {
                           <span className="w-8 text-right font-mono text-lg font-bold text-neutral-300 group-hover:text-neutral-900 transition-colors">
                             {index + 1}
                           </span>
-                          <div className="w-12 h-[72px] bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 shadow-sm group-hover:shadow-md transition-shadow relative">
-                            {book.cover_url ? (
-                              <Image src={book.cover_url} alt="" fill sizes="48px" className="object-cover" />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center text-[8px] text-neutral-400 p-1">
-                                {book.title}
-                              </div>
-                            )}
-                          </div>
+                          <BookCover src={book.cover_url} alt={book.title} size="xs" index={index} />
                           <div className="flex-1 min-w-0">
                             <p className="font-medium truncate">{book.title}</p>
                             {book.author && (

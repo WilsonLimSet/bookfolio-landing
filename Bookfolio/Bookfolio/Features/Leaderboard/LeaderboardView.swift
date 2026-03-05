@@ -196,15 +196,12 @@ struct LeaderboardView: View {
     private func avatarView(url: String?) -> some View {
         Group {
             if let url, let imageUrl = URL(string: url) {
-                AsyncImage(url: imageUrl) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                    default:
-                        avatarPlaceholder
-                    }
+                CachedAsyncImage(url: imageUrl) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                } placeholder: {
+                    avatarPlaceholder
                 }
             } else {
                 avatarPlaceholder

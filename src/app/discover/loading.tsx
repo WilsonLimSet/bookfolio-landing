@@ -1,7 +1,7 @@
 export default function DiscoverLoading() {
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-neutral-100">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-black/[0.05]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
             <div className="w-7 h-7 bg-neutral-200 rounded animate-pulse" />
@@ -27,7 +27,7 @@ export default function DiscoverLoading() {
             <div className="h-4 w-32 bg-neutral-200 rounded mb-4 animate-pulse" />
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="flex items-center gap-3 p-3 bg-white border border-neutral-100 rounded-xl">
+                <div key={i} className="flex items-center gap-3 p-3 bg-white border border-black/[0.05] rounded-xl">
                   <div className="w-10 h-10 bg-neutral-200 rounded-full animate-pulse" />
                   <div className="flex-1 space-y-1">
                     <div className="h-4 w-20 bg-neutral-200 rounded animate-pulse" />

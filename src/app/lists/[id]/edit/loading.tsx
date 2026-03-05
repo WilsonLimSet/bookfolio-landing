@@ -1,7 +1,7 @@
 export default function EditListLoading() {
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-neutral-100">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-black/[0.05]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
             <div className="w-7 h-7 bg-neutral-200 rounded animate-pulse" />
@@ -22,7 +22,7 @@ export default function EditListLoading() {
           <div className="h-7 w-24 bg-neutral-200 rounded mb-6 animate-pulse" />
 
           {/* List settings card */}
-          <div className="bg-white rounded-xl border border-neutral-100 p-4 mb-6">
+          <div className="bg-white rounded-xl border border-black/[0.05] p-4 mb-6">
             <div className="h-5 w-24 bg-neutral-200 rounded mb-4 animate-pulse" />
 
             <div className="space-y-4">
@@ -50,7 +50,7 @@ export default function EditListLoading() {
           </div>
 
           {/* Books card */}
-          <div className="bg-white rounded-xl border border-neutral-100 p-4 mb-6">
+          <div className="bg-white rounded-xl border border-black/[0.05] p-4 mb-6">
             <div className="flex items-center justify-between mb-4">
               <div className="h-5 w-20 bg-neutral-200 rounded animate-pulse" />
               <div className="h-3 w-32 bg-neutral-100 rounded animate-pulse" />
@@ -73,7 +73,7 @@ export default function EditListLoading() {
           </div>
 
           {/* Delete button */}
-          <div className="border-t border-neutral-100 pt-6">
+          <div className="border-t border-black/[0.05] pt-6">
             <div className="h-12 w-full bg-red-50 rounded-xl animate-pulse" />
           </div>
         </div>

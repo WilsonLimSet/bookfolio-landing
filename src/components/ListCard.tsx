@@ -29,7 +29,7 @@ export default function ListCard({ list, creator, books }: ListCardProps) {
   return (
     <Link
       href={`/lists/${list.id}`}
-      className="block bg-white rounded-xl border border-neutral-100 p-4 hover:shadow-md transition-shadow"
+      className="block bg-white rounded-xl border border-black/[0.05] p-4 hover:shadow-md transition-shadow"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-3">

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import type { Metadata } from "next";
+import BookCover from "@/components/BookCover";
 
 interface PageProps {
   params: Promise<{ username: string }>;
@@ -61,7 +62,7 @@ export default async function SharePage({ params }: PageProps) {
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           {/* Header */}
-          <div className="p-6 text-center border-b border-neutral-100">
+          <div className="p-6 text-center border-b border-black/[0.05]">
             <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-neutral-200 to-neutral-300 overflow-hidden relative">
               {profile.avatar_url ? (
                 <Image
@@ -93,23 +94,9 @@ export default async function SharePage({ params }: PageProps) {
             </h2>
             {favorites && favorites.length > 0 ? (
               <div className="grid grid-cols-4 gap-3">
-                {favorites.map((book) => (
+                {favorites.map((book, i) => (
                   <div key={book.id} className="text-center">
-                    <div className="aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden shadow-md relative">
-                      {book.cover_url ? (
-                        <Image
-                          src={book.cover_url}
-                          alt={book.title}
-                          fill
-                          sizes="25vw"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[8px] text-neutral-400 p-1">
-                          {book.title}
-                        </div>
-                      )}
-                    </div>
+                    <BookCover src={book.cover_url} alt={book.title} size="lg" index={i} priority={i < 4} />
                     <p className="text-[10px] text-neutral-600 mt-1 truncate">
                       {book.title}
                     </p>
@@ -118,7 +105,7 @@ export default async function SharePage({ params }: PageProps) {
                 {Array.from({ length: 4 - favorites.length }).map((_, i) => (
                   <div
                     key={`empty-${i}`}
-                    className="aspect-[2/3] bg-neutral-100 rounded-lg border-2 border-dashed border-neutral-200"
+                    className="aspect-[2/3] bg-neutral-100 rounded-lg border-2 border-dashed border-black/10"
                   />
                 ))}
               </div>

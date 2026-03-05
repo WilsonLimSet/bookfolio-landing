@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import FollowButton from "./FollowButton";
+import { PulsingDots } from "@/components/Skeleton";
 
 interface UserSearchProps {
   currentUserId: string;
@@ -73,11 +74,11 @@ export default function UserSearch({ currentUserId, followingIds }: UserSearchPr
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Search for people..."
-          className="w-full pl-10 pr-4 py-3 rounded-xl border border-neutral-200 focus:border-neutral-400 focus:outline-none"
+          className="w-full pl-10 pr-4 py-3 rounded-xl border border-black/10 focus:border-neutral-400 focus:outline-none"
         />
         {isSearching && (
           <div className="absolute right-3 top-1/2 -translate-y-1/2">
-            <div className="w-5 h-5 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin" />
+            <PulsingDots />
           </div>
         )}
       </div>
@@ -87,7 +88,7 @@ export default function UserSearch({ currentUserId, followingIds }: UserSearchPr
           {results.map((user) => (
             <div
               key={user.id}
-              className="flex items-center justify-between p-3 bg-white border border-neutral-100 rounded-xl"
+              className="flex items-center justify-between p-3 bg-white border border-black/[0.05] rounded-xl"
             >
               <Link
                 href={`/profile/${user.username}`}

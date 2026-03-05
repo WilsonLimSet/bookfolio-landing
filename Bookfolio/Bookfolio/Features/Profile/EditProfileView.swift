@@ -73,7 +73,7 @@ struct EditProfileView: View {
                             .frame(width: 80, height: 80)
                             .clipShape(Circle())
                     } else if let avatarUrl = profile?.avatarUrl, let url = URL(string: avatarUrl) {
-                        AsyncImage(url: url) { image in
+                        CachedAsyncImage(url: url) { image in
                             image.resizable()
                                 .scaledToFill()
                         } placeholder: {
@@ -190,7 +190,7 @@ struct EditProfileView: View {
                 ForEach(Array(favorites.enumerated()), id: \.element.id) { index, favorite in
                     HStack(spacing: 12) {
                         if let coverUrl = favorite.coverUrl, let url = URL(string: coverUrl) {
-                            AsyncImage(url: url) { image in
+                            CachedAsyncImage(url: url) { image in
                                 image.resizable().scaledToFill()
                             } placeholder: {
                                 Rectangle().fill(Color.gray.opacity(0.2))
@@ -277,7 +277,7 @@ struct EditProfileView: View {
                             } label: {
                                 HStack(spacing: 12) {
                                     if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
-                                        AsyncImage(url: url) { image in
+                                        CachedAsyncImage(url: url) { image in
                                             image.resizable().scaledToFill()
                                         } placeholder: {
                                             Rectangle().fill(Color.gray.opacity(0.2))

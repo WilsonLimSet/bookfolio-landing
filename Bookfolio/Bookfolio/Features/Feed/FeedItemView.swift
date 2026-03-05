@@ -81,20 +81,17 @@ struct FeedItemView: View {
             } label: {
                 HStack(alignment: .top, spacing: 12) {
                     // Cover image
-                    AsyncImage(url: item.coverUrl.flatMap { URL(string: $0) }) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                        default:
-                            Rectangle()
-                                .fill(Color.gray.opacity(0.2))
-                                .overlay {
-                                    Image(systemName: "book.closed")
-                                        .foregroundStyle(.secondary)
-                                }
-                        }
+                    CachedAsyncImage(url: item.coverUrl.flatMap { URL(string: $0) }) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } placeholder: {
+                        Rectangle()
+                            .fill(Color.gray.opacity(0.2))
+                            .overlay {
+                                Image(systemName: "book.closed")
+                                    .foregroundStyle(.secondary)
+                            }
                     }
                     .frame(width: 60, height: 90)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -168,21 +165,18 @@ struct FeedItemView: View {
 
     @ViewBuilder
     private var avatarView: some View {
-        AsyncImage(url: item.avatarUrl.flatMap { URL(string: $0) }) { phase in
-            switch phase {
-            case .success(let image):
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            default:
-                Circle()
-                    .fill(Color.gray.opacity(0.2))
-                    .overlay {
-                        Image(systemName: "person.fill")
-                            .foregroundStyle(.secondary)
-                            .font(.caption)
-                    }
-            }
+        CachedAsyncImage(url: item.avatarUrl.flatMap { URL(string: $0) }) { image in
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+        } placeholder: {
+            Circle()
+                .fill(Color.gray.opacity(0.2))
+                .overlay {
+                    Image(systemName: "person.fill")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                }
         }
         .frame(width: 40, height: 40)
         .clipShape(Circle())

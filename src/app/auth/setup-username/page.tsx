@@ -59,7 +59,7 @@ export default function SetupUsernamePage() {
               minLength={3}
               pattern="[a-zA-Z0-9_]+"
               title="Username must be at least 3 characters and contain only letters, numbers, and underscores"
-              className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+              className="w-full px-4 py-3 rounded-lg border border-black/10 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
               placeholder="your_username"
             />
           </div>

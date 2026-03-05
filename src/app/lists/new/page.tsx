@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { revalidateProfile } from "@/app/actions";
 import Header from "@/components/Header";
+import { PulsingDots } from "@/components/Skeleton";
 import ListForm from "@/components/ListForm";
 import Link from "next/link";
 import type { User } from "@supabase/supabase-js";
@@ -78,7 +79,7 @@ export default function NewListPage() {
         <Header user={null} username={null} />
         <main className="min-h-screen px-4 sm:px-6 py-6">
           <div className="max-w-md mx-auto flex justify-center py-12">
-            <div className="w-8 h-8 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
+            <PulsingDots />
           </div>
         </main>
       </>

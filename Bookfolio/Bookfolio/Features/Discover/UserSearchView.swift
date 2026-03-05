@@ -92,7 +92,7 @@ struct UserSearchView: View {
     private func avatarView(_ avatarUrl: String?) -> some View {
         Group {
             if let urlString = avatarUrl, let url = URL(string: urlString) {
-                AsyncImage(url: url) { image in
+                CachedAsyncImage(url: url) { image in
                     image.resizable().scaledToFill()
                 } placeholder: {
                     Color(.systemGray5)

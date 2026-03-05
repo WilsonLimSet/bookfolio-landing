@@ -9,6 +9,7 @@ import {
   detectCategory,
 } from "@/lib/openLibrary";
 import Link from "next/link";
+import { PulsingDots } from "@/components/Skeleton";
 
 interface GoodreadsBook {
   title: string;
@@ -411,7 +412,7 @@ export default function ImportPage() {
 
         {step === "matching" && (
           <div className="text-center py-12">
-            <div className="w-12 h-12 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin mx-auto mb-4" />
+            <PulsingDots className="mb-4" />
             <p className="font-medium">Matching books...</p>
             <p className="text-neutral-500">{progress}% complete</p>
             <p className="text-sm text-neutral-400 mt-2">{books.length} books found</p>
@@ -444,7 +445,7 @@ export default function ImportPage() {
               {matchedBooks.map((book, index) => (
                 <div
                   key={index}
-                  className="flex items-start gap-3 p-3 bg-white rounded-lg border border-neutral-100"
+                  className="flex items-start gap-3 p-3 bg-white rounded-lg border border-black/[0.05]"
                 >
                   <div className="w-10 h-14 bg-neutral-100 rounded overflow-hidden flex-shrink-0 relative">
                     {book.coverUrl && (
@@ -498,7 +499,7 @@ export default function ImportPage() {
               {getBooksInRatingGroup(currentRatingGroup).map((book, index) => (
                 <div
                   key={index}
-                  className="flex items-center gap-3 p-3 bg-white rounded-lg border border-neutral-100"
+                  className="flex items-center gap-3 p-3 bg-white rounded-lg border border-black/[0.05]"
                 >
                   <span className="w-6 text-center font-mono font-bold text-neutral-300">
                     {index + 1}
@@ -547,7 +548,7 @@ export default function ImportPage() {
 
         {step === "importing" && (
           <div className="text-center py-12">
-            <div className="w-12 h-12 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin mx-auto mb-4" />
+            <PulsingDots className="mb-4" />
             <p className="font-medium">Importing books...</p>
             <p className="text-neutral-500">{progress}% complete</p>
           </div>

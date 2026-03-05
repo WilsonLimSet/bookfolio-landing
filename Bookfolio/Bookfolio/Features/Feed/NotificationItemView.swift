@@ -49,21 +49,18 @@ struct NotificationItemView: View {
 
     @ViewBuilder
     private var avatarView: some View {
-        AsyncImage(url: item.fromAvatarUrl.flatMap { URL(string: $0) }) { phase in
-            switch phase {
-            case .success(let image):
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-            default:
-                Circle()
-                    .fill(Color.gray.opacity(0.2))
-                    .overlay {
-                        Image(systemName: "person.fill")
-                            .foregroundStyle(.secondary)
-                            .font(.caption2)
-                    }
-            }
+        CachedAsyncImage(url: item.fromAvatarUrl.flatMap { URL(string: $0) }) { image in
+            image
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+        } placeholder: {
+            Circle()
+                .fill(Color.gray.opacity(0.2))
+                .overlay {
+                    Image(systemName: "person.fill")
+                        .foregroundStyle(.secondary)
+                        .font(.caption2)
+                }
         }
         .frame(width: 36, height: 36)
         .clipShape(Circle())
@@ -86,6 +83,9 @@ struct NotificationItemView: View {
                 .font(.subheadline)
         case .friendRanked:
             Text("\(Text(username).bold()) ranked \(Text(bookTitle).bold())")
+                .font(.subheadline)
+        case .referral:
+            Text("\(Text(username).bold()) joined via your invite link")
                 .font(.subheadline)
         }
     }

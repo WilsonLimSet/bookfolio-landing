@@ -13,7 +13,7 @@ struct ProfileHeaderView: View {
     var body: some View {
         VStack(spacing: 20) {
             // Avatar
-            AsyncImage(url: profile.avatarUrl.flatMap { URL(string: $0) }) { image in
+            CachedAsyncImage(url: profile.avatarUrl.flatMap { URL(string: $0) }) { image in
                 image.resizable().scaledToFill()
             } placeholder: {
                 Image(systemName: "person.circle.fill")
@@ -23,9 +23,25 @@ struct ProfileHeaderView: View {
             .frame(width: 80, height: 80)
             .clipShape(Circle())
 
-            // Username
-            Text(profile.username)
-                .font(.title2.bold())
+            // Username + Badge
+            HStack(spacing: 6) {
+                Text(profile.username)
+                    .font(.title2.bold())
+
+                if let badge = profile.referralBadge, !badge.isEmpty {
+                    HStack(spacing: 3) {
+                        Image(systemName: badge == "ambassador" ? "star.fill" : "link")
+                            .font(.system(size: 10))
+                        Text(badge == "ambassador" ? "Ambassador" : "Connector")
+                            .font(.system(size: 11, weight: .semibold))
+                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 3)
+                    .background(badge == "ambassador" ? Color.orange.opacity(0.15) : Color.blue.opacity(0.15))
+                    .foregroundStyle(badge == "ambassador" ? .orange : .blue)
+                    .clipShape(Capsule())
+                }
+            }
 
             // Bio
             if let bio = profile.bio, !bio.isEmpty {
@@ -91,7 +107,7 @@ struct ProfileHeaderView: View {
                     HStack(spacing: 12) {
                         ForEach(stats.favoriteBooks) { book in
                             NavigationLink(value: AppRoute.bookDetail(bookKey: book.openLibraryKey)) {
-                                AsyncImage(url: book.coverUrl.flatMap { URL(string: $0) }) { image in
+                                CachedAsyncImage(url: book.coverUrl.flatMap { URL(string: $0) }) { image in
                                     image.resizable().scaledToFill()
                                 } placeholder: {
                                     RoundedRectangle(cornerRadius: 4)

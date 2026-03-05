@@ -346,7 +346,7 @@ export default async function BookPage({ params }: PageProps) {
               {reviewsWithText.map((review) => {
                 const reviewer = profileMap.get(review.user_id);
                 return (
-                  <div key={review.id} className="p-4 bg-white border border-neutral-100 rounded-xl">
+                  <div key={review.id} className="p-4 bg-white border border-black/[0.05] rounded-xl">
                     <div className="flex items-center gap-3 mb-3">
                       <Link
                         href={`/profile/${reviewer?.username}`}

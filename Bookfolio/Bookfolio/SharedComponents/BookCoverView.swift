@@ -6,21 +6,14 @@ struct BookCoverView: View {
 
     var body: some View {
         if let coverUrl, let url = URL(string: coverUrl) {
-            AsyncImage(url: url) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: size.width, height: size.height)
-                        .clipped()
-                case .failure:
-                    fallbackCover
-                case .empty:
-                    loadingCover
-                @unknown default:
-                    fallbackCover
-                }
+            CachedAsyncImage(url: url) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: size.width, height: size.height)
+                    .clipped()
+            } placeholder: {
+                loadingCover
             }
             .frame(width: size.width, height: size.height)
             .cornerRadius(8)

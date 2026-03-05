@@ -2,7 +2,7 @@ export default function FeedLoading() {
   return (
     <>
       {/* Header skeleton */}
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-neutral-100">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-black/[0.05]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
             <div className="w-7 h-7 bg-neutral-200 rounded animate-pulse" />
@@ -32,7 +32,7 @@ export default function FeedLoading() {
           {/* Feed items skeleton */}
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white rounded-xl border border-neutral-100 overflow-hidden">
+              <div key={i} className="bg-white rounded-xl border border-black/[0.05] overflow-hidden">
                 <div className="flex items-center gap-3 p-4 pb-3">
                   <div className="w-10 h-10 bg-neutral-200 rounded-full animate-pulse" />
                   <div className="flex-1 space-y-2">

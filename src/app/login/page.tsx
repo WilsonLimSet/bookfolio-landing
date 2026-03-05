@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { login, signup } from "./actions";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { PulsingDots } from "@/components/Skeleton";
 
 function LoginForm() {
   const searchParams = useSearchParams();
@@ -78,7 +79,7 @@ function LoginForm() {
             type="button"
             onClick={handleGoogleSignIn}
             disabled={googleLoading}
-            className="w-full px-4 py-3 border border-neutral-200 rounded-lg font-medium hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+            className="w-full px-4 py-3 border border-black/10 rounded-lg font-medium hover:bg-neutral-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path
@@ -103,7 +104,7 @@ function LoginForm() {
 
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-200" />
+              <div className="w-full border-t border-black/10" />
             </div>
             <div className="relative flex justify-center text-sm">
               <span className="bg-white px-4 text-neutral-500">or</span>
@@ -138,7 +139,7 @@ function LoginForm() {
                 minLength={3}
                 pattern="[a-zA-Z0-9_]+"
                 title="Username must be at least 3 characters and contain only letters, numbers, and underscores"
-                className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+                className="w-full px-4 py-3 rounded-lg border border-black/10 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
                 placeholder="your_username"
               />
             </div>
@@ -156,7 +157,7 @@ function LoginForm() {
               name="email"
               type="email"
               required
-              className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+              className="w-full px-4 py-3 rounded-lg border border-black/10 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
               placeholder="you@example.com"
             />
           </div>
@@ -174,7 +175,7 @@ function LoginForm() {
               type="password"
               required
               minLength={6}
-              className="w-full px-4 py-3 rounded-lg border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
+              className="w-full px-4 py-3 rounded-lg border border-black/10 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent"
               placeholder="••••••••"
             />
           </div>
@@ -228,7 +229,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <main className="min-h-screen flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
+          <PulsingDots />
         </main>
       }
     >

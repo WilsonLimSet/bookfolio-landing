@@ -5,6 +5,7 @@ enum NotificationType: String, Codable {
     case like
     case comment
     case friendRanked = "friend_ranked"
+    case referral
 }
 
 struct Notification: Codable, Identifiable {

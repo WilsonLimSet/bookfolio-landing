@@ -19,7 +19,7 @@ export default function ProfileError({ reset }: { error: Error; reset: () => voi
           </button>
           <Link
             href="/feed"
-            className="px-6 py-3 border border-neutral-200 rounded-xl font-medium hover:bg-neutral-50 transition-colors"
+            className="px-6 py-3 border border-black/10 rounded-xl font-medium hover:bg-neutral-50 transition-colors"
           >
             Go to feed
           </Link>

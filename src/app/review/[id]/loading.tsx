@@ -1,7 +1,7 @@
 export default function ReviewLoading() {
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-neutral-100">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-black/[0.05]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
             <div className="w-7 h-7 bg-neutral-200 rounded animate-pulse" />
@@ -19,9 +19,9 @@ export default function ReviewLoading() {
           <div className="h-4 w-24 bg-neutral-100 rounded mb-6 animate-pulse" />
 
           {/* Review card skeleton */}
-          <div className="bg-white rounded-xl border border-neutral-100 overflow-hidden">
+          <div className="bg-white rounded-xl border border-black/[0.05] overflow-hidden">
             {/* Header */}
-            <div className="flex items-center gap-3 p-4 border-b border-neutral-100">
+            <div className="flex items-center gap-3 p-4 border-b border-black/[0.05]">
               <div className="w-12 h-12 bg-neutral-200 rounded-full animate-pulse" />
               <div className="flex-1 space-y-2">
                 <div className="h-4 w-24 bg-neutral-200 rounded animate-pulse" />
@@ -48,7 +48,7 @@ export default function ReviewLoading() {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center gap-4 px-4 py-3 border-t border-neutral-100">
+            <div className="flex items-center gap-4 px-4 py-3 border-t border-black/[0.05]">
               <div className="h-5 w-12 bg-neutral-100 rounded animate-pulse" />
               <div className="h-5 w-20 bg-neutral-100 rounded animate-pulse ml-auto" />
             </div>

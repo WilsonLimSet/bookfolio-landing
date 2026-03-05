@@ -41,6 +41,6 @@ export async function setupUsername(
     return { error: "Failed to set username. Please try again." };
   }
 
-  revalidatePath("/feed");
-  redirect("/feed");
+  revalidatePath("/onboarding");
+  redirect("/onboarding");
 }

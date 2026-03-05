@@ -103,7 +103,7 @@ export default async function DiscoverPage() {
                   <Link
                     key={user.id}
                     href={`/profile/${user.username}`}
-                    className="flex items-center gap-3 p-3 bg-white border border-neutral-100 rounded-xl hover:border-neutral-300 transition-colors"
+                    className="flex items-center gap-3 p-3 bg-white border border-black/[0.05] rounded-xl hover:border-neutral-300 transition-colors"
                   >
                     <div className="w-10 h-10 bg-neutral-200 rounded-full flex items-center justify-center text-sm font-bold text-neutral-500 flex-shrink-0">
                       {user.username[0].toUpperCase()}
@@ -129,7 +129,7 @@ export default async function DiscoverPage() {
                   <Link
                     key={profile.id}
                     href={`/profile/${profile.username}`}
-                    className="flex items-center gap-3 p-3 bg-white border border-neutral-100 rounded-xl hover:border-neutral-300 transition-colors"
+                    className="flex items-center gap-3 p-3 bg-white border border-black/[0.05] rounded-xl hover:border-neutral-300 transition-colors"
                   >
                     <div className="w-10 h-10 bg-neutral-200 rounded-full flex items-center justify-center text-sm font-bold text-neutral-500 flex-shrink-0">
                       {profile.username[0].toUpperCase()}

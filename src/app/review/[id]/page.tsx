@@ -5,6 +5,7 @@ import Link from "next/link";
 import HeaderWrapper from "@/components/HeaderWrapper";
 import LikeButton from "@/components/LikeButton";
 import CommentSection from "@/components/CommentSection";
+import BookCover from "@/components/BookCover";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -67,9 +68,9 @@ export default async function ReviewPage({ params }: PageProps) {
           </Link>
 
           {/* Review Card */}
-          <div className="bg-white rounded-xl border border-neutral-100 overflow-hidden">
+          <div className="bg-white rounded-xl border border-black/[0.05] overflow-hidden">
             {/* Header */}
-            <div className="flex items-center gap-3 p-4 border-b border-neutral-100">
+            <div className="flex items-center gap-3 p-4 border-b border-black/[0.05]">
               <Link
                 href={`/profile/${profile?.username}`}
                 className="w-12 h-12 bg-neutral-200 rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center text-lg font-bold text-neutral-500 relative"
@@ -99,11 +100,9 @@ export default async function ReviewPage({ params }: PageProps) {
             <div className="flex gap-4 p-4">
               <Link
                 href={`/book/${review.open_library_key?.replace("/works/", "").replace("/books/", "") || ""}`}
-                className="w-24 h-36 bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 shadow-md relative"
+                className="flex-shrink-0"
               >
-                {review.cover_url && (
-                  <Image src={review.cover_url} alt="" fill sizes="96px" className="object-cover" />
-                )}
+                <BookCover src={review.cover_url} alt={review.title || ""} size="lg" priority />
               </Link>
               <div className="flex-1 min-w-0">
                 <Link
@@ -150,7 +149,7 @@ export default async function ReviewPage({ params }: PageProps) {
             )}
 
             {/* Actions */}
-            <div className="flex items-center gap-4 px-4 py-3 border-t border-neutral-100">
+            <div className="flex items-center gap-4 px-4 py-3 border-t border-black/[0.05]">
               {user ? (
                 <LikeButton
                   reviewId={review.id}

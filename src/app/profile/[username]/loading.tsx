@@ -1,7 +1,7 @@
 export default function ProfileLoading() {
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-neutral-100">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-black/[0.05]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
             <div className="w-7 h-7 bg-neutral-200 rounded animate-pulse" />
@@ -25,7 +25,7 @@ export default function ProfileLoading() {
           {/* Stats row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="bg-white rounded-xl p-3 text-center border border-neutral-100">
+              <div key={i} className="bg-white rounded-xl p-3 text-center border border-black/[0.05]">
                 <div className="h-8 w-12 bg-neutral-200 rounded mx-auto mb-1 animate-pulse" />
                 <div className="h-3 w-16 bg-neutral-100 rounded mx-auto animate-pulse" />
               </div>
@@ -51,7 +51,7 @@ export default function ProfileLoading() {
           {/* Reading lists */}
           <div className="space-y-2 mb-8">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="flex items-center justify-between p-4 bg-white rounded-xl border border-neutral-100">
+              <div key={i} className="flex items-center justify-between p-4 bg-white rounded-xl border border-black/[0.05]">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-neutral-100 animate-pulse" />
                   <div className="space-y-1">

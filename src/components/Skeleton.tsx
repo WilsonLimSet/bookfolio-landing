@@ -77,7 +77,7 @@ export function ProfileBookListSkeleton({ count = 6 }: { count?: number }) {
 
 export function FeedItemSkeleton() {
   return (
-    <div className="p-4 border-b border-neutral-100">
+    <div className="p-4 border-b border-black/[0.05]">
       <div className="flex gap-3">
         <Skeleton className="w-10 h-10 rounded-full flex-shrink-0" />
         <div className="flex-1 space-y-3">
@@ -107,6 +107,20 @@ export function FeedSkeleton({ count = 3 }: { count?: number }) {
         <div key={i}>
           <FeedItemSkeleton />
         </div>
+      ))}
+    </div>
+  );
+}
+
+export function PulsingDots({ className = "" }: { className?: string }) {
+  return (
+    <div className={`flex items-center justify-center gap-1.5 py-4 ${className}`}>
+      {[0, 1, 2, 3, 4].map((i) => (
+        <div
+          key={i}
+          className="w-1.5 h-1.5 rounded-full bg-neutral-400 animate-pulse"
+          style={{ animationDelay: `${i * 100}ms` }}
+        />
       ))}
     </div>
   );

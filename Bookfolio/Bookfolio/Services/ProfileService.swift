@@ -31,6 +31,14 @@ struct FollowWithProfile: Codable {
     }
 }
 
+private struct ActivityDate: Decodable {
+    let createdAt: Date
+
+    enum CodingKeys: String, CodingKey {
+        case createdAt = "created_at"
+    }
+}
+
 @MainActor
 enum ProfileService {
 
@@ -121,7 +129,7 @@ enum ProfileService {
             .eq("referrer_id", value: userIdString)
             .execute()
 
-        async let activitiesResult: [Activity] = supabase.from("activity")
+        async let activitiesResult: [ActivityDate] = supabase.from("activity")
             .select("created_at")
             .eq("user_id", value: userIdString)
             .gte("created_at", value: twelveWeeksAgoString)
@@ -164,7 +172,7 @@ enum ProfileService {
 
     // MARK: - Week Streak
 
-    private static func calculateWeekStreak(activities: [Activity]) -> Int {
+    private static func calculateWeekStreak(activities: [ActivityDate]) -> Int {
         guard !activities.isEmpty else { return 0 }
 
         let calendar = Calendar.current

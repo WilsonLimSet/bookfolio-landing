@@ -9,6 +9,7 @@ class AuthService: ObservableObject {
         case unauthenticated
         case authenticated(User)
         case needsUsername(User)
+        case needsOnboarding(User)
 
         static func == (lhs: AuthState, rhs: AuthState) -> Bool {
             switch (lhs, rhs) {
@@ -16,6 +17,7 @@ class AuthService: ObservableObject {
             case (.unauthenticated, .unauthenticated): return true
             case (.authenticated(let a), .authenticated(let b)): return a.id == b.id
             case (.needsUsername(let a), .needsUsername(let b)): return a.id == b.id
+            case (.needsOnboarding(let a), .needsOnboarding(let b)): return a.id == b.id
             default: return false
             }
         }
@@ -44,19 +46,41 @@ class AuthService: ObservableObject {
 
     func checkUsernameAndSetState(user: User) async {
         do {
-            let profile: Profile = try await supabase.from("profiles")
-                .select("id, username")
+            struct ProfileCheck: Codable {
+                let id: UUID
+                let username: String
+                let onboardingCompleted: Bool?
+
+                enum CodingKeys: String, CodingKey {
+                    case id
+                    case username
+                    case onboardingCompleted = "onboarding_completed"
+                }
+            }
+
+            let profile: ProfileCheck = try await supabase.from("profiles")
+                .select("id, username, onboarding_completed")
                 .eq("id", value: user.id)
                 .single()
                 .execute()
                 .value
             if profile.username.isEmpty {
                 state = .needsUsername(user)
+            } else if profile.onboardingCompleted != true {
+                state = .needsOnboarding(user)
             } else {
                 state = .authenticated(user)
             }
-        } catch {
-            state = .needsUsername(user)
+        } catch let error as NSError {
+            // Only treat as "needs username" if profile genuinely not found
+            // For network errors, stay in loading so user can retry
+            if error.domain == "PostgrestError" || error.localizedDescription.contains("not found") {
+                state = .needsUsername(user)
+            } else {
+                // Network/transient error — retry after delay
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                await checkUsernameAndSetState(user: user)
+            }
         }
     }
 

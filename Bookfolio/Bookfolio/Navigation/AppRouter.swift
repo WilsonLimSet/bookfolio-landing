@@ -2,28 +2,28 @@ import SwiftUI
 
 enum Tab: Int, CaseIterable, Hashable {
     case feed
-    case search
-    case profile
     case leaderboard
+    case search
     case discover
+    case profile
 
     var title: String {
         switch self {
         case .feed: "Feed"
-        case .search: "Search"
-        case .profile: "Profile"
         case .leaderboard: "Leaderboard"
+        case .search: "Search"
         case .discover: "Discover"
+        case .profile: "Profile"
         }
     }
 
     var icon: String {
         switch self {
         case .feed: "book.fill"
-        case .search: "magnifyingglass"
-        case .profile: "person.fill"
         case .leaderboard: "trophy.fill"
+        case .search: "magnifyingglass"
         case .discover: "person.2.fill"
+        case .profile: "person.fill"
         }
     }
 }

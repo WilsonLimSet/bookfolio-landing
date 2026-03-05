@@ -1,7 +1,7 @@
 export default function ReadingLoading() {
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-neutral-100">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-black/[0.05]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
             <div className="w-7 h-7 bg-neutral-200 rounded animate-pulse" />
@@ -25,7 +25,7 @@ export default function ReadingLoading() {
 
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="flex gap-4 p-4 bg-white rounded-xl border border-neutral-100">
+              <div key={i} className="flex gap-4 p-4 bg-white rounded-xl border border-black/[0.05]">
                 <div className="w-16 h-24 bg-neutral-100 rounded-lg animate-pulse" />
                 <div className="flex-1 space-y-2 py-1">
                   <div className="h-4 w-3/4 bg-neutral-200 rounded animate-pulse" />

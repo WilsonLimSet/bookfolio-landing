@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { getEditions, type Book, type BookEdition } from "@/lib/openLibrary";
+import { PulsingDots } from "@/components/Skeleton";
 
 interface EditionPickerProps {
   book: Book;
@@ -63,7 +64,7 @@ export default function EditionPicker({
       {/* Modal */}
       <div className="relative bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[85vh] flex flex-col">
         {/* Header */}
-        <div className="p-5 border-b border-neutral-200 flex-shrink-0">
+        <div className="p-5 border-b border-black/10 flex-shrink-0">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="font-semibold text-lg">Choose a cover</h2>
@@ -96,7 +97,7 @@ export default function EditionPicker({
         <div className="p-5 overflow-y-auto flex-1">
           {loading ? (
             <div className="flex items-center justify-center py-16">
-              <div className="w-8 h-8 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
+              <PulsingDots />
             </div>
           ) : visibleEditions.length > 0 ? (
             <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3">
@@ -122,7 +123,7 @@ export default function EditionPicker({
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-neutral-200 flex-shrink-0">
+        <div className="p-4 border-t border-black/10 flex-shrink-0">
           <button
             onClick={onUseDefault}
             className="w-full px-4 py-2.5 bg-neutral-900 text-white rounded-lg font-medium hover:bg-neutral-800 transition-colors text-sm"

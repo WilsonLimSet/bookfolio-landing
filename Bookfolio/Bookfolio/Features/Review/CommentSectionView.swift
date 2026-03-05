@@ -91,21 +91,18 @@ struct CommentSectionView: View {
     private func commentRow(_ comment: ReviewComment, profile: Profile) -> some View {
         HStack(alignment: .top, spacing: 10) {
             // Avatar
-            AsyncImage(url: profile.avatarUrl.flatMap { URL(string: $0) }) { phase in
-                switch phase {
-                case .success(let image):
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                default:
-                    Circle()
-                        .fill(Color.gray.opacity(0.2))
-                        .overlay {
-                            Text(String(profile.username.prefix(1)).uppercased())
-                                .font(.caption2.bold())
-                                .foregroundColor(.secondary)
-                        }
-                }
+            CachedAsyncImage(url: profile.avatarUrl.flatMap { URL(string: $0) }) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Circle()
+                    .fill(Color.gray.opacity(0.2))
+                    .overlay {
+                        Text(String(profile.username.prefix(1)).uppercased())
+                            .font(.caption2.bold())
+                            .foregroundColor(.secondary)
+                    }
             }
             .frame(width: 30, height: 30)
             .clipShape(Circle())

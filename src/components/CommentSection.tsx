@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
+import { PulsingDots } from "@/components/Skeleton";
 
 interface Comment {
   id: string;
@@ -140,7 +141,7 @@ export default function CommentSection({
   if (isLoading) {
     return (
       <div className="flex justify-center py-8">
-        <div className="w-6 h-6 border-2 border-neutral-300 border-t-neutral-900 rounded-full animate-spin" />
+        <PulsingDots />
       </div>
     );
   }
@@ -156,7 +157,7 @@ export default function CommentSection({
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Write a comment..."
-              className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-neutral-400 focus:outline-none resize-none text-sm"
+              className="w-full px-4 py-3 rounded-xl border border-black/10 focus:border-neutral-400 focus:outline-none resize-none text-sm"
               rows={2}
               maxLength={500}
             />

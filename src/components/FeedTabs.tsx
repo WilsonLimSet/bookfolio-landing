@@ -5,6 +5,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import Link from "next/link";
 import LikeButton from "./LikeButton";
+import BookCover from "./BookCover";
 
 type Tab = "friends" | "you" | "incoming";
 
@@ -247,7 +248,7 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
           className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
             activeTab === "friends"
               ? "bg-white text-neutral-900 shadow-sm"
-              : "text-neutral-600 hover:text-neutral-900"
+              : "text-neutral-900/40 hover:text-neutral-900/80"
           }`}
         >
           Friends
@@ -257,7 +258,7 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
           className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
             activeTab === "you"
               ? "bg-white text-neutral-900 shadow-sm"
-              : "text-neutral-600 hover:text-neutral-900"
+              : "text-neutral-900/40 hover:text-neutral-900/80"
           }`}
         >
           You
@@ -267,7 +268,7 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
           className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors relative ${
             activeTab === "incoming"
               ? "bg-white text-neutral-900 shadow-sm"
-              : "text-neutral-600 hover:text-neutral-900"
+              : "text-neutral-900/40 hover:text-neutral-900/80"
           }`}
         >
           Incoming
@@ -283,7 +284,7 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
       {loading ? (
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white rounded-xl border border-neutral-100 overflow-hidden">
+            <div key={i} className="bg-white rounded-xl border border-black/[0.05] overflow-hidden">
               <div className="flex items-center gap-3 p-4 pb-3">
                 <div className="w-10 h-10 bg-neutral-200 rounded-full animate-pulse" />
                 <div className="flex-1 space-y-2">
@@ -321,10 +322,11 @@ export default function FeedTabs({ currentUserId, followingIds, currentUsername 
         )
       ) : currentData.length > 0 ? (
         <div className="space-y-4">
-          {currentData.map((review) => (
+          {currentData.map((review, index) => (
             <ReviewCard
               key={review.id}
               review={review}
+              index={index}
               profile={activeTab === "you" ? { id: currentUserId, username: currentUsername, avatar_url: null } : profiles.get(review.user_id)}
               likeCount={likeCounts.get(review.id) || 0}
               isLiked={userLikes.has(review.id)}
@@ -351,6 +353,7 @@ function ReviewCard({
   isLiked,
   currentUserId,
   onLikeToggle,
+  index = 0,
 }: {
   review: ReviewData;
   profile: Profile | null | undefined;
@@ -358,11 +361,12 @@ function ReviewCard({
   isLiked: boolean;
   currentUserId: string;
   onLikeToggle: (reviewId: string, isLiked: boolean) => void;
+  index?: number;
 }) {
   const timeAgo = getTimeAgo(new Date(review.created_at));
 
   return (
-    <div className="bg-white rounded-xl border border-neutral-100 overflow-hidden">
+    <div className="bg-white rounded-xl border border-black/[0.05] overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 p-4 pb-3">
         <Link
@@ -387,11 +391,9 @@ function ReviewCard({
       <div className="flex gap-4 px-4">
         <Link
           href={`/book/${review.open_library_key?.replace("/works/", "").replace("/books/", "") || ""}`}
-          className="w-20 h-[120px] bg-neutral-100 rounded-lg overflow-hidden flex-shrink-0 shadow-md relative"
+          className="flex-shrink-0"
         >
-          {review.cover_url && (
-            <Image src={review.cover_url} alt="" fill sizes="80px" className="object-cover" />
-          )}
+          <BookCover src={review.cover_url} alt={review.title || ""} size="md" index={index} />
         </Link>
         <div className="flex-1 min-w-0 py-1">
           <Link
@@ -431,7 +433,7 @@ function ReviewCard({
       )}
 
       {/* Actions */}
-      <div className="flex items-center gap-4 px-4 py-3 border-t border-neutral-100">
+      <div className="flex items-center gap-4 px-4 py-3 border-t border-black/[0.05]">
         <LikeButton
           reviewId={review.id}
           initialLiked={isLiked}
@@ -499,7 +501,7 @@ function NotificationItem({
       href={link}
       className={`flex items-center gap-3 p-4 rounded-xl border transition-colors ${
         notification.read
-          ? "bg-white border-neutral-100 hover:bg-neutral-50"
+          ? "bg-white border-black/[0.05] hover:bg-neutral-50"
           : "bg-blue-50 border-blue-100 hover:bg-blue-100"
       }`}
     >

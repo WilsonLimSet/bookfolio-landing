@@ -1,7 +1,7 @@
 export default function ListsLoading() {
   return (
     <>
-      <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-neutral-100">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-black/[0.05]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
             <div className="w-7 h-7 bg-neutral-200 rounded animate-pulse" />
@@ -22,7 +22,7 @@ export default function ListsLoading() {
 
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="p-4 bg-white rounded-xl border border-neutral-100">
+              <div key={i} className="p-4 bg-white rounded-xl border border-black/[0.05]">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-8 h-8 bg-neutral-200 rounded-full animate-pulse" />
                   <div className="h-4 w-24 bg-neutral-200 rounded animate-pulse" />

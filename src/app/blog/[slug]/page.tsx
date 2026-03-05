@@ -121,7 +121,7 @@ export default function BlogPost({ params }: { params: { slug: string } }) {
           </div>
         </article>
 
-        <div className="border-t border-neutral-100 pt-8">
+        <div className="border-t border-black/[0.05] pt-8">
           <p className="text-neutral-600">
             Ready to start ranking?{" "}
             <Link href="/login" className="font-medium underline hover:text-neutral-900">

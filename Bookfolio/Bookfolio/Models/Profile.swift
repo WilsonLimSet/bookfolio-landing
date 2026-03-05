@@ -8,6 +8,7 @@ struct Profile: Codable, Identifiable {
     let instagram: String?
     let twitter: String?
     let referralCode: String?
+    let referralBadge: String?
     let readingGoal2025: Int?
     let updatedAt: Date?
 
@@ -15,6 +16,7 @@ struct Profile: Codable, Identifiable {
         case id, username, bio, instagram, twitter
         case avatarUrl = "avatar_url"
         case referralCode = "referral_code"
+        case referralBadge = "referral_badge"
         case readingGoal2025 = "reading_goal_2025"
         case updatedAt = "updated_at"
     }

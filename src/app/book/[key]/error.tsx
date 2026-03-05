@@ -19,7 +19,7 @@ export default function BookError({ reset }: { error: Error; reset: () => void }
           </button>
           <Link
             href="/discover"
-            className="px-6 py-3 border border-neutral-200 rounded-xl font-medium hover:bg-neutral-50 transition-colors"
+            className="px-6 py-3 border border-black/10 rounded-xl font-medium hover:bg-neutral-50 transition-colors"
           >
             Discover books
           </Link>

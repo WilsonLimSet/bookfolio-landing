@@ -48,7 +48,7 @@ struct CurrentlyReadingView: View {
     @ViewBuilder
     private func bookCell(_ book: CurrentlyReading) -> some View {
         VStack(spacing: 8) {
-            AsyncImage(url: book.coverUrl.flatMap { URL(string: $0) }) { image in
+            CachedAsyncImage(url: book.coverUrl.flatMap { URL(string: $0) }) { image in
                 image.resizable().scaledToFill()
             } placeholder: {
                 Image(systemName: "book.fill")

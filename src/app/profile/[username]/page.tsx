@@ -7,6 +7,7 @@ import { getProfileStats } from "@/lib/supabase/cached";
 import Link from "next/link";
 import FollowButton from "@/components/FollowButton";
 import HeaderWrapper from "@/components/HeaderWrapper";
+import BookCover from "@/components/BookCover";
 
 interface PageProps {
   params: Promise<{ username: string }>;
@@ -47,7 +48,7 @@ export default async function ProfilePage({ params }: PageProps) {
   const [profileResult, userResult] = await Promise.all([
     supabase
       .from("profiles")
-      .select("id, username, bio, avatar_url, instagram, twitter, reading_goal_2025")
+      .select("id, username, bio, avatar_url, instagram, twitter, reading_goal_2025, referral_badge")
       .eq("username", username)
       .single(),
     supabase.auth.getUser(),
@@ -81,8 +82,27 @@ export default async function ProfilePage({ params }: PageProps) {
                 (profile.username)[0].toUpperCase()
               )}
             </div>
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-2xl font-bold flex items-center justify-center gap-2">
               {profile.username}
+              {profile.referral_badge && (
+                <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ${
+                  profile.referral_badge === "ambassador"
+                    ? "bg-amber-100 text-amber-700"
+                    : "bg-blue-100 text-blue-700"
+                }`}>
+                  {profile.referral_badge === "ambassador" ? (
+                    <>
+                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                      Ambassador
+                    </>
+                  ) : (
+                    <>
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                      Connector
+                    </>
+                  )}
+                </span>
+              )}
             </h1>
             <p className="text-neutral-500">@{profile.username}</p>
             {profile.bio && (
@@ -111,7 +131,7 @@ function ProfileContentSkeleton() {
       {/* Stats skeleton */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="bg-white rounded-xl p-3 text-center border border-neutral-100">
+          <div key={i} className="bg-white rounded-xl p-3 text-center border border-black/[0.05]">
             <div className="h-8 w-12 bg-neutral-200 rounded mx-auto mb-1 animate-pulse" />
             <div className="h-3 w-16 bg-neutral-100 rounded mx-auto animate-pulse" />
           </div>
@@ -134,7 +154,7 @@ function ProfileContentSkeleton() {
       {/* Lists skeleton */}
       <div className="space-y-2 mb-8">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="flex items-center justify-between p-4 bg-white rounded-xl border border-neutral-100">
+          <div key={i} className="flex items-center justify-between p-4 bg-white rounded-xl border border-black/[0.05]">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-neutral-100 animate-pulse" />
               <div className="space-y-1">
@@ -163,6 +183,7 @@ async function ProfileContent({
     instagram: string | null;
     twitter: string | null;
     reading_goal_2025: number | null;
+    referral_badge: string | null;
   };
   user: { id: string } | null;
   isOwner: boolean;
@@ -227,28 +248,28 @@ async function ProfileContent({
       )}
 
       {/* Stats Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
-        <div className="bg-white rounded-xl p-3 text-center border border-neutral-100">
+      <div className="grid grid-cols-4 gap-1.5 mb-4">
+        <div className="rounded-xl p-3 text-center bg-neutral-50">
           <p className="text-2xl font-bold">{totalBooksRead}</p>
-          <p className="text-xs text-neutral-500">Read</p>
+          <p className="text-[11px] text-neutral-900/40 uppercase tracking-wider">Read</p>
         </div>
-        <div className="bg-white rounded-xl p-3 text-center border border-neutral-100">
+        <div className="rounded-xl p-3 text-center bg-neutral-50">
           <p className="text-2xl font-bold">{weekStreak}</p>
-          <p className="text-xs text-neutral-500">Week Streak</p>
+          <p className="text-[11px] text-neutral-900/40 uppercase tracking-wider">Streak</p>
         </div>
-        <div className="bg-white rounded-xl p-3 text-center border border-neutral-100">
+        <div className="rounded-xl p-3 text-center bg-neutral-50">
           <p className="text-2xl font-bold">#{stats.userRank || "-"}</p>
-          <p className="text-xs text-neutral-500">Rank</p>
+          <p className="text-[11px] text-neutral-900/40 uppercase tracking-wider">Rank</p>
         </div>
-        <div className="bg-white rounded-xl p-3 text-center border border-neutral-100">
+        <div className="rounded-xl p-3 text-center bg-neutral-50">
           <p className="text-2xl font-bold">{stats.followersCount}</p>
-          <p className="text-xs text-neutral-500">Followers</p>
+          <p className="text-[11px] text-neutral-900/40 uppercase tracking-wider">Followers</p>
         </div>
       </div>
 
       {/* 2025 Reading Goal */}
       {readingGoal && (
-        <div className="bg-white rounded-xl p-4 border border-neutral-100 mb-6">
+        <div className="rounded-xl p-4 bg-neutral-50 mb-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-medium">2025 Reading Goal</span>
             <span className="text-sm text-neutral-500">
@@ -274,7 +295,7 @@ async function ProfileContent({
         {isOwner && (
           <Link
             href="/profile/edit"
-            className="px-4 py-2 text-sm text-neutral-600 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors"
+            className="px-4 py-2 text-sm text-neutral-900/60 border border-black/[0.08] rounded-lg hover:bg-neutral-50 transition-colors"
           >
             Edit Profile
           </Link>
@@ -287,7 +308,7 @@ async function ProfileContent({
         />
         <Link
           href={`/share/${username}`}
-          className="px-4 py-2 text-sm text-neutral-600 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors flex items-center gap-1.5"
+          className="px-4 py-2 text-sm text-neutral-900/60 border border-black/[0.08] rounded-lg hover:bg-neutral-50 transition-colors flex items-center gap-1.5"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
@@ -313,20 +334,22 @@ async function ProfileContent({
             )}
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            {stats.favoriteBooks.map((book) => (
+            {stats.favoriteBooks.map((book, i) => (
               <Link
                 key={book.id}
                 href={`/book/${(book.open_library_key || book.id).replace("/works/", "").replace("/books/", "")}`}
-                className="group relative aspect-[2/3] bg-neutral-100 rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all hover:scale-105"
+                className="group relative aspect-[2/3] rounded-lg overflow-hidden"
               >
-                {book.cover_url ? (
-                  <Image src={book.cover_url} alt={book.title} fill sizes="(min-width: 640px) 25vw, 50vw" className="object-cover" />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center p-2 text-center">
-                    <span className="text-xs text-neutral-400">{book.title}</span>
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                <BookCover
+                  src={book.cover_url}
+                  alt={book.title}
+                  size="xl"
+                  index={i}
+                  priority={i < 4}
+                  className="!w-full !h-full"
+                  showSpine={false}
+                />
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3 z-10">
                   <div>
                     <p className="text-white text-sm font-medium leading-tight">{book.title}</p>
                     {book.author && <p className="text-white/70 text-xs mt-1">{book.author}</p>}
@@ -339,14 +362,14 @@ async function ProfileContent({
                 <Link
                   key={`empty-${i}`}
                   href="/profile/edit#favorites"
-                  className="aspect-[2/3] bg-neutral-100 rounded-lg border-2 border-dashed border-neutral-200 hover:border-neutral-400 hover:bg-neutral-50 transition-all flex items-center justify-center"
+                  className="aspect-[2/3] bg-neutral-100 rounded-lg border-2 border-dashed border-black/10 hover:border-neutral-400 hover:bg-neutral-50 transition-all flex items-center justify-center"
                 >
                   <span className="text-neutral-300 text-2xl">+</span>
                 </Link>
               ) : (
                 <div
                   key={`empty-${i}`}
-                  className="aspect-[2/3] bg-neutral-100 rounded-lg border-2 border-dashed border-neutral-200"
+                  className="aspect-[2/3] bg-neutral-100 rounded-lg border-2 border-dashed border-black/10"
                 />
               )
             )}
@@ -355,90 +378,90 @@ async function ProfileContent({
       )}
 
       {/* Reading Lists */}
-      <section className="space-y-2 mb-8">
+      <section className="space-y-1 mb-8">
         <Link
           href={`/profile/${username}/reading`}
-          className="flex items-center justify-between p-4 bg-white rounded-xl border border-neutral-100 hover:bg-neutral-50 transition-colors"
+          className="flex items-center justify-between p-3 rounded-xl hover:bg-neutral-50 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center">
+              <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
               </svg>
             </div>
             <div>
-              <p className="font-medium">Currently Reading</p>
-              <p className="text-sm text-neutral-500">{stats.currentlyReading.length} {stats.currentlyReading.length === 1 ? "book" : "books"}</p>
+              <p className="text-sm font-medium">Currently Reading</p>
+              <p className="text-xs text-neutral-900/40">{stats.currentlyReading.length} {stats.currentlyReading.length === 1 ? "book" : "books"}</p>
             </div>
           </div>
-          <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-neutral-900/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </Link>
 
         <Link
           href={`/profile/${username}/read`}
-          className="flex items-center justify-between p-4 bg-white rounded-xl border border-neutral-100 hover:bg-neutral-50 transition-colors"
+          className="flex items-center justify-between p-3 rounded-xl hover:bg-neutral-50 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-              <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-9 h-9 rounded-full bg-green-50 flex items-center justify-center">
+              <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
             <div>
-              <p className="font-medium">Read</p>
-              <p className="text-sm text-neutral-500">{totalBooksRead} {totalBooksRead === 1 ? "book" : "books"}</p>
+              <p className="text-sm font-medium">Read</p>
+              <p className="text-xs text-neutral-900/40">{totalBooksRead} {totalBooksRead === 1 ? "book" : "books"}</p>
             </div>
           </div>
-          <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-neutral-900/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </Link>
 
         <Link
           href={`/profile/${username}/want-to-read`}
-          className="flex items-center justify-between p-4 bg-white rounded-xl border border-neutral-100 hover:bg-neutral-50 transition-colors"
+          className="flex items-center justify-between p-3 rounded-xl hover:bg-neutral-50 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
-              <svg className="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-9 h-9 rounded-full bg-amber-50 flex items-center justify-center">
+              <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
             </div>
             <div>
-              <p className="font-medium">Want to Read</p>
-              <p className="text-sm text-neutral-500">{stats.wantToReadCount} {stats.wantToReadCount === 1 ? "book" : "books"}</p>
+              <p className="text-sm font-medium">Want to Read</p>
+              <p className="text-xs text-neutral-900/40">{stats.wantToReadCount} {stats.wantToReadCount === 1 ? "book" : "books"}</p>
             </div>
           </div>
-          <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-neutral-900/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </Link>
 
         <Link
           href={`/profile/${username}/lists`}
-          className="flex items-center justify-between p-4 bg-white rounded-xl border border-neutral-100 hover:bg-neutral-50 transition-colors"
+          className="flex items-center justify-between p-3 rounded-xl hover:bg-neutral-50 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-              <svg className="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-9 h-9 rounded-full bg-purple-50 flex items-center justify-center">
+              <svg className="w-4 h-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
             </div>
             <div>
-              <p className="font-medium">Lists</p>
-              <p className="text-sm text-neutral-500">{stats.listsCount} {stats.listsCount === 1 ? "list" : "lists"}</p>
+              <p className="text-sm font-medium">Lists</p>
+              <p className="text-xs text-neutral-900/40">{stats.listsCount} {stats.listsCount === 1 ? "list" : "lists"}</p>
             </div>
           </div>
-          <svg className="w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-neutral-900/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </Link>
       </section>
 
       {/* Following Stats */}
-      <div className="flex justify-center gap-8 text-sm text-neutral-500">
+      <div className="flex justify-center gap-6 text-sm text-neutral-900/40">
         <span><strong className="text-neutral-900">{stats.followingCount}</strong> Following</span>
         <span><strong className="text-neutral-900">{stats.followersCount}</strong> Followers</span>
       </div>

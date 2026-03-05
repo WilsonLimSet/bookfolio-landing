@@ -112,7 +112,7 @@ export default function BookSearch({
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setShowResults(true)}
           placeholder={placeholder}
-          className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
+          className="w-full px-4 py-3 rounded-xl border border-black/10 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent transition-all"
         />
 
         <AnimatePresence>
@@ -136,7 +136,7 @@ export default function BookSearch({
       <AnimatePresence>
         {showResults && (loading || results.length > 0 || (query && !loading)) && (
           <motion.div
-            className="absolute z-10 w-full mt-2 bg-white rounded-xl border border-neutral-200 shadow-xl max-h-80 overflow-hidden"
+            className="absolute z-10 w-full mt-2 bg-white rounded-xl border border-black/10 shadow-xl max-h-80 overflow-hidden"
             initial={{ opacity: 0, y: -10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.98 }}

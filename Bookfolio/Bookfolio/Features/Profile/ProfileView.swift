@@ -194,7 +194,7 @@ struct ProfileView: View {
                 )
             }
         } catch {
-            // Profile/stats will remain nil — error state shown
+            print("Error loading profile: \(error)")
         }
         isLoading = false
     }

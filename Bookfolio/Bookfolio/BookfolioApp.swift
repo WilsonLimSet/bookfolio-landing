@@ -17,17 +17,20 @@ struct BookfolioApp: App {
                 switch authService.state {
                 case .loading:
                     VStack(spacing: 16) {
-                        Image(systemName: "book.fill")
-                            .font(.system(size: 48))
-                            .foregroundStyle(Color.accentColor)
+                        Image("AppLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 80, height: 80)
                         Text("Bookfolio")
                             .font(.largeTitle.bold())
                         ProgressView()
                     }
                 case .unauthenticated:
-                    LoginView()
+                    OnboardingView(startStep: .carousel, userId: nil)
                 case .needsUsername(let user):
-                    UsernameSetupView(userId: user.id)
+                    OnboardingView(startStep: .username, userId: user.id)
+                case .needsOnboarding(let user):
+                    OnboardingView(startStep: .photo, userId: user.id)
                 case .authenticated:
                     mainTabView
                         .task {
@@ -44,18 +47,20 @@ struct BookfolioApp: App {
             FeedTab(router: appRouter.feedRouter)
                 .tabItem { Label(Tab.feed.title, systemImage: Tab.feed.icon) }
                 .tag(Tab.feed)
-            SearchTab(router: appRouter.searchRouter)
-                .tabItem { Label(Tab.search.title, systemImage: Tab.search.icon) }
-                .tag(Tab.search)
-            ProfileTab(router: appRouter.profileRouter)
-                .tabItem { Label(Tab.profile.title, systemImage: Tab.profile.icon) }
-                .tag(Tab.profile)
             LeaderboardTab(router: appRouter.leaderboardRouter)
                 .tabItem { Label(Tab.leaderboard.title, systemImage: Tab.leaderboard.icon) }
                 .tag(Tab.leaderboard)
+            SearchTab(router: appRouter.searchRouter)
+                .tabItem { Label(Tab.search.title, systemImage: Tab.search.icon) }
+                .tag(Tab.search)
             DiscoverTab(router: appRouter.discoverRouter)
                 .tabItem { Label(Tab.discover.title, systemImage: Tab.discover.icon) }
                 .tag(Tab.discover)
+            ProfileTab(router: appRouter.profileRouter)
+                .tabItem {
+                    ProfileTabLabel()
+                }
+                .tag(Tab.profile)
         }
         .environmentObject(appRouter)
     }

@@ -230,7 +230,7 @@ struct GoodreadsImportView: View {
         HStack(spacing: 12) {
             // Cover thumbnail
             if let coverUrl = book.coverUrl, let url = URL(string: coverUrl) {
-                AsyncImage(url: url) { image in
+                CachedAsyncImage(url: url) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fill)

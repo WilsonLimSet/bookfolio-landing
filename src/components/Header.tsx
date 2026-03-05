@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { searchBooks, Book } from "@/lib/openLibrary";
+import { PulsingDots } from "@/components/Skeleton";
 
 interface HeaderProps {
   user?: { id: string } | null;
@@ -94,7 +95,7 @@ export default function Header({ user, username }: HeaderProps) {
     : [];
 
   return (
-    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-neutral-100">
+    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-black/[0.05]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-14">
           {/* Logo */}
@@ -123,7 +124,7 @@ export default function Header({ user, username }: HeaderProps) {
                 className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   pathname === link.href
                     ? "bg-neutral-100 text-neutral-900"
-                    : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"
+                    : "text-neutral-900/50 hover:text-neutral-900/90 hover:bg-neutral-50"
                 }`}
               >
                 {link.label}
@@ -138,7 +139,7 @@ export default function Header({ user, username }: HeaderProps) {
               <div ref={searchRef} className="relative">
                 <button
                   onClick={() => setShowSearch(!showSearch)}
-                  className="p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
+                  className="p-2 text-neutral-900/50 hover:text-neutral-900/90 hover:bg-neutral-50 rounded-lg transition-colors"
                   aria-label="Search books"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,26 +148,26 @@ export default function Header({ user, username }: HeaderProps) {
                 </button>
 
                 {showSearch && (
-                  <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-neutral-200 overflow-hidden">
+                  <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-xl shadow-lg border border-black/10 overflow-hidden">
                     <div className="p-2">
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search books..."
-                        className="w-full px-3 py-2 rounded-lg border border-neutral-200 focus:border-neutral-400 focus:outline-none text-sm"
+                        className="w-full px-3 py-2 rounded-lg border border-black/10 focus:border-neutral-400 focus:outline-none text-sm"
                         autoFocus
                       />
                     </div>
 
                     {isSearching && (
                       <div className="p-4 text-center">
-                        <div className="w-5 h-5 border-2 border-neutral-300 border-t-neutral-600 rounded-full animate-spin mx-auto" />
+                        <PulsingDots />
                       </div>
                     )}
 
                     {(userResults.length > 0 || bookResults.length > 0) && (
-                      <div className="max-h-96 overflow-y-auto border-t border-neutral-100">
+                      <div className="max-h-96 overflow-y-auto border-t border-black/[0.05]">
                         {/* Users Section */}
                         {userResults.length > 0 && (
                           <div>
@@ -247,7 +248,7 @@ export default function Header({ user, username }: HeaderProps) {
                 className={`p-2 rounded-lg transition-colors ${
                   pathname.startsWith("/profile")
                     ? "bg-neutral-100 text-neutral-900"
-                    : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"
+                    : "text-neutral-900/50 hover:text-neutral-900/90 hover:bg-neutral-50"
                 }`}
                 aria-label="Profile"
               >
@@ -268,7 +269,7 @@ export default function Header({ user, username }: HeaderProps) {
             {user && (
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="md:hidden p-2 text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors"
+                className="md:hidden p-2 text-neutral-900/50 hover:text-neutral-900/90 hover:bg-neutral-50 rounded-lg transition-colors"
                 aria-label="Menu"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -285,7 +286,7 @@ export default function Header({ user, username }: HeaderProps) {
 
         {/* Mobile menu */}
         {showMobileMenu && user && (
-          <nav className="md:hidden py-2 border-t border-neutral-100">
+          <nav className="md:hidden py-2 border-t border-black/[0.05]">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -294,7 +295,7 @@ export default function Header({ user, username }: HeaderProps) {
                 className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   pathname === link.href
                     ? "bg-neutral-100 text-neutral-900"
-                    : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50"
+                    : "text-neutral-900/50 hover:text-neutral-900/90 hover:bg-neutral-50"
                 }`}
               >
                 {link.label}

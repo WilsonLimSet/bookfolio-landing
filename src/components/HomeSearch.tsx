@@ -101,7 +101,7 @@ export default function HomeSearch() {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setShowResults(true)}
           placeholder="Search for a book..."
-          className="w-full px-4 py-3 pl-11 rounded-xl border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-left transition-all"
+          className="w-full px-4 py-3 pl-11 rounded-xl border border-black/10 focus:outline-none focus:ring-2 focus:ring-neutral-900 focus:border-transparent text-left transition-all"
         />
         <svg
           className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400"
@@ -138,7 +138,7 @@ export default function HomeSearch() {
       <AnimatePresence>
         {showResults && (loading || results.length > 0 || (query && !loading)) && (
           <motion.div
-            className="absolute z-10 w-full mt-2 bg-white rounded-xl border border-neutral-200 shadow-xl max-h-96 overflow-hidden"
+            className="absolute z-10 w-full mt-2 bg-white rounded-xl border border-black/10 shadow-xl max-h-96 overflow-hidden"
             initial={{ opacity: 0, y: -10, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -10, scale: 0.98 }}
